@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Garage Log</title>
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+/* RESET */
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+-webkit-user-select:none;
+user-select:none;
+}
+
+body{
+height:100vh;
+background:#111;
+color:white;
+overflow:hidden;
+}
+
+/* BACKGROUND */
+#bg{
+position:fixed;
+inset:0;
+object-fit:cover;
+z-index:-2;
+}
+
+#overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(8px);
+z-index:-1;
+}
+
+/* LOADING */
+#loading{
+position:fixed;
+inset:0;
+background:#111;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+z-index:100;
+}
+
+#loading h1{
+font-size:26px;
+margin-bottom:10px;
+}
+
+/* LOGIN */
+#login{
+position:fixed;
+inset:0;
+background:#111;
+display:none;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+z-index:90;
+}
+
+#login button{
+padding:14px 20px;
+font-size:16px;
+border:none;
+border-radius:10px;
+background:#3fb950;
+color:white;
+}
+
+/* APP */
+#app{
+display:none;
+height:100vh;
+}
+
+/* LAYOUT */
+.container{
+display:flex;
+flex-direction:column;
+height:calc(100vh - 70px);
+}
+
+.top-area{
+flex:0.3;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.middle-area{
+flex:0.3;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.bottom-area{
+flex:0.4;
+padding:10px 20px 20px;
+overflow:auto;
+}
+
+/* CARD */
+.card{
+background:rgba(20,20,20,0.7);
+backdrop-filter:blur(20px);
+border-radius:18px;
+padding:20px;
+width:90%;
+max-width:420px;
+box-shadow:0 8px 30px rgba(0,0,0,0.5);
+}
+
+.card h2{
+font-size:22px;
+margin-bottom:8px;
+}
+
+.card p{
+opacity:0.8;
+margin-bottom:6px;
+}
+
+/* TAGS */
+.tag{
+display:inline-block;
+padding:4px 8px;
+background:#444;
+border-radius:6px;
+font-size:12px;
+margin-right:5px;
+}
+
+/* PROGRESS */
+.progress-container{
+margin-top:12px;
+background:rgba(255,255,255,0.12);
+border-radius:6px;
+height:8px;
+overflow:hidden;
+}
+
+.progress-bar{
+height:100%;
+width:40%;
+background:#3fb950;
+}
+
+/* NAV */
+.bottom{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+height:70px;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(10px);
+display:flex;
+justify-content:space-around;
+align-items:center;
+}
+
+.bottom button{
+background:none;
+border:none;
+color:white;
+font-size:14px;
+opacity:0.7;
+}
+
+.bottom button.active{
+opacity:1;
+font-weight:bold;
+}
+
+/* HIDDEN */
+.hidden{
+display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<img id="bg">
+<div id="overlay"></div>
+
+<!-- LOADING -->
+<div id="loading">
+<h1>Garage Log</h1>
+<p>loading...</p>
+</div>
+
+<!-- LOGIN -->
+<div id="login">
+<h2>Sign in</h2>
+<p style="opacity:0.6;margin:10px 0 20px">
+Google account required
+</p>
+<button onclick="googleLogin()">Sign in with Google</button>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+<div class="container">
+
+<!-- TASK -->
+<div class="top-area">
+
+<div class="card" id="taskCard">
+
+<h2 id="taskTitle">Replace brake line</h2>
+<p id="taskProject">BMW E28</p>
+
+<div>
+<span class="tag">priority: high</span>
+<span class="tag">time: 2h</span>
+</div>
+
+<p style="margin-top:10px">
+Tools: jack, flare wrench
+</p>
+
+<p>
+Budget: €30
+</p>
+
+<div class="progress-container">
+<div class="progress-bar" id="progress"></div>
+</div>
+
+<div style="margin-top:14px;display:flex;gap:10px">
+<button onclick="doneTask()" style="flex:1;padding:10px">Done</button>
+<button onclick="skipTask()" style="flex:1;padding:10px">Skip</button>
+</div>
+
+</div>
+
+</div>
+
+<!-- PROJECTS -->
+<div id="projects" class="middle-area hidden">
+
+<div class="card">
+<h2>BMW E28</h2>
+<p>Progress 42%</p>
+</div>
+
+</div>
+
+<!-- BUDGET -->
+<div id="budget" class="middle-area hidden">
+
+<div class="card">
+<h2>Total spent</h2>
+<p>BMW E28 — €820</p>
+<p>Tools — €240</p>
+</div>
+
+</div>
+
+<!-- TOOLS -->
+<div id="tools" class="middle-area hidden">
+
+<div class="card">
+<p>✓ compressor</p>
+<p>✓ welder</p>
+<p>✓ jack</p>
+<p>✓ multimeter</p>
+</div>
+
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="bottom-area hidden">
+
+<div class="card">
+<h2>Background</h2>
+<input type="file" id="bgUpload">
+</div>
+
+<div class="card">
+<h2>Import CSV</h2>
+<input type="file" id="csvUpload">
+</div>
+
+<div class="card">
+<h2>Import Text</h2>
+<textarea id="textInput" style="width:100%;height:80px"></textarea>
+<button onclick="parseText()" style="margin-top:10px;width:100%">Parse</button>
+</div>
+
+</div>
+
+</div>
+
+<div class="bottom">
+<button onclick="showTab('tasks')" class="active">Tasks</button>
+<button onclick="showTab('projects')">Projects</button>
+<button onclick="showTab('budget')">Budget</button>
+<button onclick="showTab('tools')">Tools</button>
+<button onclick="showTab('settings')">Settings</button>
+</div>
+
+</div>
+
+<script>
+
+/* SUPABASE */
+const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co";
+const SUPA_KEY = "eyJhbGc..."; // оставь свой ключ
+
+const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+/* AUTH */
+
+async function checkSession(){
+
+const { data } = await supabase.auth.getSession();
+
+document.getElementById("loading").style.display="none";
+
+if(data.session){
+
+document.getElementById("app").style.display="block";
+
+}else{
+
+document.getElementById("login").style.display="flex";
+
+}
+
+}
+
+/* GOOGLE LOGIN */
+
+async function googleLogin(){
+
+await supabase.auth.signInWithOAuth({
+provider:'google'
+});
+
+}
+
+/* TABS */
+
+let tabs=["tasks","projects","budget","tools","settings"];
+
+function showTab(tab){
+
+tabs.forEach(t=>{
+let el=document.getElementById(t);
+if(el) el.classList.add("hidden");
+});
+
+let active=document.getElementById(tab);
+if(active) active.classList.remove("hidden");
+
+}
+
+/* TASK ACTIONS */
+
+function doneTask(){
+document.getElementById("progress").style.width="100%";
+}
+
+function skipTask(){
+alert("task skipped");
+}
+
+/* BACKGROUND */
+
+document.getElementById("bgUpload").addEventListener("change",function(){
+
+let file=this.files[0];
+
+let reader=new FileReader();
+
+reader.onload=function(e){
+
+document.getElementById("bg").src=e.target.result;
+localStorage.setItem("bg",e.target.result);
+
+};
+
+reader.readAsDataURL(file);
+
+});
+
+let savedBg=localStorage.getItem("bg");
+if(savedBg) document.getElementById("bg").src=savedBg;
+
+/* CSV */
+
+document.getElementById("csvUpload").addEventListener("change",function(){
+
+let file=this.files[0];
+let reader=new FileReader();
+
+reader.onload=function(e){
+
+console.log(e.target.result);
+alert("CSV loaded");
+
+};
+
+reader.readAsText(file);
+
+});
+
+/* TEXT PARSER */
+
+function parseText(){
+alert("parser coming in next version");
+}
+
+/* INIT */
+
+checkSession();
+
+</script>
+
+</body>
+</html>
