@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garage Log</title>
+
+<style>
+
+/* BASIC RESET */
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+user-select:none;
+}
+
+body{
+height:100vh;
+color:white;
+overflow:hidden;
+background:black;
+}
+
+#bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:-2;
+}
+
+#overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.55);
+backdrop-filter:blur(6px);
+z-index:-1;
+}
+
+/* LAYOUT */
+.container{
+display:flex;
+flex-direction:column;
+height:calc(100vh - 70px);
+}
+
+/* TOP AREA (30%) */
+.top-area{
+flex:0.3;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+/* TASK CARD */
+.card{
+background:rgba(20,20,20,0.7);
+backdrop-filter:blur(20px);
+border-radius:18px;
+padding:20px;
+width:90%;
+max-width:420px;
+box-shadow:0 8px 30px rgba(0,0,0,0.5);
+}
+
+.card h2{
+font-size:22px;
+margin-bottom:8px;
+}
+
+.card p{
+opacity:0.8;
+margin-bottom:6px;
+}
+
+.tag{
+display:inline-block;
+padding:4px 8px;
+background:#444;
+border-radius:6px;
+font-size:12px;
+margin-right:5px;
+}
+
+/* PROGRESS BAR */
+.progress-container{
+margin-top:12px;
+background:rgba(255,255,255,0.1);
+border-radius:6px;
+height:8px;
+overflow:hidden;
+}
+
+.progress-bar{
+height:100%;
+width:40%;
+background:#3fb950;
+}
+
+/* MIDDLE AREA (CARD ALREADY) */
+.middle-area{
+flex:0.3;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+/* BOTTOM AREA (40%) */
+.bottom-area{
+flex:0.4;
+padding:10px 20px 20px;
+overflow:auto;
+}
+
+/* BOTTOM NAV */
+.bottom{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+height:70px;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(10px);
+display:flex;
+justify-content:space-around;
+align-items:center;
+}
+
+.bottom button{
+background:none;
+border:none;
+color:white;
+font-size:14px;
+opacity:0.7;
+}
+
+.bottom button.active{
+opacity:1;
+font-weight:bold;
+}
+
+/* HIDDEN */
+.hidden{
+display:none;
+}
+
+/* SWIPE */
+#taskCard{
+touch-action:pan-y;
+}
+
+</style>
+</head>
+
+<body>
+
+<img id="bg">
+<div id="overlay"></div>
+
+<div class="container">
+
+<!-- TASK (CENTER) -->
+<div class="top-area">
+
+<div class="card" id="taskCard">
+
+<h2 id="taskTitle">Replace brake line</h2>
+<p id="taskProject">BMW E28</p>
+
+<div>
+<span class="tag">priority: high</span>
+<span class="tag">time: 2h</span>
+</div>
+
+<p style="margin-top:10px">
+Tools: jack, flare wrench
+</p>
+
+<p>
+Budget: €30
+</p>
+
+<div class="progress-container">
+<div class="progress-bar" id="progress"></div>
+</div>
+
+<div style="margin-top:14px;display:flex;gap:10px">
+<button onclick="doneTask()" style="flex:1;padding:10px">Done</button>
+<button onclick="skipTask()" style="flex:1;padding:10px">Skip</button>
+<button onclick="alert('details')" style="flex:1;padding:10px">Details</button>
+</div>
+
+</div>
+
+</div>
+
+<!-- PROJECTS -->
+<div id="projects" class="middle-area hidden">
+
+<div class="card">
+<h2>BMW E28</h2>
+<p>Progress 42%</p>
+</div>
+
+<button onclick="alert('add project')" style="width:90%;padding:12px">
+Add project
+</button>
+
+</div>
+
+<!-- BUDGET -->
+<div id="budget" class="middle-area hidden">
+
+<div class="card">
+<h2>Total spent</h2>
+<p>BMW E28 — €820</p>
+<p>Tools — €240</p>
+</div>
+
+<button onclick="alert('add expense')" style="width:90%;padding:12px">
+Add expense
+</button>
+
+</div>
+
+<!-- TOOLS -->
+<div id="tools" class="middle-area hidden">
+
+<div class="card">
+<p>✓ compressor</p>
+<p>✓ welder</p>
+<p>✓ jack</p>
+<p>✓ multimeter</p>
+</div>
+
+<button onclick="alert('add tool')" style="width:90%;padding:12px">
+Add tool
+</button>
+
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="bottom-area hidden">
+
+<div class="card">
+<h2>Background</h2>
+<input type="file" id="bgUpload">
+</div>
+
+<div class="card">
+<h2>Import CSV</h2>
+<input type="file" id="csvUpload">
+</div>
+
+<div class="card">
+<h2>Import Text (beta)</h2>
+<textarea id="textInput" style="width:100%;height:80px"></textarea>
+<button onclick="parseText()" style="margin-top:10px;width:100%">Parse</button>
+</div>
+
+<!-- GOOGLE AUTH (Supabase) -->
+<div class="card">
+<h2>Google login</h2>
+<button onclick="googleLogin()" style="width:100%;padding:12px">
+Sign in with Google
+</button>
+</div>
+
+</div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom">
+
+<button onclick="showTab('tasks')" class="active">Tasks</button>
+<button onclick="showTab('projects')">Projects</button>
+<button onclick="showTab('budget')">Budget</button>
+<button onclick="showTab('tools')">Tools</button>
+<button onclick="showTab('settings')">Settings</button>
+
+</div>
+
+<script>
+
+/* TABS */
+let tabs = ["tasks","projects","budget","tools","settings"]
+
+function showTab(tab){
+
+tabs.forEach(t=>{
+document.getElementById(t).classList.add("hidden")
+})
+
+document.getElementById(tab).classList.remove("hidden")
+
+document.querySelectorAll(".bottom button").forEach(b=>b.classList.remove("active"))
+
+event.target.classList.add("active")
+}
+
+/* SWIPE UP/DOWN */
+let startY=0
+let card=document.getElementById("taskCard")
+
+card.addEventListener("touchstart",e=>{
+startY=e.touches[0].clientY
+})
+
+card.addEventListener("touchend",e=>{
+
+let endY=e.changedTouches[0].clientY
+let diff=startY-endY
+
+if(diff>100){
+nextTask()
+}
+
+if(diff<-100){
+prevTask()
+}
+
+})
+
+function nextTask(){
+let p=document.getElementById("progress")
+p.style.width="60%"
+alert("next task")
+}
+
+function prevTask(){
+let p=document.getElementById("progress")
+p.style.width="40%"
+alert("previous task")
+}
+
+function doneTask(){
+let p=document.getElementById("progress")
+p.style.width="100%"
+alert("task done")
+}
+
+function skipTask(){
+alert("task skipped")
+}
+
+/* BACKGROUND */
+let bgUpload=document.getElementById("bgUpload")
+
+bgUpload.addEventListener("change",function(){
+
+let file=this.files[0]
+
+let reader=new FileReader()
+
+reader.onload=function(e){
+
+document.getElementById("bg").src=e.target.result
+localStorage.setItem("bg",e.target.result)
+
+}
+
+reader.readAsDataURL(file)
+
+})
+
+let savedBg=localStorage.getItem("bg")
+
+if(savedBg){
+document.getElementById("bg").src=savedBg
+}
+
+/* CSV IMPORT (basic) */
+document.getElementById("csvUpload").addEventListener("change",function(){
+
+let file=this.files[0]
+let reader=new FileReader()
+
+reader.onload=function(e){
+let text=e.target.result
+console.log(text)
+alert("CSV loaded (see console)")
+}
+
+reader.readAsText(file)
+
+})
+
+/* TEXT PARSE (beta) */
+function parseText(){
+let text=document.getElementById("textInput").value
+alert("text parse not implemented yet")
+}
+
+/* GOOGLE AUTH (Supabase) */
+const SUPA_URL = "YOUR_SUPABASE_URL"
+const SUPA_KEY = "YOUR_SUPABASE_KEY"
+
+async function googleLogin(){
+try{
+const { data, error } = await supabase.auth.signInWithOAuth({
+provider:'google'
+})
+
+if(error) throw error
+
+}catch(err){
+alert(err.message)
+}
+}
+
+</script>
+
+</body>
+</html>
