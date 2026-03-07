@@ -69,6 +69,11 @@ cursor:pointer;
 margin-top:8px;
 }
 
+button:disabled{
+opacity:0.5;
+cursor:default;
+}
+
 .container{
 padding:20px;
 height:100vh;
@@ -134,7 +139,7 @@ color:white;
 
 <div id="login">
 <h2 id="loginTitle">Garage Log</h2>
-<button onclick="login()" id="loginBtn"></button>
+<button id="loginBtn"></button>
 </div>
 
 <div id="app" style="display:none">
@@ -147,7 +152,7 @@ color:white;
 
 <input id="newTask">
 
-<button id="addTaskBtn" onclick="addTask()" disabled></button>
+<button id="addTaskBtn" disabled></button>
 
 </div>
 
@@ -175,7 +180,7 @@ color:white;
 
 <div class="card">
 
-<button onclick="logout()" id="logoutBtn"></button>
+<button id="logoutBtn"></button>
 
 </div>
 
@@ -183,9 +188,9 @@ color:white;
 
 <div class="tabs">
 
-<button onclick="showTab('tasks')" id="tabTasks"></button>
-<button onclick="showTab('gallery')" id="tabGallery"></button>
-<button onclick="showTab('settings')" id="tabSettings"></button>
+<button id="tabTasks"></button>
+<button id="tabGallery"></button>
+<button id="tabSettings"></button>
 
 </div>
 
@@ -194,7 +199,7 @@ color:white;
 <script>
 
 const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
-const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
+const SUPA_KEY = "YOUR_PUBLIC_KEY"
 
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY)
 
@@ -222,11 +227,18 @@ logout:"Вийти"
 
 }
 
-let lang = navigator.language.startsWith("uk")
-? "uk"
-: "en"
-
+let lang = navigator.language.startsWith("uk") ? "uk" : "en"
 const t = translations[lang]
+
+const loginBtn = document.getElementById("loginBtn")
+const tasksTitle = document.getElementById("tasksTitle")
+const galleryTitle = document.getElementById("galleryTitle")
+const tabTasks = document.getElementById("tabTasks")
+const tabGallery = document.getElementById("tabGallery")
+const tabSettings = document.getElementById("tabSettings")
+const logoutBtn = document.getElementById("logoutBtn")
+const addTaskBtn = document.getElementById("addTaskBtn")
+const newTask = document.getElementById("newTask")
 
 loginBtn.innerText = t.login
 tasksTitle.innerText = t.tasks
@@ -236,19 +248,20 @@ tabGallery.innerText = t.gallery
 tabSettings.innerText = t.settings
 logoutBtn.innerText = t.logout
 addTaskBtn.innerText = t.addTask
-document.getElementById("newTask").placeholder = t.newTask
+newTask.placeholder = t.newTask
+
+loginBtn.onclick = login
+logoutBtn.onclick = logout
+addTaskBtn.onclick = addTask
+tabTasks.onclick = ()=>showTab("tasks")
+tabGallery.onclick = ()=>showTab("gallery")
+tabSettings.onclick = ()=>showTab("settings")
 
 let tasks = []
 let user = null
 
-const taskInput = document.getElementById("newTask")
-const addBtn = document.getElementById("addTaskBtn")
-
-taskInput.addEventListener("input",()=>{
-
-addBtn.disabled =
-taskInput.value.trim()===""
-
+newTask.addEventListener("input",()=>{
+addTaskBtn.disabled = newTask.value.trim()===""
 })
 
 function login(){
@@ -293,7 +306,7 @@ const {data} = await sb
 .select("*")
 .order("created_at",{ascending:false})
 
-tasks = data || []
+tasks = data ?? []
 
 renderTasks()
 renderGallery()
@@ -303,34 +316,30 @@ renderGallery()
 function renderTasks(){
 
 const el = document.getElementById("tasks")
-
 el.innerHTML=""
 
-tasks.forEach(t=>{
+tasks.forEach(task=>{
 
 const card = document.createElement("div")
-
 card.className="card"
 
 let photoButton=""
 
-if(t.done){
+if(task.done){
 
-photoButton=`
-<input type="file" onchange="uploadPhoto(event,'${t.id}')">
-`
+photoButton=`<input type="file" onchange="uploadPhoto(event,'${task.id}')">`
 
 }
 
 card.innerHTML = `
-<h3>${t.title}</h3>
-<p>Status: ${t.done ? "Done" : "Open"}</p>
+<h3>${task.title}</h3>
+<p>Status: ${task.done ? "Done" : "Open"}</p>
 
-${!t.done ? `<button onclick="completeTask('${t.id}')">Complete</button>` : ""}
+${!task.done ? `<button onclick="completeTask('${task.id}')">Complete</button>` : ""}
 
 ${photoButton}
 
-${t.photo ? `<img class="taskphoto" src="${t.photo}">` : ""}
+${task.photo ? `<img class="taskphoto" src="${task.photo}">` : ""}
 `
 
 el.appendChild(card)
@@ -342,7 +351,6 @@ el.appendChild(card)
 function renderGallery(){
 
 const g = document.getElementById("gallery")
-
 g.innerHTML=""
 
 tasks
@@ -350,9 +358,7 @@ tasks
 .forEach(t=>{
 
 const img = document.createElement("img")
-
 img.src = t.photo
-
 g.appendChild(img)
 
 })
@@ -361,15 +367,13 @@ g.appendChild(img)
 
 async function addTask(){
 
-const title = document.getElementById("newTask").value
-
+const title = newTask.value
 if(!title) return
 
 await sb.from("tasks").insert({title:title})
 
-document.getElementById("newTask").value=""
-
-addBtn.disabled = true
+newTask.value=""
+addTaskBtn.disabled=true
 
 loadTasks()
 
@@ -413,7 +417,6 @@ canvas.width = w
 canvas.height = h
 
 const ctx = canvas.getContext("2d")
-
 ctx.drawImage(img,0,0,w,h)
 
 canvas.toBlob(resolve,"image/jpeg",0.8)
@@ -429,7 +432,6 @@ reader.readAsDataURL(file)
 async function uploadPhoto(e,id){
 
 let file = e.target.files[0]
-
 if(!file) return
 
 file = await compressImage(file)
