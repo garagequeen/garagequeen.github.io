@@ -5,6 +5,7 @@
 <title>Garage Tasks</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 
 body{
@@ -73,11 +74,9 @@ const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
 
 const { createClient } = supabase
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-const supabaseClient = createClient(
-SUPA_URL,
-SUPA_KEY
-)
+
 async function loadTasks(){
 
 const { data, error } = await supabaseClient
@@ -103,9 +102,10 @@ renderTasks(data)
 
 }
 
+
 function renderTasks(tasks){
 
-const list = document.getElementById("task-list")
+const list=document.getElementById("task-list")
 list.innerHTML=""
 
 tasks.forEach(task=>{
@@ -113,11 +113,9 @@ tasks.forEach(task=>{
 let photosHtml=""
 
 if(task.photos){
-
 photosHtml += task.photos
 .map(p=>`<img src="${p.url}" class="task-photo">`)
 .join("")
-
 }
 
 if(task.photo){
@@ -157,10 +155,10 @@ list.appendChild(el)
 
 }
 
+
 async function addTask(){
 
 const input=document.getElementById("task-input")
-
 const title=input.value.trim()
 
 if(!title) return
@@ -178,10 +176,10 @@ return
 }
 
 input.value=""
-
 loadTasks()
 
 }
+
 
 async function completeTask(id){
 
@@ -199,6 +197,7 @@ loadTasks()
 
 }
 
+
 async function deleteTask(id){
 
 const { error } = await supabaseClient
@@ -215,15 +214,15 @@ loadTasks()
 
 }
 
+
 async function uploadPhoto(taskId,input){
 
 const file=input.files[0]
-
 if(!file) return
 
 const filePath=`${taskId}/${Date.now()}_${file.name}`
 
-const { error:uploadError } = await supabase.storage
+const { error:uploadError } = await supabaseClient.storage
 .from("taskphotos")
 .upload(filePath,file)
 
@@ -232,7 +231,7 @@ console.error(uploadError)
 return
 }
 
-const { data } = supabase.storage
+const { data } = supabaseClient.storage
 .from("taskphotos")
 .getPublicUrl(filePath)
 
@@ -253,6 +252,7 @@ return
 loadTasks()
 
 }
+
 
 loadTasks()
 
