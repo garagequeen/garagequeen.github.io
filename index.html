@@ -1,104 +1,182 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<title>GarageQueen</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Garage Log</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
+
 <style>
 
-body{
-font-family:Arial;
+*{
 margin:0;
-background:#f4f4f4;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 }
 
-header{
+body{
 background:#111;
 color:white;
-padding:12px;
-font-size:18px;
+height:100vh;
+overflow:hidden;
 }
 
-.container{
-padding:16px;
-max-width:600px;
-margin:auto;
-}
-
-input{
-padding:8px;
-margin:4px 0;
+#bg{
+position:fixed;
+top:0;
+left:0;
 width:100%;
-box-sizing:border-box;
+height:100%;
+object-fit:cover;
+z-index:-2;
+}
+
+#overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.55);
+z-index:-1;
+}
+
+#login{
+position:fixed;
+inset:0;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:20px;
+background:#111;
 }
 
 button{
-padding:8px 12px;
-margin-top:6px;
+padding:10px 16px;
+border:none;
+border-radius:10px;
+background:#3fb950;
+color:white;
+font-size:14px;
 cursor:pointer;
+margin-top:8px;
 }
 
-.task{
-background:white;
-padding:12px;
+.container{
+padding:20px;
+height:100vh;
+overflow:auto;
+padding-bottom:80px;
+}
+
+.card{
+background:rgba(30,30,30,0.85);
+border-radius:16px;
+padding:16px;
+margin-bottom:14px;
+}
+
+input{
+width:100%;
+margin-top:10px;
+padding:10px;
 border-radius:8px;
-margin-top:12px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
+border:none;
+background:#222;
+color:white;
 }
 
-.task-title{
-font-weight:bold;
+img.taskphoto{
+width:100%;
+border-radius:10px;
+margin-top:10px;
 }
 
-.task-photos{
+.gallery img{
+width:100%;
+border-radius:12px;
+margin-bottom:12px;
+}
+
+.tabs{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
 display:flex;
-gap:6px;
-flex-wrap:wrap;
-margin-top:6px;
+background:#000;
+border-top:1px solid #222;
 }
 
-.task-photo{
-width:80px;
-height:80px;
-object-fit:cover;
-border-radius:6px;
-}
-
-#app{
-display:none;
+.tabs button{
+flex:1;
+background:none;
+padding:14px;
+font-size:14px;
+color:white;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<header>GarageQueen</header>
-
-<div class="container">
+<img id="bg">
+<div id="overlay"></div>
 
 <div id="login">
+<h2>Garage Log</h2>
+<button onclick="login()">Sign in with Google</button>
+</div>
 
-<h3>Login</h3>
+<div id="app" style="display:none">
 
-<input id="email" placeholder="email">
-<input id="password" type="password" placeholder="password">
+<div id="tasksTab" class="container">
 
-<button onclick="login()">Login</button>
-<button onclick="signup()">Signup</button>
+<h2>Tasks</h2>
+
+<div class="card">
+
+<input id="newTask" placeholder="New task">
+
+<button onclick="addTask()">Add task</button>
 
 </div>
 
-<div id="app">
+<div id="tasks"></div>
 
-<h3>Tasks</h3>
+</div>
 
-<input id="task-input" placeholder="New task">
-<button onclick="addTask()">Add Task</button>
+<div id="galleryTab" class="container" style="display:none">
 
-<div id="task-list"></div>
+<h2>Work Gallery</h2>
+
+<div id="gallery" class="gallery"></div>
+
+</div>
+
+<div id="settingsTab" class="container" style="display:none">
+
+<div class="card">
+
+<h3>Background</h3>
+
+<input type="file" id="bgUpload" accept="image/*">
+
+</div>
+
+</div>
+
+<div class="tabs">
+
+<button onclick="showTab('tasks')">Tasks</button> <button onclick="showTab('gallery')">Gallery</button> <button onclick="showTab('settings')">Settings</button>
 
 </div>
 
@@ -109,48 +187,27 @@ display:none;
 const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
 
-const { createClient } = supabase
-const supabaseClient=createClient(SUPABASE_URL,SUPABASE_KEY)
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY)
 
+let tasks = []
+let user = null
 
-async function login(){
+function login(){
 
-const email=document.getElementById("email").value
-const password=document.getElementById("password").value
-
-const { error } = await supabaseClient.auth.signInWithPassword({
-email,
-password
+sb.auth.signInWithOAuth({
+provider:"google",
+options:{redirectTo:window.location.origin}
 })
 
-if(error){
-alert(error.message)
-return
 }
 
-startApp()
+async function checkUser(){
 
-}
+const {data} = await sb.auth.getSession()
 
+if(data.session){
 
-async function signup(){
-
-const email=document.getElementById("email").value
-const password=document.getElementById("password").value
-
-const { error } = await supabaseClient.auth.signUp({
-email,
-password
-})
-
-if(error){
-alert(error.message)
-}
-
-}
-
-
-function startApp(){
+user = data.session.user
 
 document.getElementById("login").style.display="none"
 document.getElementById("app").style.display="block"
@@ -159,202 +216,208 @@ loadTasks()
 
 }
 
-
-async function checkSession(){
-
-const { data } = await supabaseClient.auth.getSession()
-
-if(data.session){
-startApp()
 }
 
-}
-
-checkSession()
-
-
+checkUser()
 
 async function loadTasks(){
 
-const { data, error } = await supabaseClient
+const {data} = await sb
 .from("tasks")
-.select(`
-id,
-title,
-done,
-photo,
-photos (
-id,
-url
-)
-`)
+.select("*")
 .order("created_at",{ascending:false})
 
-if(error){
-console.error(error)
-return
-}
+tasks = data || []
 
-renderTasks(data)
+renderTasks()
+renderGallery()
 
 }
 
+function renderTasks(){
 
+const el = document.getElementById("tasks")
 
-function renderTasks(tasks){
+el.innerHTML=""
 
-const list=document.getElementById("task-list")
-list.innerHTML=""
+tasks.forEach(t=>{
 
-tasks.forEach(task=>{
+const card = document.createElement("div")
 
-let photosHtml=""
+card.className="card"
 
-if(task.photos){
-photosHtml += task.photos
-.map(p=>`<img src="${p.url}" class="task-photo">`)
-.join("")
-}
+let photoButton=""
 
-if(task.photo){
-photosHtml += `<img src="${task.photo}" class="task-photo">`
-}
+if(t.done){
 
-const el=document.createElement("div")
-el.className="task"
-
-el.innerHTML=`
-
-<div class="task-title">${task.title}</div>
-
-<div class="task-photos">
-${photosHtml}
-</div>
-
-<input type="file" onchange="uploadPhoto('${task.id}',this)">
-
-<br>
-
-<button onclick="completeTask('${task.id}')">
-Complete
-</button>
-
-<button onclick="deleteTask('${task.id}')">
-Delete
-</button>
-
+photoButton=`
+<input type="file" onchange="uploadPhoto(event,'${t.id}')">
 `
 
-list.appendChild(el)
+}
+
+card.innerHTML = `
+<h3>${t.title}</h3>
+<p>Status: ${t.done ? "Done" : "Open"}</p>
+
+${!t.done ? `<button onclick="completeTask('${t.id}')">Complete</button>` : ""}
+
+${photoButton}
+
+${t.photo ? `<img class="taskphoto" src="${t.photo}">` : ""}
+`
+
+el.appendChild(card)
 
 })
 
 }
 
+function renderGallery(){
 
+const g = document.getElementById("gallery")
+
+g.innerHTML=""
+
+tasks
+.filter(t=>t.photo)
+.forEach(t=>{
+
+const img = document.createElement("img")
+
+img.src = t.photo
+
+g.appendChild(img)
+
+})
+
+}
 
 async function addTask(){
 
-const input=document.getElementById("task-input")
-const title=input.value.trim()
+const title = document.getElementById("newTask").value
 
 if(!title) return
 
-const user = await supabaseClient.auth.getUser()
+await sb.from("tasks").insert({title:title})
 
-const { error } = await supabaseClient
-.from("tasks")
-.insert({
-title:title,
-done:false,
-user_id:user.data.user.id
-})
-
-if(error){
-console.error(error)
-return
-}
-
-input.value=""
+document.getElementById("newTask").value=""
 
 loadTasks()
 
 }
 
-
-
 async function completeTask(id){
 
-const { error } = await supabaseClient
+await sb
 .from("tasks")
 .update({done:true})
 .eq("id",id)
 
-if(error){
-console.error(error)
-return
-}
-
 loadTasks()
 
 }
 
+function compressImage(file){
 
+return new Promise(resolve=>{
 
-async function deleteTask(id){
+const img = new Image()
+const reader = new FileReader()
 
-const { error } = await supabaseClient
-.from("tasks")
-.delete()
-.eq("id",id)
+reader.onload = e => img.src = e.target.result
 
-if(error){
-console.error(error)
-return
+img.onload = ()=>{
+
+const canvas = document.createElement("canvas")
+
+const MAX = 1600
+
+let w = img.width
+let h = img.height
+
+if(w > MAX){
+h *= MAX / w
+w = MAX
 }
 
-loadTasks()
+canvas.width = w
+canvas.height = h
+
+const ctx = canvas.getContext("2d")
+
+ctx.drawImage(img,0,0,w,h)
+
+canvas.toBlob(resolve,"image/jpeg",0.8)
 
 }
 
+reader.readAsDataURL(file)
 
-
-async function uploadPhoto(taskId,input){
-
-const file=input.files[0]
-if(!file) return
-
-const filePath=`${taskId}/${Date.now()}_${file.name}`
-
-const { error:uploadError } = await supabaseClient.storage
-.from("taskphotos")
-.upload(filePath,file)
-
-if(uploadError){
-console.error(uploadError)
-return
-}
-
-const { data } = supabaseClient.storage
-.from("taskphotos")
-.getPublicUrl(filePath)
-
-const url=data.publicUrl
-
-const { error } = await supabaseClient
-.from("photos")
-.insert({
-task_id:taskId,
-url:url
 })
 
-if(error){
-console.error(error)
-return
 }
+
+async function uploadPhoto(e,id){
+
+let file = e.target.files[0]
+
+if(!file) return
+
+file = await compressImage(file)
+
+const name = id + "-" + Date.now() + ".jpg"
+
+await sb.storage
+.from("taskphotos")
+.upload(name,file)
+
+const {data} = sb.storage
+.from("taskphotos")
+.getPublicUrl(name)
+
+await sb
+.from("tasks")
+.update({photo:data.publicUrl})
+.eq("id",id)
 
 loadTasks()
 
+}
+
+function showTab(tab){
+
+document.getElementById("tasksTab").style.display="none"
+document.getElementById("galleryTab").style.display="none"
+document.getElementById("settingsTab").style.display="none"
+
+document.getElementById(tab+"Tab").style.display="block"
+
+}
+
+document.getElementById("bgUpload").addEventListener("change",function(){
+
+const reader = new FileReader()
+
+reader.onload = e =>{
+
+document.getElementById("bg").src = e.target.result
+localStorage.setItem("bg",e.target.result)
+
+}
+
+reader.readAsDataURL(this.files[0])
+
+})
+
+const bg = localStorage.getItem("bg")
+
+if(bg){
+document.getElementById("bg").src = bg
+}
+
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("sw.js")
 }
 
 </script>
