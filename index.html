@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 
@@ -122,6 +121,12 @@ font-size:14px;
 color:white;
 }
 
+.focusCard{
+font-size:20px;
+text-align:center;
+padding:30px;
+}
+
 </style>
 
 </head>
@@ -138,7 +143,19 @@ color:white;
 
 <div id="app" style="display:none">
 
-<div id="tasksTab" class="container">
+<!-- FOCUS -->
+
+<div id="focusTab" class="container">
+
+<h2>Focus</h2>
+
+<div id="focusTask"></div>
+
+</div>
+
+<!-- TASKS -->
+
+<div id="tasksTab" class="container" style="display:none">
 
 <h2>Tasks</h2>
 
@@ -154,6 +171,26 @@ color:white;
 
 </div>
 
+<!-- PROJECTS -->
+
+<div id="projectsTab" class="container" style="display:none">
+
+<h2>Projects</h2>
+
+<div class="card">
+
+<input id="newProject" placeholder="Project name">
+
+<button onclick="addProject()">Add project</button>
+
+</div>
+
+<div id="projects"></div>
+
+</div>
+
+<!-- GALLERY -->
+
 <div id="galleryTab" class="container" style="display:none">
 
 <h2>Work Gallery</h2>
@@ -161,6 +198,8 @@ color:white;
 <div id="gallery" class="gallery"></div>
 
 </div>
+
+<!-- SETTINGS -->
 
 <div id="settingsTab" class="container" style="display:none">
 
@@ -176,7 +215,11 @@ color:white;
 
 <div class="tabs">
 
-<button onclick="showTab('tasks')">Tasks</button> <button onclick="showTab('gallery')">Gallery</button> <button onclick="showTab('settings')">Settings</button>
+<button onclick="showTab('focus')">Focus</button>
+<button onclick="showTab('tasks')">Tasks</button>
+<button onclick="showTab('projects')">Projects</button>
+<button onclick="showTab('gallery')">Gallery</button>
+<button onclick="showTab('settings')">Settings</button>
 
 </div>
 
@@ -190,6 +233,7 @@ const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY)
 
 let tasks = []
+let projects = []
 let user = null
 
 function login(){
@@ -213,6 +257,7 @@ document.getElementById("login").style.display="none"
 document.getElementById("app").style.display="block"
 
 loadTasks()
+loadProjects()
 
 }
 
@@ -231,6 +276,47 @@ tasks = data || []
 
 renderTasks()
 renderGallery()
+renderFocus()
+
+}
+
+async function loadProjects(){
+
+const {data} = await sb
+.from("projects")
+.select("*")
+.order("created_at",{ascending:false})
+
+projects = data || []
+
+renderProjects()
+
+}
+
+function renderFocus(){
+
+const el = document.getElementById("focusTask")
+
+const task = tasks.find(t => !t.done)
+
+if(!task){
+
+el.innerHTML = `<div class="card focusCard">No tasks available</div>`
+return
+
+}
+
+el.innerHTML = `
+<div class="card focusCard">
+
+<h2>${task.title}</h2>
+
+<button onclick="completeTask('${task.id}')">
+Complete
+</button>
+
+</div>
+`
 
 }
 
@@ -273,6 +359,28 @@ el.appendChild(card)
 
 }
 
+function renderProjects(){
+
+const el = document.getElementById("projects")
+
+el.innerHTML=""
+
+projects.forEach(p=>{
+
+const card = document.createElement("div")
+
+card.className="card"
+
+card.innerHTML = `
+<h3>${p.title}</h3>
+`
+
+el.appendChild(card)
+
+})
+
+}
+
 function renderGallery(){
 
 const g = document.getElementById("gallery")
@@ -299,11 +407,31 @@ const title = document.getElementById("newTask").value
 
 if(!title) return
 
-await sb.from("tasks").insert({title:title})
+await sb.from("tasks").insert({
+title:title,
+user_id:user.id
+})
 
 document.getElementById("newTask").value=""
 
 loadTasks()
+
+}
+
+async function addProject(){
+
+const title = document.getElementById("newProject").value
+
+if(!title) return
+
+await sb.from("projects").insert({
+title:title,
+user_id:user.id
+})
+
+document.getElementById("newProject").value=""
+
+loadProjects()
 
 }
 
@@ -387,7 +515,9 @@ loadTasks()
 
 function showTab(tab){
 
+document.getElementById("focusTab").style.display="none"
 document.getElementById("tasksTab").style.display="none"
+document.getElementById("projectsTab").style.display="none"
 document.getElementById("galleryTab").style.display="none"
 document.getElementById("settingsTab").style.display="none"
 
