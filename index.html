@@ -7,257 +7,486 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-<title>Focus Tasks</title>
+<title>Garage Log</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
+
 <style>
 
-body{
+*{
 margin:0;
-font-family: system-ui;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+
+body{
+background:#111;
 color:white;
-background:black;
-padding-bottom:80px;
+height:100vh;
+overflow:hidden;
+}
+
+#bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:-2;
+}
+
+#overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.55);
+z-index:-1;
+}
+
+#login{
+position:fixed;
+inset:0;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:20px;
+background:#111;
+}
+
+button{
+padding:10px 16px;
+border:none;
+border-radius:10px;
+background:#3fb950;
+color:white;
+font-size:14px;
+cursor:pointer;
+margin-top:8px;
 }
 
 .container{
 padding:20px;
+height:100vh;
+overflow:auto;
+padding-bottom:80px;
+}
+
+.card{
+background:rgba(30,30,30,0.85);
+border-radius:16px;
+padding:16px;
+margin-bottom:14px;
 }
 
 input{
 width:100%;
-padding:14px;
-border-radius:10px;
+margin-top:10px;
+padding:10px;
+border-radius:8px;
 border:none;
-font-size:16px;
-margin-bottom:10px;
-}
-
-button{
-padding:12px;
-border:none;
-border-radius:10px;
-font-size:16px;
-}
-
-.add-btn{
-width:100%;
-background:#2ecc71;
+background:#222;
 color:white;
 }
 
-.add-btn:disabled{
-opacity:0.5;
-}
-
-.task{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:10px;
-margin-top:10px;
-background:rgba(255,255,255,0.1);
+img.taskphoto{
+width:100%;
 border-radius:10px;
+margin-top:10px;
 }
 
-.bottom-nav{
+.gallery img{
+width:100%;
+border-radius:12px;
+margin-bottom:12px;
+}
+
+.tabs{
 position:fixed;
 bottom:0;
 left:0;
 width:100%;
 display:flex;
-justify-content:space-around;
-background:rgba(0,0,0,0.7);
-padding:12px;
-backdrop-filter:blur(10px);
+background:#000;
+border-top:1px solid #222;
 }
 
-.bottom-nav button{
+.tabs button{
+flex:1;
 background:none;
-border:none;
-color:white;
+padding:14px;
 font-size:14px;
+color:white;
 }
 
 </style>
 
 </head>
+
 <body>
 
-<div class="container" id="focusScreen">
+<img id="bg">
+<div id="overlay"></div>
 
-<h2 id="title"></h2>
+<div id="login">
+<h2 id="loginTitle">Garage Log</h2>
+<button onclick="login()" id="loginBtn"></button>
+</div>
 
-<input id="taskInput">
+<div id="app" style="display:none">
 
-<button id="addTaskBtn" class="add-btn" disabled></button>
+<div id="tasksTab" class="container">
+
+<h2 id="tasksTitle"></h2>
+
+<div class="card">
+
+<input id="newTask">
+
+<button id="addTaskBtn" onclick="addTask()" disabled></button>
+
+</div>
 
 <div id="tasks"></div>
 
 </div>
 
-<div class="container" id="projectsScreen" style="display:none">
-<h2>Projects</h2>
-</div>
+<div id="galleryTab" class="container" style="display:none">
 
-<div class="container" id="tasksScreen" style="display:none">
-<h2>All Tasks</h2>
-</div>
+<h2 id="galleryTitle"></h2>
 
-<div class="container" id="inventoryScreen" style="display:none">
-<h2>Inventory</h2>
-</div>
-
-<div class="container" id="settingsScreen" style="display:none">
-
-<h2 id="settingsTitle"></h2>
-
-<button id="logoutBtn"></button>
+<div id="gallery" class="gallery"></div>
 
 </div>
 
-<div class="bottom-nav">
+<div id="settingsTab" class="container" style="display:none">
 
-<button id="navFocus"></button>
-<button id="navProjects"></button>
-<button id="navTasks"></button>
-<button id="navInventory"></button>
-<button id="navSettings"></button>
+<div class="card">
+
+<h3>Background</h3>
+
+<input type="file" id="bgUpload" accept="image/*">
+
+</div>
+
+<div class="card">
+
+<button onclick="logout()" id="logoutBtn"></button>
+
+</div>
+
+</div>
+
+<div class="tabs">
+
+<button onclick="showTab('tasks')" id="tabTasks"></button>
+<button onclick="showTab('gallery')" id="tabGallery"></button>
+<button onclick="showTab('settings')" id="tabSettings"></button>
+
+</div>
 
 </div>
 
 <script>
 
 const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
-const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
+const SUPA_KEY = "YOUR_ANON_KEY"
 
-const supabase = supabase.createClient(SUPA_URL,SUPA_KEY)
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY)
 
 const translations = {
 
 en:{
-title:"Focus",
-projects:"Projects",
+login:"Sign in with Google",
 tasks:"Tasks",
-inventory:"Inventory",
+gallery:"Gallery",
 settings:"Settings",
+newTask:"New task",
 addTask:"Add task",
-writeTask:"Write a task...",
 logout:"Logout"
 },
 
 uk:{
-title:"Фокус",
-projects:"Проєкти",
+login:"Увійти через Google",
 tasks:"Задачі",
-inventory:"Інвентар",
+gallery:"Галерея",
 settings:"Налаштування",
-addTask:"Додати задачу",
-writeTask:"Напиши задачу...",
+newTask:"Нова задача",
+addTask:"Додати",
 logout:"Вийти"
 }
 
 }
 
-let lang = localStorage.getItem("lang")
-
-if(!lang){
-lang = navigator.language.startsWith("uk") ? "uk" : "en"
-}
+let lang = navigator.language.startsWith("uk")
+? "uk"
+: "en"
 
 const t = translations[lang]
 
-title.innerText = t.title
-settingsTitle.innerText = t.settings
-
-navFocus.innerText = t.title
-navProjects.innerText = t.projects
-navTasks.innerText = t.tasks
-navInventory.innerText = t.inventory
-navSettings.innerText = t.settings
-
-taskInput.placeholder = t.writeTask
-addTaskBtn.innerText = t.addTask
+loginBtn.innerText = t.login
+tasksTitle.innerText = t.tasks
+galleryTitle.innerText = t.gallery
+tabTasks.innerText = t.tasks
+tabGallery.innerText = t.gallery
+tabSettings.innerText = t.settings
 logoutBtn.innerText = t.logout
+addTaskBtn.innerText = t.addTask
+document.getElementById("newTask").placeholder = t.newTask
+
+let tasks = []
+let user = null
+
+const taskInput = document.getElementById("newTask")
+const addBtn = document.getElementById("addTaskBtn")
 
 taskInput.addEventListener("input",()=>{
 
-addTaskBtn.disabled =
+addBtn.disabled =
 taskInput.value.trim()===""
 
 })
 
+function login(){
+
+sb.auth.signInWithOAuth({
+provider:"google",
+options:{redirectTo:window.location.origin}
+})
+
+}
+
+async function logout(){
+
+await sb.auth.signOut()
+location.reload()
+
+}
+
+async function checkUser(){
+
+const {data} = await sb.auth.getSession()
+
+if(data.session){
+
+user = data.session.user
+
+document.getElementById("login").style.display="none"
+document.getElementById("app").style.display="block"
+
+loadTasks()
+
+}
+
+}
+
+checkUser()
+
 async function loadTasks(){
 
-const {data} = await supabase
+const {data} = await sb
 .from("tasks")
 .select("*")
 .order("created_at",{ascending:false})
 
-tasks.innerHTML=""
+tasks = data || []
 
-data.forEach(task=>{
+renderTasks()
+renderGallery()
 
-const div=document.createElement("div")
+}
 
-div.className="task"
+function renderTasks(){
 
-div.innerHTML=`
-<span>${task.title}</span>
-<input type="checkbox" ${task.done ? "checked":""}>
+const el = document.getElementById("tasks")
+
+el.innerHTML=""
+
+tasks.forEach(t=>{
+
+const card = document.createElement("div")
+
+card.className="card"
+
+let photoButton=""
+
+if(t.done){
+
+photoButton=`
+<input type="file" onchange="uploadPhoto(event,'${t.id}')">
 `
 
-tasks.appendChild(div)
+}
+
+card.innerHTML = `
+<h3>${t.title}</h3>
+<p>Status: ${t.done ? "Done" : "Open"}</p>
+
+${!t.done ? `<button onclick="completeTask('${t.id}')">Complete</button>` : ""}
+
+${photoButton}
+
+${t.photo ? `<img class="taskphoto" src="${t.photo}">` : ""}
+`
+
+el.appendChild(card)
 
 })
 
 }
 
-addTaskBtn.onclick = async ()=>{
+function renderGallery(){
 
-const text = taskInput.value.trim()
+const g = document.getElementById("gallery")
 
-if(!text) return
+g.innerHTML=""
 
-await supabase
+tasks
+.filter(t=>t.photo)
+.forEach(t=>{
+
+const img = document.createElement("img")
+
+img.src = t.photo
+
+g.appendChild(img)
+
+})
+
+}
+
+async function addTask(){
+
+const title = document.getElementById("newTask").value
+
+if(!title) return
+
+await sb.from("tasks").insert({title:title})
+
+document.getElementById("newTask").value=""
+
+addBtn.disabled = true
+
+loadTasks()
+
+}
+
+async function completeTask(id){
+
+await sb
 .from("tasks")
-.insert([{title:text}])
-
-taskInput.value=""
-addTaskBtn.disabled=true
+.update({done:true})
+.eq("id",id)
 
 loadTasks()
 
 }
 
-logoutBtn.onclick = async ()=>{
+function compressImage(file){
 
-await supabase.auth.signOut()
+return new Promise(resolve=>{
 
-location.reload()
+const img = new Image()
+const reader = new FileReader()
+
+reader.onload = e => img.src = e.target.result
+
+img.onload = ()=>{
+
+const canvas = document.createElement("canvas")
+
+const MAX = 1600
+
+let w = img.width
+let h = img.height
+
+if(w > MAX){
+h *= MAX / w
+w = MAX
+}
+
+canvas.width = w
+canvas.height = h
+
+const ctx = canvas.getContext("2d")
+
+ctx.drawImage(img,0,0,w,h)
+
+canvas.toBlob(resolve,"image/jpeg",0.8)
 
 }
 
-function showScreen(screen){
+reader.readAsDataURL(file)
 
-focusScreen.style.display="none"
-projectsScreen.style.display="none"
-tasksScreen.style.display="none"
-inventoryScreen.style.display="none"
-settingsScreen.style.display="none"
-
-screen.style.display="block"
+})
 
 }
 
-navFocus.onclick=()=>showScreen(focusScreen)
-navProjects.onclick=()=>showScreen(projectsScreen)
-navTasks.onclick=()=>showScreen(tasksScreen)
-navInventory.onclick=()=>showScreen(inventoryScreen)
-navSettings.onclick=()=>showScreen(settingsScreen)
+async function uploadPhoto(e,id){
+
+let file = e.target.files[0]
+
+if(!file) return
+
+file = await compressImage(file)
+
+const name = id + "-" + Date.now() + ".jpg"
+
+await sb.storage
+.from("taskphotos")
+.upload(name,file)
+
+const {data} = sb.storage
+.from("taskphotos")
+.getPublicUrl(name)
+
+await sb
+.from("tasks")
+.update({photo:data.publicUrl})
+.eq("id",id)
 
 loadTasks()
+
+}
+
+function showTab(tab){
+
+document.getElementById("tasksTab").style.display="none"
+document.getElementById("galleryTab").style.display="none"
+document.getElementById("settingsTab").style.display="none"
+
+document.getElementById(tab+"Tab").style.display="block"
+
+}
+
+document.getElementById("bgUpload").addEventListener("change",function(){
+
+const reader = new FileReader()
+
+reader.onload = e =>{
+
+document.getElementById("bg").src = e.target.result
+localStorage.setItem("bg",e.target.result)
+
+}
+
+reader.readAsDataURL(this.files[0])
+
+})
+
+const bg = localStorage.getItem("bg")
+
+if(bg){
+document.getElementById("bg").src = bg
+}
+
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("sw.js")
+}
 
 </script>
 
