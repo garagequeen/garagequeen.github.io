@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <title>Garage Tasks</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 
 body{
@@ -73,14 +72,15 @@ margin-top:6px;
 const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
 
-const supabase = supabase.createClient(
+const { createClient } = supabase
+
+const supabaseClient = createClient(
 SUPA_URL,
 SUPA_KEY
 )
-
 async function loadTasks(){
 
-const { data, error } = await supabase
+const { data, error } = await supabaseClient
 .from("tasks")
 .select(`
 id,
@@ -165,7 +165,7 @@ const title=input.value.trim()
 
 if(!title) return
 
-const { error } = await supabase
+const { error } = await supabaseClient
 .from("tasks")
 .insert({
 title:title,
@@ -185,7 +185,7 @@ loadTasks()
 
 async function completeTask(id){
 
-const { error } = await supabase
+const { error } = await supabaseClient
 .from("tasks")
 .update({done:true})
 .eq("id",id)
@@ -201,7 +201,7 @@ loadTasks()
 
 async function deleteTask(id){
 
-const { error } = await supabase
+const { error } = await supabaseClient
 .from("tasks")
 .delete()
 .eq("id",id)
@@ -238,7 +238,7 @@ const { data } = supabase.storage
 
 const url=data.publicUrl
 
-const { error } = await supabase
+const { error } = await supabaseClient
 .from("photos")
 .insert({
 task_id:taskId,
