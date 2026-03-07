@@ -1,4 +1,4 @@
-const CACHE="garage-cache-v1"
+const CACHE="garage-cache-v2"
 
 self.addEventListener("install",e=>{
 e.waitUntil(
