@@ -58,13 +58,14 @@ background:#111;
 }
 
 button{
-padding:12px 18px;
+padding:10px 16px;
 border:none;
 border-radius:10px;
 background:#3fb950;
 color:white;
-font-size:15px;
+font-size:14px;
 cursor:pointer;
+margin-top:8px;
 }
 
 .container{
@@ -183,8 +184,8 @@ color:white;
 
 <script>
 
-const SUPABASE_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co";
-const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk";
+const SUPABASE_URL = "YOUR_SUPABASE_URL"
+const SUPABASE_KEY = "YOUR_ANON_KEY"
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
@@ -245,13 +246,23 @@ const card = document.createElement("div")
 
 card.className="card"
 
+let photoButton=""
+
+if(t.done){
+
+photoButton=`
+<input type="file" onchange="uploadPhoto(event,'${t.id}')">
+`
+
+}
+
 card.innerHTML = `
 <h3>${t.title}</h3>
 <p>Status: ${t.done ? "Done" : "Open"}</p>
 
-<button onclick="completeTask('${t.id}')">Complete</button>
+${!t.done ? `<button onclick="completeTask('${t.id}')">Complete</button>` : ""}
 
-<input type="file" onchange="uploadPhoto(event,'${t.id}')">
+${photoButton}
 
 ${t.photo ? `<img class="taskphoto" src="${t.photo}">` : ""}
 `
@@ -288,4 +299,128 @@ const title = document.getElementById("newTask").value
 
 if(!title) return
 
-await sb.from("tasks").insert({title:title
+await sb.from("tasks").insert({title:title})
+
+document.getElementById("newTask").value=""
+
+loadTasks()
+
+}
+
+async function completeTask(id){
+
+await sb
+.from("tasks")
+.update({done:true})
+.eq("id",id)
+
+loadTasks()
+
+}
+
+function compressImage(file){
+
+return new Promise(resolve=>{
+
+const img = new Image()
+const reader = new FileReader()
+
+reader.onload = e => img.src = e.target.result
+
+img.onload = ()=>{
+
+const canvas = document.createElement("canvas")
+
+const MAX = 1600
+
+let w = img.width
+let h = img.height
+
+if(w > MAX){
+h *= MAX / w
+w = MAX
+}
+
+canvas.width = w
+canvas.height = h
+
+const ctx = canvas.getContext("2d")
+
+ctx.drawImage(img,0,0,w,h)
+
+canvas.toBlob(resolve,"image/jpeg",0.8)
+
+}
+
+reader.readAsDataURL(file)
+
+})
+
+}
+
+async function uploadPhoto(e,id){
+
+let file = e.target.files[0]
+
+if(!file) return
+
+file = await compressImage(file)
+
+const name = id + "-" + Date.now() + ".jpg"
+
+await sb.storage
+.from("taskphotos")
+.upload(name,file)
+
+const {data} = sb.storage
+.from("taskphotos")
+.getPublicUrl(name)
+
+await sb
+.from("tasks")
+.update({photo:data.publicUrl})
+.eq("id",id)
+
+loadTasks()
+
+}
+
+function showTab(tab){
+
+document.getElementById("tasksTab").style.display="none"
+document.getElementById("galleryTab").style.display="none"
+document.getElementById("settingsTab").style.display="none"
+
+document.getElementById(tab+"Tab").style.display="block"
+
+}
+
+document.getElementById("bgUpload").addEventListener("change",function(){
+
+const reader = new FileReader()
+
+reader.onload = e =>{
+
+document.getElementById("bg").src = e.target.result
+localStorage.setItem("bg",e.target.result)
+
+}
+
+reader.readAsDataURL(this.files[0])
+
+})
+
+const bg = localStorage.getItem("bg")
+
+if(bg){
+document.getElementById("bg").src = bg
+}
+
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("sw.js")
+}
+
+</script>
+
+</body>
+</html>
