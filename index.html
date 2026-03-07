@@ -1,378 +1,157 @@
 <!DOCTYPE html>
-
-<html lang="en">
+<html>
 <head>
-
 <meta charset="UTF-8">
+<title>Garage Tasks</title>
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-<title>Garage Log</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#111111">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-}
-
 body{
-background:#111;
-color:white;
-height:100vh;
-overflow:hidden;
+font-family:Arial;
+margin:20px;
+background:#f4f4f4;
 }
 
-#bg{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-object-fit:cover;
-z-index:-2;
+h1{
+margin-bottom:20px;
 }
 
-#overlay{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.55);
-z-index:-1;
-}
-
-#login{
-position:fixed;
-inset:0;
+#task-list{
 display:flex;
 flex-direction:column;
-align-items:center;
-justify-content:center;
-gap:20px;
-background:#111;
+gap:12px;
+}
+
+.task{
+background:white;
+padding:12px;
+border-radius:8px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.task-title{
+font-weight:bold;
+margin-bottom:6px;
+}
+
+.task-photos{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+margin-top:6px;
+}
+
+.task-photo{
+width:80px;
+height:80px;
+object-fit:cover;
+border-radius:6px;
 }
 
 button{
-padding:10px 16px;
-border:none;
-border-radius:10px;
-background:#3fb950;
-color:white;
-font-size:14px;
-cursor:pointer;
-margin-top:8px;
-}
-
-button:disabled{
-opacity:0.5;
-cursor:default;
-}
-
-.container{
-padding:20px;
-height:100vh;
-overflow:auto;
-padding-bottom:80px;
-}
-
-.card{
-background:rgba(30,30,30,0.85);
-border-radius:16px;
-padding:16px;
-margin-bottom:14px;
-}
-
-input{
-width:100%;
-margin-top:10px;
-padding:10px;
-border-radius:8px;
-border:none;
-background:#222;
-color:white;
-}
-
-img.taskphoto{
-width:100%;
-border-radius:10px;
-margin-top:10px;
-}
-
-.gallery img{
-width:100%;
-border-radius:12px;
-margin-bottom:12px;
-}
-
-.tabs{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-display:flex;
-background:#000;
-border-top:1px solid #222;
-}
-
-.tabs button{
-flex:1;
-background:none;
-padding:14px;
-font-size:14px;
-color:white;
-}
-
-.small{
-font-size:12px;
-opacity:0.7;
 margin-top:6px;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<img id="bg">
-<div id="overlay"></div>
+<h1>Garage Tasks</h1>
 
-<div id="login">
-<h2>Garage Log</h2>
-<button id="loginBtn"></button>
-</div>
+<input id="task-input" placeholder="New task">
+<button onclick="addTask()">Add</button>
 
-<div id="app" style="display:none">
+<hr>
 
-<div id="tasksTab" class="container">
-
-<h2 id="tasksTitle"></h2>
-
-<div class="card">
-
-<input id="newTask">
-<button id="addTaskBtn" disabled></button>
-
-</div>
-
-<div id="tasks"></div>
-
-</div>
-
-<div id="galleryTab" class="container" style="display:none">
-
-<h2 id="galleryTitle"></h2>
-<div id="gallery" class="gallery"></div>
-
-</div>
-
-<div id="settingsTab" class="container" style="display:none">
-
-<div class="card">
-
-<p class="small">Logged in as:</p>
-<p id="userEmail"></p>
-
-<button id="logoutBtn"></button>
-
-</div>
-
-<div class="card">
-
-<h3>Background</h3>
-<input type="file" id="bgUpload" accept="image/*">
-
-</div>
-
-</div>
-
-<div class="tabs">
-
-<button id="tabTasks"></button> <button id="tabGallery"></button> <button id="tabSettings"></button>
-
-</div>
-
-</div>
+<div id="task-list"></div>
 
 <script>
 
 const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
 
-const sb=supabase.createClient(SUPA_URL,SUPA_KEY)
-
-const translations={
-
-en:{
-login:"Sign in with Google",
-tasks:"Tasks",
-gallery:"Gallery",
-settings:"Settings",
-newTask:"New task",
-addTask:"Add task",
-logout:"Logout"
-},
-
-uk:{
-login:"Увійти через Google",
-tasks:"Задачі",
-gallery:"Галерея",
-settings:"Налаштування",
-newTask:"Нова задача",
-addTask:"Додати",
-logout:"Вийти"
-}
-
-}
-
-let lang=navigator.language.startsWith("uk")?"uk":"en"
-const t=translations[lang]
-
-const loginBtn=document.getElementById("loginBtn")
-const tasksTitle=document.getElementById("tasksTitle")
-const galleryTitle=document.getElementById("galleryTitle")
-const tabTasks=document.getElementById("tabTasks")
-const tabGallery=document.getElementById("tabGallery")
-const tabSettings=document.getElementById("tabSettings")
-const logoutBtn=document.getElementById("logoutBtn")
-const addTaskBtn=document.getElementById("addTaskBtn")
-const newTask=document.getElementById("newTask")
-const tasksEl=document.getElementById("tasks")
-
-loginBtn.innerText=t.login
-tasksTitle.innerText=t.tasks
-galleryTitle.innerText=t.gallery
-tabTasks.innerText=t.tasks
-tabGallery.innerText=t.gallery
-tabSettings.innerText=t.settings
-logoutBtn.innerText=t.logout
-addTaskBtn.innerText=t.addTask
-newTask.placeholder=t.newTask
-
-loginBtn.onclick=login
-logoutBtn.onclick=logout
-addTaskBtn.onclick=addTask
-tabTasks.onclick=()=>showTab("tasks")
-tabGallery.onclick=()=>showTab("gallery")
-tabSettings.onclick=()=>showTab("settings")
-
-let tasks=[]
-let user=null
-
-newTask.addEventListener("input",()=>{
-addTaskBtn.disabled=newTask.value.trim()===""
-})
-
-function login(){
-
-sb.auth.signInWithOAuth({
-provider:"google",
-options:{redirectTo:window.location.origin}
-})
-
-}
-
-async function logout(){
-
-await sb.auth.signOut()
-location.reload()
-
-}
-
-async function checkUser(){
-
-const {data}=await sb.auth.getSession()
-
-if(data.session){
-
-user=data.session.user
-
-document.getElementById("userEmail").innerText=user.email
-
-document.getElementById("login").style.display="none"
-document.getElementById("app").style.display="block"
-
-loadTasks()
-
-}
-
-}
-
-checkUser()
+const supabase = supabase.createClient(
+SUPA_URL,
+SUPA_KEY
+)
 
 async function loadTasks(){
 
-const {data,error}=await sb
+const { data, error } = await supabase
 .from("tasks")
-.select("*")
-.eq("user_id",user.id)
+.select(`
+id,
+title,
+done,
+photo,
+photos (
+id,
+url
+)
+`)
 .order("created_at",{ascending:false})
 
 if(error){
-alert(error.message)
+console.error(error)
 return
 }
 
-tasks=data??[]
-
-renderTasks()
-renderGallery()
+renderTasks(data)
 
 }
 
-function renderTasks(){
+function renderTasks(tasks){
 
-tasksEl.innerHTML=""
+const list = document.getElementById("task-list")
+list.innerHTML=""
 
 tasks.forEach(task=>{
 
-const card=document.createElement("div")
-card.className="card"
+let photosHtml=""
 
-let photoButton=""
+if(task.photos){
 
-if(task.done){
-
-photoButton=`<input type="file" onchange="uploadPhoto(event,'${task.id}')">`
+photosHtml += task.photos
+.map(p=>`<img src="${p.url}" class="task-photo">`)
+.join("")
 
 }
 
-card.innerHTML=`
-<h3>${task.title}</h3>
-<p>Status: ${task.done?"Done":"Open"}</p>
+if(task.photo){
+photosHtml += `<img src="${task.photo}" class="task-photo">`
+}
 
-${!task.done?`<button onclick="completeTask('${task.id}')">Complete</button>`:""}
+const el=document.createElement("div")
+el.className="task"
 
-${photoButton}
+el.innerHTML=`
 
-${task.photo?`<img class="taskphoto" src="${task.photo}">`:""}
+<div class="task-title">
+${task.title}
+</div>
+
+<div class="task-photos">
+${photosHtml}
+</div>
+
+<input type="file" onchange="uploadPhoto('${task.id}',this)">
+
+<br>
+
+<button onclick="completeTask('${task.id}')">
+Complete
+</button>
+
+<button onclick="deleteTask('${task.id}')">
+Delete
+</button>
+
 `
 
-tasksEl.appendChild(card)
-
-})
-
-}
-
-function renderGallery(){
-
-const g=document.getElementById("gallery")
-g.innerHTML=""
-
-tasks
-.filter(t=>t.photo)
-.forEach(t=>{
-
-const img=document.createElement("img")
-img.src=t.photo
-g.appendChild(img)
+list.appendChild(el)
 
 })
 
@@ -380,93 +159,102 @@ g.appendChild(img)
 
 async function addTask(){
 
-const title=newTask.value.trim()
+const input=document.getElementById("task-input")
+
+const title=input.value.trim()
+
 if(!title) return
 
-addTaskBtn.disabled=true
-
-const {error}=await sb
+const { error } = await supabase
 .from("tasks")
 .insert({
 title:title,
-user_id:user.id
+done:false
 })
 
 if(error){
-alert(error.message)
+console.error(error)
+return
 }
 
-newTask.value=""
+input.value=""
+
 loadTasks()
 
 }
 
 async function completeTask(id){
 
-await sb
+const { error } = await supabase
 .from("tasks")
 .update({done:true})
 .eq("id",id)
 
+if(error){
+console.error(error)
+return
+}
+
 loadTasks()
 
 }
 
-async function uploadPhoto(e,id){
+async function deleteTask(id){
 
-let file=e.target.files[0]
-if(!file) return
-
-const name=id+"-"+Date.now()+".jpg"
-
-await sb.storage
-.from("taskphotos")
-.upload(name,file)
-
-const {data}=sb.storage
-.from("taskphotos")
-.getPublicUrl(name)
-
-await sb
+const { error } = await supabase
 .from("tasks")
-.update({photo:data.publicUrl})
+.delete()
 .eq("id",id)
 
+if(error){
+console.error(error)
+return
+}
+
 loadTasks()
 
 }
 
-function showTab(tab){
+async function uploadPhoto(taskId,input){
 
-document.getElementById("tasksTab").style.display="none"
-document.getElementById("galleryTab").style.display="none"
-document.getElementById("settingsTab").style.display="none"
+const file=input.files[0]
 
-document.getElementById(tab+"Tab").style.display="block"
+if(!file) return
 
+const filePath=`${taskId}/${Date.now()}_${file.name}`
+
+const { error:uploadError } = await supabase.storage
+.from("taskphotos")
+.upload(filePath,file)
+
+if(uploadError){
+console.error(uploadError)
+return
 }
 
-document.getElementById("bgUpload").addEventListener("change",function(){
+const { data } = supabase.storage
+.from("taskphotos")
+.getPublicUrl(filePath)
 
-const reader=new FileReader()
+const url=data.publicUrl
 
-reader.onload=e=>{
-document.getElementById("bg").src=e.target.result
-localStorage.setItem("bg",e.target.result)
-}
-
-reader.readAsDataURL(this.files[0])
-
+const { error } = await supabase
+.from("photos")
+.insert({
+task_id:taskId,
+url:url
 })
 
-const bg=localStorage.getItem("bg")
-if(bg){
-document.getElementById("bg").src=bg
+if(error){
+console.error(error)
+return
 }
 
-if("serviceWorker" in navigator){
-navigator.serviceWorker.register("sw.js")
+loadTasks()
+
 }
+
+loadTasks()
 
 </script>
 
