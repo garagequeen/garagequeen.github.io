@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Garage Tasks</title>
+<title>GarageQueen</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -10,30 +10,46 @@
 
 body{
 font-family:Arial;
-margin:20px;
+margin:0;
 background:#f4f4f4;
 }
 
-h1{
-margin-bottom:20px;
+header{
+background:#111;
+color:white;
+padding:12px;
+font-size:18px;
 }
 
-#task-list{
-display:flex;
-flex-direction:column;
-gap:12px;
+.container{
+padding:16px;
+max-width:600px;
+margin:auto;
+}
+
+input{
+padding:8px;
+margin:4px 0;
+width:100%;
+box-sizing:border-box;
+}
+
+button{
+padding:8px 12px;
+margin-top:6px;
+cursor:pointer;
 }
 
 .task{
 background:white;
 padding:12px;
 border-radius:8px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
+margin-top:12px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
 .task-title{
 font-weight:bold;
-margin-bottom:6px;
 }
 
 .task-photos{
@@ -50,8 +66,8 @@ object-fit:cover;
 border-radius:6px;
 }
 
-button{
-margin-top:6px;
+#app{
+display:none;
 }
 
 </style>
@@ -59,14 +75,34 @@ margin-top:6px;
 
 <body>
 
-<h1>Garage Tasks</h1>
+<header>GarageQueen</header>
+
+<div class="container">
+
+<div id="login">
+
+<h3>Login</h3>
+
+<input id="email" placeholder="email">
+<input id="password" type="password" placeholder="password">
+
+<button onclick="login()">Login</button>
+<button onclick="signup()">Signup</button>
+
+</div>
+
+<div id="app">
+
+<h3>Tasks</h3>
 
 <input id="task-input" placeholder="New task">
-<button onclick="addTask()">Add</button>
-
-<hr>
+<button onclick="addTask()">Add Task</button>
 
 <div id="task-list"></div>
+
+</div>
+
+</div>
 
 <script>
 
@@ -74,7 +110,68 @@ const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
 
 const { createClient } = supabase
-const supabaseClient = createClient(SUPA_URL, SUPA_KEY)
+const supabaseClient=createClient(SUPABASE_URL,SUPABASE_KEY)
+
+
+async function login(){
+
+const email=document.getElementById("email").value
+const password=document.getElementById("password").value
+
+const { error } = await supabaseClient.auth.signInWithPassword({
+email,
+password
+})
+
+if(error){
+alert(error.message)
+return
+}
+
+startApp()
+
+}
+
+
+async function signup(){
+
+const email=document.getElementById("email").value
+const password=document.getElementById("password").value
+
+const { error } = await supabaseClient.auth.signUp({
+email,
+password
+})
+
+if(error){
+alert(error.message)
+}
+
+}
+
+
+function startApp(){
+
+document.getElementById("login").style.display="none"
+document.getElementById("app").style.display="block"
+
+loadTasks()
+
+}
+
+
+async function checkSession(){
+
+const { data } = await supabaseClient.auth.getSession()
+
+if(data.session){
+startApp()
+}
+
+}
+
+checkSession()
+
 
 
 async function loadTasks(){
@@ -103,6 +200,7 @@ renderTasks(data)
 }
 
 
+
 function renderTasks(tasks){
 
 const list=document.getElementById("task-list")
@@ -127,9 +225,7 @@ el.className="task"
 
 el.innerHTML=`
 
-<div class="task-title">
-${task.title}
-</div>
+<div class="task-title">${task.title}</div>
 
 <div class="task-photos">
 ${photosHtml}
@@ -156,6 +252,7 @@ list.appendChild(el)
 }
 
 
+
 async function addTask(){
 
 const input=document.getElementById("task-input")
@@ -163,11 +260,14 @@ const title=input.value.trim()
 
 if(!title) return
 
+const user = await supabaseClient.auth.getUser()
+
 const { error } = await supabaseClient
 .from("tasks")
 .insert({
 title:title,
-done:false
+done:false,
+user_id:user.data.user.id
 })
 
 if(error){
@@ -176,9 +276,11 @@ return
 }
 
 input.value=""
+
 loadTasks()
 
 }
+
 
 
 async function completeTask(id){
@@ -198,6 +300,7 @@ loadTasks()
 }
 
 
+
 async function deleteTask(id){
 
 const { error } = await supabaseClient
@@ -213,6 +316,7 @@ return
 loadTasks()
 
 }
+
 
 
 async function uploadPhoto(taskId,input){
@@ -252,9 +356,6 @@ return
 loadTasks()
 
 }
-
-
-loadTasks()
 
 </script>
 
