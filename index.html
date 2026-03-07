@@ -122,9 +122,8 @@ color:white;
 }
 
 .focusCard{
-font-size:20px;
 text-align:center;
-padding:30px;
+font-size:20px;
 }
 
 </style>
@@ -205,6 +204,16 @@ padding:30px;
 
 <div class="card">
 
+<h3>Account</h3>
+
+<p id="userEmail"></p>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+<div class="card">
+
 <h3>Background</h3>
 
 <input type="file" id="bgUpload" accept="image/*">
@@ -230,11 +239,12 @@ padding:30px;
 const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
 
+
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY)
 
-let tasks = []
-let projects = []
-let user = null
+let tasks=[]
+let projects=[]
+let user=null
 
 function login(){
 
@@ -251,10 +261,12 @@ const {data} = await sb.auth.getSession()
 
 if(data.session){
 
-user = data.session.user
+user=data.session.user
 
 document.getElementById("login").style.display="none"
 document.getElementById("app").style.display="block"
+
+document.getElementById("userEmail").innerText=user.email
 
 loadTasks()
 loadProjects()
@@ -267,12 +279,15 @@ checkUser()
 
 async function loadTasks(){
 
-const {data} = await sb
+const {data,error}=await sb
 .from("tasks")
 .select("*")
+.eq("user_id",user.id)
 .order("created_at",{ascending:false})
 
-tasks = data || []
+if(error) console.log(error)
+
+tasks=data||[]
 
 renderTasks()
 renderGallery()
@@ -282,12 +297,15 @@ renderFocus()
 
 async function loadProjects(){
 
-const {data} = await sb
+const {data,error}=await sb
 .from("projects")
 .select("*")
+.eq("user_id",user.id)
 .order("created_at",{ascending:false})
 
-projects = data || []
+if(error) console.log(error)
+
+projects=data||[]
 
 renderProjects()
 
@@ -295,18 +313,18 @@ renderProjects()
 
 function renderFocus(){
 
-const el = document.getElementById("focusTask")
+const el=document.getElementById("focusTask")
 
-const task = tasks.find(t => !t.done)
+const task=tasks.find(t=>!t.done)
 
 if(!task){
 
-el.innerHTML = `<div class="card focusCard">No tasks available</div>`
+el.innerHTML=`<div class="card focusCard">No tasks available</div>`
 return
 
 }
 
-el.innerHTML = `
+el.innerHTML=`
 <div class="card focusCard">
 
 <h2>${task.title}</h2>
@@ -322,13 +340,13 @@ Complete
 
 function renderTasks(){
 
-const el = document.getElementById("tasks")
+const el=document.getElementById("tasks")
 
 el.innerHTML=""
 
 tasks.forEach(t=>{
 
-const card = document.createElement("div")
+const card=document.createElement("div")
 
 card.className="card"
 
@@ -336,21 +354,19 @@ let photoButton=""
 
 if(t.done){
 
-photoButton=`
-<input type="file" onchange="uploadPhoto(event,'${t.id}')">
-`
+photoButton=`<input type="file" onchange="uploadPhoto(event,'${t.id}')">`
 
 }
 
-card.innerHTML = `
+card.innerHTML=`
 <h3>${t.title}</h3>
-<p>Status: ${t.done ? "Done" : "Open"}</p>
+<p>Status: ${t.done ? "Done":"Open"}</p>
 
-${!t.done ? `<button onclick="completeTask('${t.id}')">Complete</button>` : ""}
+${!t.done ? `<button onclick="completeTask('${t.id}')">Complete</button>`:""}
 
 ${photoButton}
 
-${t.photo ? `<img class="taskphoto" src="${t.photo}">` : ""}
+${t.photo ? `<img class="taskphoto" src="${t.photo}">`:""}
 `
 
 el.appendChild(card)
@@ -361,19 +377,17 @@ el.appendChild(card)
 
 function renderProjects(){
 
-const el = document.getElementById("projects")
+const el=document.getElementById("projects")
 
 el.innerHTML=""
 
 projects.forEach(p=>{
 
-const card = document.createElement("div")
+const card=document.createElement("div")
 
 card.className="card"
 
-card.innerHTML = `
-<h3>${p.title}</h3>
-`
+card.innerHTML=`<h3>${p.title}</h3>`
 
 el.appendChild(card)
 
@@ -383,7 +397,7 @@ el.appendChild(card)
 
 function renderGallery(){
 
-const g = document.getElementById("gallery")
+const g=document.getElementById("gallery")
 
 g.innerHTML=""
 
@@ -391,9 +405,9 @@ tasks
 .filter(t=>t.photo)
 .forEach(t=>{
 
-const img = document.createElement("img")
+const img=document.createElement("img")
 
-img.src = t.photo
+img.src=t.photo
 
 g.appendChild(img)
 
@@ -403,14 +417,18 @@ g.appendChild(img)
 
 async function addTask(){
 
-const title = document.getElementById("newTask").value
+const title=document.getElementById("newTask").value
 
 if(!title) return
 
-await sb.from("tasks").insert({
+const {error}=await sb
+.from("tasks")
+.insert({
 title:title,
 user_id:user.id
 })
+
+if(error) console.log(error)
 
 document.getElementById("newTask").value=""
 
@@ -420,14 +438,18 @@ loadTasks()
 
 async function addProject(){
 
-const title = document.getElementById("newProject").value
+const title=document.getElementById("newProject").value
 
 if(!title) return
 
-await sb.from("projects").insert({
+const {error}=await sb
+.from("projects")
+.insert({
 title:title,
 user_id:user.id
 })
+
+if(error) console.log(error)
 
 document.getElementById("newProject").value=""
 
@@ -437,79 +459,23 @@ loadProjects()
 
 async function completeTask(id){
 
-await sb
+const {error}=await sb
 .from("tasks")
 .update({done:true})
 .eq("id",id)
+.eq("user_id",user.id)
+
+if(error) console.log(error)
 
 loadTasks()
 
 }
 
-function compressImage(file){
+async function logout(){
 
-return new Promise(resolve=>{
+await sb.auth.signOut()
 
-const img = new Image()
-const reader = new FileReader()
-
-reader.onload = e => img.src = e.target.result
-
-img.onload = ()=>{
-
-const canvas = document.createElement("canvas")
-
-const MAX = 1600
-
-let w = img.width
-let h = img.height
-
-if(w > MAX){
-h *= MAX / w
-w = MAX
-}
-
-canvas.width = w
-canvas.height = h
-
-const ctx = canvas.getContext("2d")
-
-ctx.drawImage(img,0,0,w,h)
-
-canvas.toBlob(resolve,"image/jpeg",0.8)
-
-}
-
-reader.readAsDataURL(file)
-
-})
-
-}
-
-async function uploadPhoto(e,id){
-
-let file = e.target.files[0]
-
-if(!file) return
-
-file = await compressImage(file)
-
-const name = id + "-" + Date.now() + ".jpg"
-
-await sb.storage
-.from("taskphotos")
-.upload(name,file)
-
-const {data} = sb.storage
-.from("taskphotos")
-.getPublicUrl(name)
-
-await sb
-.from("tasks")
-.update({photo:data.publicUrl})
-.eq("id",id)
-
-loadTasks()
+location.reload()
 
 }
 
@@ -527,11 +493,11 @@ document.getElementById(tab+"Tab").style.display="block"
 
 document.getElementById("bgUpload").addEventListener("change",function(){
 
-const reader = new FileReader()
+const reader=new FileReader()
 
-reader.onload = e =>{
+reader.onload=e=>{
 
-document.getElementById("bg").src = e.target.result
+document.getElementById("bg").src=e.target.result
 localStorage.setItem("bg",e.target.result)
 
 }
@@ -540,10 +506,10 @@ reader.readAsDataURL(this.files[0])
 
 })
 
-const bg = localStorage.getItem("bg")
+const bg=localStorage.getItem("bg")
 
 if(bg){
-document.getElementById("bg").src = bg
+document.getElementById("bg").src=bg
 }
 
 if("serviceWorker" in navigator){
