@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Garage Log</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link rel="manifest" href="/manifest.json">
+
+<meta name="theme-color" content="#111111">
+
+<link rel="apple-touch-icon" href="/icon-192.png">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+-webkit-user-select:none;
+user-select:none;
+touch-action:manipulation;
+}
+
+body{
+height:100vh;
+background:#111;
+color:white;
+overflow:hidden;
+}
+
+#bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+object-position:center;
+z-index:-2;
+pointer-events:none;
+}
+
+#overlay{
+position:fixed;
+inset:0;
+background:linear-gradient(
+to bottom,
+rgba(0,0,0,0.4),
+rgba(0,0,0,0.7)
+);
+backdrop-filter:blur(8px);
+z-index:-1;
+}
+
+#login{
+position:fixed;
+inset:0;
+background:#111;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+z-index:90;
+}
+
+#login button{
+padding:14px 28px;
+font-size:16px;
+border:none;
+border-radius:10px;
+background:#3fb950;
+color:white;
+cursor:pointer;
+min-width:200px;
+}
+
+#app{
+display:none;
+height:100vh;
+}
+
+.container{
+display:flex;
+flex-direction:column;
+height:calc(100vh - 70px);
+}
+
+.top-area{
+flex:0.3;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.middle-area{
+flex:0.3;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+gap:10px;
+padding:10px 20px;
+overflow:auto;
+}
+
+.bottom-area{
+flex:0.4;
+padding:10px 20px 20px;
+overflow:auto;
+}
+
+.card{
+background:rgba(20,20,20,0.7);
+backdrop-filter:blur(20px);
+border-radius:18px;
+padding:20px;
+width:90%;
+max-width:420px;
+box-shadow:0 8px 30px rgba(0,0,0,0.5);
+}
+
+.bottom{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+height:70px;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(10px);
+display:flex;
+justify-content:space-around;
+align-items:center;
+}
+
+.bottom button{
+background:none;
+border:none;
+color:white;
+font-size:14px;
+opacity:0.7;
+cursor:pointer;
+}
+
+.bottom button.active{
+opacity:1;
+font-weight:bold;
+}
+
+.hidden{
+display:none;
+}
+
+#debugMsg{
+margin-top:12px;
+font-size:11px;
+opacity:0.4;
+text-align:center;
+max-width:280px;
+word-break:break-all;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<img id="bg">
+
+<div id="overlay"></div>
+
+<div id="login">
+
+<h2 style="margin-bottom:8px">Garage Log</h2>
+
+<p style="opacity:0.6;margin-bottom:24px;font-size:14px">Sign in to continue</p>
+
+<button id="loginBtn" onclick="googleLogin()">Sign in with Google</button>
+
+<p id="debugMsg"></p>
+
+</div>
+
+<div id="app">
+
+<div class="container">
+
+<div id="tasks" class="top-area">
+<div class="card">
+
+<p id="taskMeta"></p>
+
+<h2 id="taskTitle"></h2>
+
+<p id="taskObj"></p>
+
+<div id="taskTags"></div>
+
+<p id="taskNote"></p>
+
+</div>
+</div>
+
+<div id="projects" class="middle-area hidden"></div>
+
+<div id="budget" class="middle-area hidden"></div>
+
+<div id="tools" class="middle-area hidden"></div>
+
+<div id="settings" class="bottom-area hidden">
+
+<div class="card">
+
+<h2>Background</h2>
+
+<input type="file" id="bgUpload" accept="image/*">
+
+</div>
+
+<div class="card" style="margin-top:10px">
+
+<p id="userInfo"></p>
+
+<button onclick="doLogout()">Sign out</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="bottom">
+
+<button onclick="showTab('tasks')" class="active" id="btn-tasks">Tasks</button>
+
+<button onclick="showTab('projects')" id="btn-projects">Fleet</button>
+
+<button onclick="showTab('budget')" id="btn-budget">Buy</button>
+
+<button onclick="showTab('tools')" id="btn-tools">All</button>
+
+<button onclick="showTab('settings')" id="btn-settings">Settings</button>
+
+</div>
+
+</div>
+
+<script>
+
+const SUPA_URL="https://fqmmlntmpybijmvrsfxx.supabase.co"
+
+const SUPA_KEY="YOUR_ANON_KEY"
+
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY)
+
+let user=null
+
+function dbg(msg){
+
+document.getElementById("debugMsg").textContent=msg
+
+}
+
+async function googleLogin(){
+
+try{
+
+await sb.auth.signInWithOAuth({
+
+provider:"google",
+
+options:{redirectTo:window.location.origin}
+
+})
+
+}catch(e){
+
+dbg(e.message)
+
+}
+
+}
+
+async function doLogout(){
+
+await sb.auth.signOut()
+
+location.reload()
+
+}
+
+(async()=>{
+
+const {data}=await sb.auth.getSession()
+
+if(data?.session?.user){
+
+user=data.session.user
+
+showApp()
+
+}
+
+})()
+
+function showApp(){
+
+document.getElementById("login").style.display="none"
+
+document.getElementById("app").style.display="block"
+
+document.getElementById("userInfo").textContent=user.email
+
+}
+
+document.getElementById("bgUpload").addEventListener("change",function(){
+
+const reader=new FileReader()
+
+reader.onload=e=>{
+
+document.getElementById("bg").src=e.target.result
+
+localStorage.setItem("bg",e.target.result)
+
+}
+
+reader.readAsDataURL(this.files[0])
+
+})
+
+const savedBg=localStorage.getItem("bg")
+
+if(savedBg)document.getElementById("bg").src=savedBg
+
+if("serviceWorker" in navigator){
+
+navigator.serviceWorker.register("/sw.js")
+
+}
+
+</script>
+
+</body>
+
+</html>
