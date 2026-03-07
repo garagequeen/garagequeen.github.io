@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Garage Log</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+
+body{
+background:#111;
+color:white;
+height:100vh;
+overflow:hidden;
+}
+
+#bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:-2;
+}
+
+#overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.55);
+z-index:-1;
+}
+
+#login{
+position:fixed;
+inset:0;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:20px;
+background:#111;
+}
+
+button{
+padding:12px 18px;
+border:none;
+border-radius:10px;
+background:#3fb950;
+color:white;
+font-size:15px;
+cursor:pointer;
+}
+
+.container{
+padding:20px;
+height:100vh;
+overflow:auto;
+padding-bottom:80px;
+}
+
+.card{
+background:rgba(30,30,30,0.85);
+border-radius:16px;
+padding:16px;
+margin-bottom:14px;
+}
+
+input{
+width:100%;
+margin-top:10px;
+padding:10px;
+border-radius:8px;
+border:none;
+background:#222;
+color:white;
+}
+
+img.taskphoto{
+width:100%;
+border-radius:10px;
+margin-top:10px;
+}
+
+.gallery img{
+width:100%;
+border-radius:12px;
+margin-bottom:12px;
+}
+
+.tabs{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+display:flex;
+background:#000;
+border-top:1px solid #222;
+}
+
+.tabs button{
+flex:1;
+background:none;
+padding:14px;
+font-size:14px;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<img id="bg">
+<div id="overlay"></div>
+
+<div id="login">
+<h2>Garage Log</h2>
+<button onclick="login()">Sign in with Google</button>
+</div>
+
+<div id="app" style="display:none">
+
+<div id="tasksTab" class="container">
+
+<h2>Tasks</h2>
+
+<div class="card">
+
+<input id="newTask" placeholder="New task">
+
+<button onclick="addTask()">Add task</button>
+
+</div>
+
+<div id="tasks"></div>
+
+</div>
+
+<div id="galleryTab" class="container" style="display:none">
+
+<h2>Work Gallery</h2>
+
+<div id="gallery" class="gallery"></div>
+
+</div>
+
+<div id="settingsTab" class="container" style="display:none">
+
+<div class="card">
+
+<h3>Background</h3>
+
+<input type="file" id="bgUpload" accept="image/*">
+
+</div>
+
+</div>
+
+<div class="tabs">
+
+<button onclick="showTab('tasks')">Tasks</button> <button onclick="showTab('gallery')">Gallery</button> <button onclick="showTab('settings')">Settings</button>
+
+</div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co";
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk";
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+let tasks = []
+let user = null
+
+function login(){
+
+sb.auth.signInWithOAuth({
+provider:"google",
+options:{redirectTo:window.location.origin}
+})
+
+}
+
+async function checkUser(){
+
+const {data} = await sb.auth.getSession()
+
+if(data.session){
+
+user = data.session.user
+
+document.getElementById("login").style.display="none"
+document.getElementById("app").style.display="block"
+
+loadTasks()
+
+}
+
+}
+
+checkUser()
+
+async function loadTasks(){
+
+const {data} = await sb
+.from("tasks")
+.select("*")
+.order("created_at",{ascending:false})
+
+tasks = data || []
+
+renderTasks()
+renderGallery()
+
+}
+
+function renderTasks(){
+
+const el = document.getElementById("tasks")
+
+el.innerHTML=""
+
+tasks.forEach(t=>{
+
+const card = document.createElement("div")
+
+card.className="card"
+
+card.innerHTML = `
+<h3>${t.title}</h3>
+<p>Status: ${t.done ? "Done" : "Open"}</p>
+
+<button onclick="completeTask('${t.id}')">Complete</button>
+
+<input type="file" onchange="uploadPhoto(event,'${t.id}')">
+
+${t.photo ? `<img class="taskphoto" src="${t.photo}">` : ""}
+`
+
+el.appendChild(card)
+
+})
+
+}
+
+function renderGallery(){
+
+const g = document.getElementById("gallery")
+
+g.innerHTML=""
+
+tasks
+.filter(t=>t.photo)
+.forEach(t=>{
+
+const img = document.createElement("img")
+
+img.src = t.photo
+
+g.appendChild(img)
+
+})
+
+}
+
+async function addTask(){
+
+const title = document.getElementById("newTask").value
+
+if(!title) return
+
+await sb.from("tasks").insert({title:title
