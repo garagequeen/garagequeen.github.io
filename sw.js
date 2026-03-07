@@ -1,13 +1,23 @@
-const CACHE="garage-cache-v2"
+const CACHE = "garage-cache-v3"
 
-self.addEventListener("install",e=>{
+const ASSETS = [
+"./",
+"./index.html",
+"./manifest.json"
+]
+
+self.addEventListener("install", e => {
+
 e.waitUntil(
-caches.open(CACHE).then(c=>c.addAll(["./"]))
+caches.open(CACHE).then(cache => cache.addAll(ASSETS))
 )
+
 })
 
-self.addEventListener("fetch",e=>{
+self.addEventListener("fetch", e => {
+
 e.respondWith(
-caches.match(e.request).then(r=>r||fetch(e.request))
+caches.match(e.request).then(res => res || fetch(e.request))
 )
+
 })
