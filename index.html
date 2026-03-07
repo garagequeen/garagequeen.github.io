@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 
@@ -128,6 +129,12 @@ font-size:14px;
 color:white;
 }
 
+.small{
+font-size:12px;
+opacity:0.7;
+margin-top:6px;
+}
+
 </style>
 
 </head>
@@ -138,7 +145,7 @@ color:white;
 <div id="overlay"></div>
 
 <div id="login">
-<h2 id="loginTitle">Garage Log</h2>
+<h2>Garage Log</h2>
 <button id="loginBtn"></button>
 </div>
 
@@ -151,7 +158,6 @@ color:white;
 <div class="card">
 
 <input id="newTask">
-
 <button id="addTaskBtn" disabled></button>
 
 </div>
@@ -163,7 +169,6 @@ color:white;
 <div id="galleryTab" class="container" style="display:none">
 
 <h2 id="galleryTitle"></h2>
-
 <div id="gallery" class="gallery"></div>
 
 </div>
@@ -172,15 +177,17 @@ color:white;
 
 <div class="card">
 
-<h3>Background</h3>
+<p class="small">Logged in as:</p>
+<p id="userEmail"></p>
 
-<input type="file" id="bgUpload" accept="image/*">
+<button id="logoutBtn"></button>
 
 </div>
 
 <div class="card">
 
-<button id="logoutBtn"></button>
+<h3>Background</h3>
+<input type="file" id="bgUpload" accept="image/*">
 
 </div>
 
@@ -188,9 +195,7 @@ color:white;
 
 <div class="tabs">
 
-<button id="tabTasks"></button>
-<button id="tabGallery"></button>
-<button id="tabSettings"></button>
+<button id="tabTasks"></button> <button id="tabGallery"></button> <button id="tabSettings"></button>
 
 </div>
 
@@ -201,9 +206,9 @@ color:white;
 const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
 
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY)
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY)
 
-const translations = {
+const translations={
 
 en:{
 login:"Sign in with Google",
@@ -227,41 +232,42 @@ logout:"Вийти"
 
 }
 
-let lang = navigator.language.startsWith("uk") ? "uk" : "en"
-const t = translations[lang]
+let lang=navigator.language.startsWith("uk")?"uk":"en"
+const t=translations[lang]
 
-const loginBtn = document.getElementById("loginBtn")
-const tasksTitle = document.getElementById("tasksTitle")
-const galleryTitle = document.getElementById("galleryTitle")
-const tabTasks = document.getElementById("tabTasks")
-const tabGallery = document.getElementById("tabGallery")
-const tabSettings = document.getElementById("tabSettings")
-const logoutBtn = document.getElementById("logoutBtn")
-const addTaskBtn = document.getElementById("addTaskBtn")
-const newTask = document.getElementById("newTask")
+const loginBtn=document.getElementById("loginBtn")
+const tasksTitle=document.getElementById("tasksTitle")
+const galleryTitle=document.getElementById("galleryTitle")
+const tabTasks=document.getElementById("tabTasks")
+const tabGallery=document.getElementById("tabGallery")
+const tabSettings=document.getElementById("tabSettings")
+const logoutBtn=document.getElementById("logoutBtn")
+const addTaskBtn=document.getElementById("addTaskBtn")
+const newTask=document.getElementById("newTask")
+const tasksEl=document.getElementById("tasks")
 
-loginBtn.innerText = t.login
-tasksTitle.innerText = t.tasks
-galleryTitle.innerText = t.gallery
-tabTasks.innerText = t.tasks
-tabGallery.innerText = t.gallery
-tabSettings.innerText = t.settings
-logoutBtn.innerText = t.logout
-addTaskBtn.innerText = t.addTask
-newTask.placeholder = t.newTask
+loginBtn.innerText=t.login
+tasksTitle.innerText=t.tasks
+galleryTitle.innerText=t.gallery
+tabTasks.innerText=t.tasks
+tabGallery.innerText=t.gallery
+tabSettings.innerText=t.settings
+logoutBtn.innerText=t.logout
+addTaskBtn.innerText=t.addTask
+newTask.placeholder=t.newTask
 
-loginBtn.onclick = login
-logoutBtn.onclick = logout
-addTaskBtn.onclick = addTask
-tabTasks.onclick = ()=>showTab("tasks")
-tabGallery.onclick = ()=>showTab("gallery")
-tabSettings.onclick = ()=>showTab("settings")
+loginBtn.onclick=login
+logoutBtn.onclick=logout
+addTaskBtn.onclick=addTask
+tabTasks.onclick=()=>showTab("tasks")
+tabGallery.onclick=()=>showTab("gallery")
+tabSettings.onclick=()=>showTab("settings")
 
-let tasks = []
-let user = null
+let tasks=[]
+let user=null
 
 newTask.addEventListener("input",()=>{
-addTaskBtn.disabled = newTask.value.trim()===""
+addTaskBtn.disabled=newTask.value.trim()===""
 })
 
 function login(){
@@ -282,11 +288,13 @@ location.reload()
 
 async function checkUser(){
 
-const {data} = await sb.auth.getSession()
+const {data}=await sb.auth.getSession()
 
 if(data.session){
 
-user = data.session.user
+user=data.session.user
+
+document.getElementById("userEmail").innerText=user.email
 
 document.getElementById("login").style.display="none"
 document.getElementById("app").style.display="block"
@@ -301,12 +309,18 @@ checkUser()
 
 async function loadTasks(){
 
-const {data} = await sb
+const {data,error}=await sb
 .from("tasks")
 .select("*")
+.eq("user_id",user.id)
 .order("created_at",{ascending:false})
 
-tasks = data ?? []
+if(error){
+alert(error.message)
+return
+}
+
+tasks=data??[]
 
 renderTasks()
 renderGallery()
@@ -315,12 +329,11 @@ renderGallery()
 
 function renderTasks(){
 
-const el = document.getElementById("tasks")
-el.innerHTML=""
+tasksEl.innerHTML=""
 
 tasks.forEach(task=>{
 
-const card = document.createElement("div")
+const card=document.createElement("div")
 card.className="card"
 
 let photoButton=""
@@ -331,18 +344,18 @@ photoButton=`<input type="file" onchange="uploadPhoto(event,'${task.id}')">`
 
 }
 
-card.innerHTML = `
+card.innerHTML=`
 <h3>${task.title}</h3>
-<p>Status: ${task.done ? "Done" : "Open"}</p>
+<p>Status: ${task.done?"Done":"Open"}</p>
 
-${!task.done ? `<button onclick="completeTask('${task.id}')">Complete</button>` : ""}
+${!task.done?`<button onclick="completeTask('${task.id}')">Complete</button>`:""}
 
 ${photoButton}
 
-${task.photo ? `<img class="taskphoto" src="${task.photo}">` : ""}
+${task.photo?`<img class="taskphoto" src="${task.photo}">`:""}
 `
 
-el.appendChild(card)
+tasksEl.appendChild(card)
 
 })
 
@@ -350,15 +363,15 @@ el.appendChild(card)
 
 function renderGallery(){
 
-const g = document.getElementById("gallery")
+const g=document.getElementById("gallery")
 g.innerHTML=""
 
 tasks
 .filter(t=>t.photo)
 .forEach(t=>{
 
-const img = document.createElement("img")
-img.src = t.photo
+const img=document.createElement("img")
+img.src=t.photo
 g.appendChild(img)
 
 })
@@ -367,14 +380,23 @@ g.appendChild(img)
 
 async function addTask(){
 
-const title = newTask.value
+const title=newTask.value.trim()
 if(!title) return
 
-await sb.from("tasks").insert({title:title})
-
-newTask.value=""
 addTaskBtn.disabled=true
 
+const {error}=await sb
+.from("tasks")
+.insert({
+title:title,
+user_id:user.id
+})
+
+if(error){
+alert(error.message)
+}
+
+newTask.value=""
 loadTasks()
 
 }
@@ -390,59 +412,18 @@ loadTasks()
 
 }
 
-function compressImage(file){
-
-return new Promise(resolve=>{
-
-const img = new Image()
-const reader = new FileReader()
-
-reader.onload = e => img.src = e.target.result
-
-img.onload = ()=>{
-
-const canvas = document.createElement("canvas")
-
-const MAX = 1600
-
-let w = img.width
-let h = img.height
-
-if(w > MAX){
-h *= MAX / w
-w = MAX
-}
-
-canvas.width = w
-canvas.height = h
-
-const ctx = canvas.getContext("2d")
-ctx.drawImage(img,0,0,w,h)
-
-canvas.toBlob(resolve,"image/jpeg",0.8)
-
-}
-
-reader.readAsDataURL(file)
-
-})
-
-}
-
 async function uploadPhoto(e,id){
 
-let file = e.target.files[0]
+let file=e.target.files[0]
 if(!file) return
 
-file = await compressImage(file)
-
-const name = id + "-" + Date.now() + ".jpg"
+const name=id+"-"+Date.now()+".jpg"
 
 await sb.storage
 .from("taskphotos")
 .upload(name,file)
 
-const {data} = sb.storage
+const {data}=sb.storage
 .from("taskphotos")
 .getPublicUrl(name)
 
@@ -467,23 +448,20 @@ document.getElementById(tab+"Tab").style.display="block"
 
 document.getElementById("bgUpload").addEventListener("change",function(){
 
-const reader = new FileReader()
+const reader=new FileReader()
 
-reader.onload = e =>{
-
-document.getElementById("bg").src = e.target.result
+reader.onload=e=>{
+document.getElementById("bg").src=e.target.result
 localStorage.setItem("bg",e.target.result)
-
 }
 
 reader.readAsDataURL(this.files[0])
 
 })
 
-const bg = localStorage.getItem("bg")
-
+const bg=localStorage.getItem("bg")
 if(bg){
-document.getElementById("bg").src = bg
+document.getElementById("bg").src=bg
 }
 
 if("serviceWorker" in navigator){
