@@ -10,7 +10,7 @@ Turns chaos — spreadsheets, lists, half-done projects — into focused action.
 ## What it does
 
 - **Focus** — shows only tasks you can actually do right now (unblocked, parts available)
-- **Projects** — BMW e28, e23, ZAZ, Garage, YouTube — each with its own task list
+- **Projects** — Cars, Garage, YouTube — each with its own task list
 - **Inventory** — parts, consumables, tools with availability status *(coming v0.3)*
 - **Objects** — car cards with VIN, mileage, service log *(coming v0.4)*
 - **YouTube pipeline** — tag tasks as filmable, auto-collects into video project *(coming v0.6)*
