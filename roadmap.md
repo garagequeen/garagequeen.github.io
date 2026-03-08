@@ -14,7 +14,7 @@ Structure: Now → Next → Later
 - [x] Auth fix for Chrome iOS
 - [x] Tasks tab back (global list + add task with project picker)
 - [x] Auth working in Chrome on iPhone confirmed
-- [ ] Feedback button (problem / idea)
+- [x] Feedback button (problem / idea)
 
 -----
 
