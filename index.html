@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Garage Log</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-user-select:none;user-select:none;}
+body{background:#111;color:white;height:100vh;overflow:hidden;}
+#bg{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:-1;}
+#login{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#111;padding-top:env(safe-area-inset-top);}
+button{padding:10px 16px;border:none;border-radius:10px;background:#3fb950;color:white;font-size:14px;cursor:pointer;margin-top:8px;}
+.container{padding:20px;height:100vh;overflow:auto;padding-bottom:90px;}
+.card{background:rgba(30,30,30,0.85);border-radius:16px;padding:16px;margin-bottom:14px;}
+input,select,textarea{width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;background:#222;color:white;font-size:14px;-webkit-user-select:text;user-select:text;}
+textarea{height:100px;resize:none;}
+.tabs{position:fixed;bottom:0;left:0;width:100%;display:flex;background:#000;border-top:1px solid #222;padding-bottom:env(safe-area-inset-bottom);}
+.tabs button{flex:1;background:none;padding:10px 4px;font-size:11px;color:white;margin-top:0;border-radius:0;}
+.tabs button.active{color:#3fb950;}
+#projectDetail{position:fixed;inset:0;background:#111;z-index:50;display:none;flex-direction:column;overflow-y:auto;}
+#projectDetail.open{display:flex;}
+.detail-header{display:flex;align-items:center;gap:8px;padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top));border-bottom:1px solid #222;position:sticky;top:0;background:#111;z-index:10;}
+.back-btn{background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;margin-top:0;padding:0;}
+.detail-title{font-size:18px;font-weight:600;}
+.detail-actions{margin-left:auto;display:flex;gap:6px;}
+.detail-actions button{margin-top:0;font-size:12px;padding:6px 10px;}
+.btn-danger{background:#c0392b !important;}
+.btn-secondary{background:#333 !important;}
+.task-card{background:rgba(30,30,30,0.85);border-radius:16px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;}
+.task-check{width:22px;height:22px;min-width:22px;border:2px solid #444;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:none;padding:0;margin-top:1px;}
+.task-check.done{background:#3fb950;border-color:#3fb950;}
+.task-check.done::after{content:'✓';font-size:12px;color:#111;font-weight:700;}
+.task-body{flex:1;}
+.task-title{font-size:15px;line-height:1.4;}
+.task-title.done{text-decoration:line-through;color:#666;}
+.task-meta{font-size:12px;color:#666;margin-top:4px;}
+.task-category{font-size:11px;color:#3fb950;text-transform:uppercase;letter-spacing:0.05em;margin-top:3px;}
+.category-header{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.08em;padding:16px 0 6px;font-weight:600;}
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:none;align-items:flex-end;}
+.sheet-overlay.open{display:flex;}
+.sheet{background:#1a1a1a;border-radius:20px 20px 0 0;padding:20px;width:100%;border-top:1px solid #333;animation:slideUp 0.25s ease;max-height:90vh;overflow-y:auto;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:36px;height:3px;background:#333;border-radius:2px;margin:0 auto 16px;}
+.sheet h3{font-size:16px;margin-bottom:4px;}
+.sheet button{width:100%;}
+.btn-cancel{background:#333 !important;margin-top:8px;}
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;}
+.confirm-overlay.open{display:flex;}
+.confirm-box{background:#1a1a1a;border-radius:16px;padding:24px;width:100%;max-width:320px;}
+.confirm-box h3{font-size:16px;margin-bottom:8px;}
+.confirm-box p{font-size:13px;color:#aaa;margin-bottom:20px;line-height:1.5;}
+.confirm-actions{display:flex;gap:8px;}
+.confirm-actions button{flex:1;margin-top:0;}
+.focus-card{background:rgba(30,30,30,0.85);border-radius:16px;padding:20px;margin-bottom:14px;}
+.focus-project{font-size:11px;color:#3fb950;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+.focus-title{font-size:22px;font-weight:600;margin-bottom:8px;}
+.focus-notes{font-size:13px;color:#aaa;margin-bottom:16px;line-height:1.5;}
+.focus-actions{display:flex;gap:8px;}
+.focus-actions button{flex:1;margin-top:0;}
+.btn-skip{background:#333 !important;}
+.focus-count{font-size:12px;color:#555;padding:4px 0 8px;}
+.empty{text-align:center;padding:60px 20px;color:#555;line-height:1.6;}
+.version{text-align:center;font-size:11px;color:#333;padding:24px 0 4px;}
+.safe-top{padding-top:env(safe-area-inset-top);}
+.container > h2:first-child, .container > .filter-tabs:first-child{margin-top:env(safe-area-inset-top);}
+
+/* Import preview */
+.import-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #222;}
+.import-item:last-child{border-bottom:none;}
+.import-check{width:20px;height:20px;min-width:20px;accent-color:#3fb950;margin-top:2px;}
+.import-label{flex:1;font-size:14px;line-height:1.4;}
+.import-label small{color:#555;font-size:11px;display:block;margin-top:2px;}
+.import-done{text-decoration:line-through;color:#555;}
+.import-category-header{font-size:11px;color:#3fb950;text-transform:uppercase;letter-spacing:0.08em;padding:14px 0 4px;font-weight:600;}
+.import-count{font-size:13px;color:#aaa;margin:8px 0 12px;}
+
+/* Inventory */
+.inv-card{background:rgba(30,30,30,0.85);border-radius:16px;padding:14px 16px;margin-bottom:10px;}
+.inv-name{font-size:15px;font-weight:500;}
+.inv-meta{font-size:12px;color:#666;margin-top:4px;}
+.inv-status{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;margin-top:6px;}
+.inv-status.have{background:#1a3a1a;color:#3fb950;}
+.inv-status.low{background:#3a2a00;color:#f0a500;}
+.inv-status.missing{background:#3a1a1a;color:#c0392b;}
+.filter-tabs{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;}
+.filter-tab{background:#222;border:none;color:#aaa;padding:6px 14px;border-radius:20px;font-size:13px;white-space:nowrap;margin-top:0;}
+.filter-tab.active{background:#3fb950;color:#111;}
+</style>
+
+</head>
+<body>
+
+<img id="bg">
+<div id="overlay"></div>
+
+<div id="login">
+  <h2>Garage Log</h2>
+  <button onclick="login()">Sign in with Google</button>
+</div>
+
+<div id="app" style="display:none">
+
+  <div id="focusTab" class="container safe-top">
+    <h2>Focus</h2>
+    <div id="focusContent"></div>
+  </div>
+
+  <div id="tasksTab" class="container safe-top" style="display:none">
+    <h2 style="margin-bottom:14px">Tasks</h2>
+    <div id="allTasksList"></div>
+  </div>
+
+  <div id="projectsTab" class="container safe-top" style="display:none">
+    <h2 style="margin-bottom:14px">Projects</h2>
+    <div id="projectsList"></div>
+    <div class="card">
+      <input id="newProject" placeholder="New project name" oninput="document.getElementById('addProjectBtn').disabled=!this.value.trim()">
+      <button onclick="addProject()" id="addProjectBtn" disabled style="opacity:0.4">Add project</button>
+    </div>
+  </div>
+
+  <div id="inventoryTab" class="container safe-top" style="display:none">
+    <h2 style="margin-bottom:14px">Inventory</h2>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="setInvFilter('all')">All</button>
+      <button class="filter-tab" onclick="setInvFilter('part')">Parts</button>
+      <button class="filter-tab" onclick="setInvFilter('tool')">Tools</button>
+      <button class="filter-tab" onclick="setInvFilter('consumable')">Consumables</button>
+    </div>
+    <div id="inventoryList"></div>
+    <button onclick="openAddInventory()" style="width:100%;margin-top:4px">+ Add item</button>
+  </div>
+
+  <div id="settingsTab" class="container safe-top" style="display:none">
+    <div class="card">
+      <h3>Account</h3>
+      <p id="userEmail" style="color:#aaa;margin-top:8px;font-size:14px"></p>
+      <button onclick="logout()">Logout</button>
+    </div>
+    <div class="card">
+      <h3>Background</h3>
+      <input type="file" id="bgUpload" accept="image/*">
+    </div>
+    <div class="card">
+      <h3>Feedback</h3>
+      <button onclick="openFeedback('bug')" style="background:#c0392b;margin-top:10px">🐛 Problem</button>
+      <button onclick="openFeedback('idea')" style="margin-top:8px">💡 Idea</button>
+    </div>
+    <div class="version">v0.3.1d</div>
+  </div>
+
+  <div class="tabs">
+    <button id="tab-focus" class="active" onclick="showTab('focus')">Focus</button>
+    <button id="tab-tasks" onclick="showTab('tasks')">Tasks</button>
+    <button id="tab-projects" onclick="showTab('projects')">Projects</button>
+    <button id="tab-inventory" onclick="showTab('inventory')">Inventory</button>
+    <button id="tab-settings" onclick="showTab('settings')">Settings</button>
+  </div>
+</div>
+
+<!-- PROJECT DETAIL -->
+
+<div id="projectDetail">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closeDetail()">←</button>
+    <div class="detail-title" id="detailTitle"></div>
+    <div class="detail-actions">
+      <button class="btn-secondary" onclick="openImport()">Import</button>
+      <button onclick="openAddTask()">+ Task</button>
+      <button class="btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+  <div style="padding:16px" id="tasksList"></div>
+</div>
+
+<!-- ADD TASK -->
+
+<div class="sheet-overlay" id="addTaskSheet" onclick="closeIfBg(event,'addTaskSheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3>New task</h3>
+    <input id="newTaskTitle" placeholder="Task name" autocomplete="off">
+    <select id="newTaskPriority">
+      <option value="">Priority (optional)</option>
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+    <textarea id="newTaskNotes" placeholder="Notes (optional)" style="height:60px"></textarea>
+    <button onclick="addTask()" style="margin-top:12px">Add task</button>
+    <button class="btn-cancel" onclick="closeSheet('addTaskSheet')">Cancel</button>
+  </div>
+</div>
+
+<!-- IMPORT TASKS -->
+
+<div class="sheet-overlay" id="importSheet" onclick="closeIfBg(event,'importSheet')">
+  <div class="sheet" id="importSheetInner">
+    <div class="sheet-handle"></div>
+    <div id="importStep1">
+      <h3>Import tasks</h3>
+      <p style="font-size:13px;color:#666;margin-top:6px">Paste your notes list. Lines starting with - [ ] or - [x] become tasks. Headers become categories.</p>
+      <textarea id="importText" placeholder="- [ ] fix radiator&#10;- [x] change oil&#10;&#10;Cooling system&#10;- [ ] flush coolant" style="height:160px;margin-top:12px"></textarea>
+      <button onclick="parseImport()" style="margin-top:12px">Parse →</button>
+      <button class="btn-cancel" onclick="closeSheet('importSheet')">Cancel</button>
+    </div>
+    <div id="importStep2" style="display:none">
+      <h3>Review tasks</h3>
+      <div id="importCount" class="import-count"></div>
+      <div id="importPreview"></div>
+      <button onclick="doImport()" id="importBtn" style="margin-top:12px">Import</button>
+      <button class="btn-cancel" onclick="backToImportStep1()">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD INVENTORY -->
+
+<div class="sheet-overlay" id="addInventorySheet" onclick="closeIfBg(event,'addInventorySheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3>New item</h3>
+    <input id="invName" placeholder="Item name" autocomplete="off">
+    <select id="invType">
+      <option value="part">Part</option>
+      <option value="tool">Tool</option>
+      <option value="consumable">Consumable</option>
+    </select>
+    <select id="invStatus">
+      <option value="have">Have it</option>
+      <option value="low">Running low</option>
+      <option value="missing">Missing</option>
+    </select>
+    <input id="invQty" placeholder="Quantity (optional)" type="number" min="0">
+    <input id="invLocation" placeholder="Location (optional)" autocomplete="off">
+    <button onclick="addInventoryItem()" style="margin-top:12px">Add item</button>
+    <button class="btn-cancel" onclick="closeSheet('addInventorySheet')">Cancel</button>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3 id="confirmTitle"></h3>
+    <p id="confirmText"></p>
+    <div class="confirm-actions">
+      <button style="background:#333;margin-top:0" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-danger" style="margin-top:0" id="confirmOk">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- FEEDBACK -->
+
+<div class="sheet-overlay" id="feedbackSheet" onclick="closeIfBg(event,'feedbackSheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 id="feedbackSheetTitle">Feedback</h3>
+    <textarea id="feedbackText" style="margin-top:12px"></textarea>
+    <button onclick="submitFeedback()" style="margin-top:12px">Send</button>
+    <button class="btn-cancel" onclick="closeSheet('feedbackSheet')">Cancel</button>
+  </div>
+</div>
+
+<script>
+const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { auth: { flowType: 'pkce' } })
+
+let user = null, projects = [], tasks = [], inventory = [], currentProject = null, invFilter = 'all'
+
+function login() {
+  sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: window.location.origin } })
+}
+async function logout() { await sb.auth.signOut(); location.reload() }
+
+async function checkUser() {
+  const { data } = await sb.auth.getSession()
+  if (data.session) {
+    user = data.session.user
+    document.getElementById("login").style.display = "none"
+    document.getElementById("app").style.display = "block"
+    document.getElementById("userEmail").innerText = user.email
+    await loadAll()
+  }
+}
+sb.auth.onAuthStateChange((_e, s) => { if (s && !user) checkUser() })
+checkUser()
+
+async function loadAll() {
+  const [p, t, inv] = await Promise.all([
+    sb.from("projects").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+    sb.from("tasks").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+    sb.from("inventory").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+  ])
+  projects = p.data || []
+  tasks = t.data || []
+  inventory = inv.data || []
+  renderProjects()
+  renderFocus()
+  renderAllTasks()
+  renderInventory()
+  if (currentProject) renderTasks()
+  if (!projects.length && !user._initialLoadDone) { user._initialLoadDone = true; showTab("projects") }
+  user._initialLoadDone = true
+}
+
+// ── PROJECTS ──
+function renderProjects() {
+  const el = document.getElementById("projectsList")
+  if (!projects.length) { el.innerHTML = `<div class="empty">No projects yet.<br>Add your first one below.</div>`; return }
+  el.innerHTML = ""
+  projects.forEach(p => {
+    const open = tasks.filter(t => t.project_id === p.id && t.status !== "done").length
+    const d = document.createElement("div")
+    d.className = "card"
+    d.style.cursor = "pointer"
+    d.innerHTML = `<b>${p.title}</b><div style="font-size:12px;color:#666;margin-top:4px">${open} open task${open!==1?"s":""}</div>`
+    d.onclick = () => openDetail(p)
+    el.appendChild(d)
+  })
+}
+
+async function addProject() {
+  const title = document.getElementById("newProject").value.trim()
+  if (!title) return
+  const duplicate = projects.find(p => p.title.toLowerCase() === title.toLowerCase())
+  if (duplicate) { alert(`Project "${title}" already exists.`); return }
+  await sb.from("projects").insert({ title, user_id: user.id })
+  document.getElementById("newProject").value = ""
+  document.getElementById("addProjectBtn").disabled = true
+  document.getElementById("addProjectBtn").style.opacity = "0.4"
+  await loadAll()
+}
+
+async function deleteProject(id) {
+  await sb.from("tasks").delete().eq("project_id", id).eq("user_id", user.id)
+  await sb.from("projects").delete().eq("id", id).eq("user_id", user.id)
+  closeDetail()
+  await loadAll()
+}
+
+// ── PROJECT DETAIL ──
+function openDetail(p) {
+  currentProject = p
+  document.getElementById("detailTitle").innerText = p.title
+  document.getElementById("projectDetail").classList.add("open")
+  renderTasks()
+}
+function closeDetail() { document.getElementById("projectDetail").classList.remove("open"); currentProject = null }
+
+function renderTasks() {
+  const el = document.getElementById("tasksList")
+  const pt = tasks.filter(t => t.project_id === currentProject?.id)
+  if (!pt.length) { el.innerHTML = `<div class="empty">No tasks yet.<br>Tap "+ Task" or import.</div>`; return }
+  el.innerHTML = ""
+  const open = pt.filter(t => t.status !== "done")
+  const done = pt.filter(t => t.status === "done")
+
+  // Group by category
+  const grouped = {}
+  ;[...open, ...done].forEach(t => {
+    const cat = t.category || ""
+    if (!grouped[cat]) grouped[cat] = []
+    grouped[cat].push(t)
+  })
+
+  Object.keys(grouped).forEach(cat => {
+    if (cat) {
+      const h = document.createElement("div")
+      h.className = "category-header"
+      h.innerText = cat
+      el.appendChild(h)
+    }
+    grouped[cat].forEach(t => {
+      const isDone = t.status === "done"
+      const d = document.createElement("div")
+      d.className = "task-card"
+      d.innerHTML = `
+        <div class="task-check${isDone?" done":""}" onclick="completeTask('${t.id}')"></div>
+        <div class="task-body">
+          <div class="task-title${isDone?" done":""}">${t.title}</div>
+          ${t.priority?`<div class="task-meta">${t.priority}</div>`:""}
+          ${t.notes?`<div class="task-meta">${t.notes}</div>`:""}
+        </div>`
+      el.appendChild(d)
+    })
+  })
+}
+
+function openAddTask() {
+  document.getElementById("addTaskSheet").classList.add("open")
+  setTimeout(() => document.getElementById("newTaskTitle").focus(), 300)
+}
+
+async function addTask() {
+  const title = document.getElementById("newTaskTitle").value.trim()
+  if (!title || !currentProject) return
+  await sb.from("tasks").insert({
+    title, user_id: user.id, project_id: currentProject.id,
+    priority: document.getElementById("newTaskPriority").value || null,
+    notes: document.getElementById("newTaskNotes").value.trim() || null,
+    status: "open"
+  })
+  document.getElementById("newTaskTitle").value = ""
+  document.getElementById("newTaskNotes").value = ""
+  document.getElementById("newTaskPriority").value = ""
+  closeSheet("addTaskSheet")
+  await loadAll()
+}
+
+async function completeTask(id) {
+  const task = tasks.find(t => t.id === id)
+  if (!task) return
+  const isDone = task.status === "done"
+  await sb.from("tasks").update(
+    isDone ? { status:"open", done_at: null } : { status:"done", done_at: new Date().toISOString() }
+  ).eq("id", id).eq("user_id", user.id)
+  await loadAll()
+}
+
+// ── IMPORT ──
+let parsedImportItems = []
+
+function openImport() {
+  document.getElementById("importStep1").style.display = "block"
+  document.getElementById("importStep2").style.display = "none"
+  document.getElementById("importText").value = ""
+  document.getElementById("importSheet").classList.add("open")
+}
+
+function backToImportStep1() {
+  document.getElementById("importStep1").style.display = "block"
+  document.getElementById("importStep2").style.display = "none"
+}
+
+function parseImport() {
+  const text = document.getElementById("importText").value
+  const lines = text.split("\n")
+  parsedImportItems = []
+  let currentCategory = ""
+
+  lines.forEach(line => {
+    const trimmed = line.trim()
+    if (!trimmed) return
+
+    const openMatch = trimmed.match(/^-\s\[\s\]\s+(.+)/)
+    const doneMatch = trimmed.match(/^-\s\[x\]\s+(.+)/i)
+
+    if (openMatch || doneMatch) {
+      const raw = (openMatch || doneMatch)[1]
+      // Extract notes from parentheses
+      const notesMatch = raw.match(/\(([^)]+)\)/)
+      const notes = notesMatch ? notesMatch[1] : null
+      const title = raw.replace(/\([^)]+\)/g, "").trim()
+      parsedImportItems.push({
+        title,
+        notes,
+        status: doneMatch ? "done" : "open",
+        category: currentCategory,
+        selected: true
+      })
+    } else if (!trimmed.startsWith("-")) {
+      // It's a category header
+      currentCategory = trimmed
+    }
+  })
+
+  if (!parsedImportItems.length) {
+    alert("No tasks found. Make sure lines start with - [ ] or - [x]")
+    return
+  }
+
+  renderImportPreview()
+  document.getElementById("importStep1").style.display = "none"
+  document.getElementById("importStep2").style.display = "block"
+}
+
+function renderImportPreview() {
+  const el = document.getElementById("importPreview")
+  el.innerHTML = ""
+
+  const selected = parsedImportItems.filter(i => i.selected).length
+  document.getElementById("importCount").innerText = `${selected} tasks selected`
+  document.getElementById("importBtn").innerText = `Import ${selected} tasks`
+
+  // Group by category
+  const grouped = {}
+  parsedImportItems.forEach((item, idx) => {
+    const cat = item.category || ""
+    if (!grouped[cat]) grouped[cat] = []
+    grouped[cat].push({ ...item, idx })
+  })
+
+  Object.keys(grouped).forEach(cat => {
+    if (cat) {
+      const h = document.createElement("div")
+      h.className = "import-category-header"
+      h.innerText = cat
+      el.appendChild(h)
+    }
+    grouped[cat].forEach(({ title, notes, status, selected, idx }) => {
+      const d = document.createElement("div")
+      d.className = "import-item"
+      d.innerHTML = `
+        <input type="checkbox" class="import-check" ${selected?"checked":""} onchange="toggleImportItem(${idx}, this.checked)">
+        <div class="import-label ${status==='done'?'import-done':''}">
+          ${title}
+          ${notes?`<small>${notes}</small>`:""}
+          ${status==='done'?`<small>✓ done</small>`:""}
+        </div>`
+      el.appendChild(d)
+    })
+  })
+}
+
+function toggleImportItem(idx, checked) {
+  parsedImportItems[idx].selected = checked
+  const selected = parsedImportItems.filter(i => i.selected).length
+  document.getElementById("importCount").innerText = `${selected} tasks selected`
+  document.getElementById("importBtn").innerText = `Import ${selected} tasks`
+}
+
+async function doImport() {
+  const toInsert = parsedImportItems
+    .filter(i => i.selected)
+    .map(i => ({
+      title: i.title,
+      notes: i.notes || null,
+      status: i.status,
+      category: i.category || null,
+      done_at: i.status === "done" ? new Date().toISOString() : null,
+      user_id: user.id,
+      project_id: currentProject.id
+    }))
+
+  if (!toInsert.length) return
+
+  await sb.from("tasks").insert(toInsert)
+  closeSheet("importSheet")
+  await loadAll()
+}
+
+// ── ALL TASKS ──
+function renderAllTasks() {
+  const el = document.getElementById("allTasksList")
+  const open = tasks.filter(t => t.status !== "done")
+  const done = tasks.filter(t => t.status === "done")
+  if (!tasks.length) { el.innerHTML = `<div class="empty">No tasks yet.<br>Add them inside a project.</div>`; return }
+  el.innerHTML = ""
+  const pm = {}; projects.forEach(p => pm[p.id] = p)
+  ;[...open, ...done].forEach(t => {
+    const isDone = t.status === "done"
+    const proj = pm[t.project_id]
+    const d = document.createElement("div")
+    d.className = "task-card"
+    d.innerHTML = `
+      <div class="task-check${isDone?" done":""}" onclick="completeTask('${t.id}')"></div>
+      <div class="task-body">
+        <div class="task-title${isDone?" done":""}">${t.title}</div>
+        <div class="task-meta">${proj ? proj.title : "No project"}${t.category ? " · "+t.category : ""}${t.priority ? " · "+t.priority : ""}</div>
+      </div>`
+    el.appendChild(d)
+  })
+}
+
+// ── INVENTORY ──
+function setInvFilter(f) {
+  invFilter = f
+  document.querySelectorAll(".filter-tab").forEach(b => b.classList.remove("active"))
+  event.target.classList.add("active")
+  renderInventory()
+}
+
+function renderInventory() {
+  const el = document.getElementById("inventoryList")
+  const filtered = invFilter === "all" ? inventory : inventory.filter(i => i.type === invFilter)
+  if (!filtered.length) { el.innerHTML = `<div class="empty">No items yet.</div>`; return }
+  el.innerHTML = ""
+  filtered.forEach(item => {
+    const d = document.createElement("div")
+    d.className = "inv-card"
+    const statusLabel = { have: "Have it", low: "Running low", missing: "Missing" }
+    d.innerHTML = `
+      <div class="inv-name">${item.name}</div>
+      <div class="inv-meta">${item.type}${item.quantity!=null?" · qty: "+item.quantity:""}${item.location?" · "+item.location:""}</div>
+      <span class="inv-status ${item.status}">${statusLabel[item.status]||item.status}</span>`
+    el.appendChild(d)
+  })
+}
+
+function openAddInventory() {
+  document.getElementById("invName").value = ""
+  document.getElementById("invQty").value = ""
+  document.getElementById("invLocation").value = ""
+  document.getElementById("addInventorySheet").classList.add("open")
+  setTimeout(() => document.getElementById("invName").focus(), 300)
+}
+
+async function addInventoryItem() {
+  const name = document.getElementById("invName").value.trim()
+  if (!name) return
+  await sb.from("inventory").insert({
+    name,
+    type: document.getElementById("invType").value,
+    status: document.getElementById("invStatus").value,
+    quantity: document.getElementById("invQty").value ? parseInt(document.getElementById("invQty").value) : null,
+    location: document.getElementById("invLocation").value.trim() || null,
+    user_id: user.id
+  })
+  closeSheet("addInventorySheet")
+  await loadAll()
+}
+
+// ── FOCUS ──
+function renderFocus() {
+  const el = document.getElementById("focusContent")
+  const open = tasks.filter(t => t.status !== "done" && !t.blocked_reason)
+  if (!open.length) {
+    el.innerHTML = `<div class="empty">${projects.length ? "All done or blocked." : "Add projects and tasks to see your focus."}</div>`
+    return
+  }
+  const pm = {}; projects.forEach(p => pm[p.id] = p)
+  el.innerHTML = `<div class="focus-count">${open.length} task${open.length!==1?"s":""} available</div>`
+  open.forEach(t => {
+    const proj = pm[t.project_id]
+    const d = document.createElement("div")
+    d.className = "focus-card"
+    d.innerHTML = `
+      ${proj?`<div class="focus-project">${proj.title}</div>`:""}
+      <div class="focus-title">${t.title}</div>
+      ${t.notes?`<div class="focus-notes">${t.notes}</div>`:""}
+      <div class="focus-actions">
+        <button onclick="completeTask('${t.id}')">Complete</button>
+        <button class="btn-skip" onclick="this.closest('.focus-card').remove()">Skip</button>
+      </div>`
+    el.appendChild(d)
+  })
+}
+
+// ── UI ──
+function showTab(tab) {
+  ["focus","tasks","projects","inventory","settings"].forEach(t => {
+    document.getElementById(t+"Tab").style.display = t===tab?"block":"none"
+    document.getElementById("tab-"+t).classList.toggle("active", t===tab)
+  })
+}
+
+function closeSheet(id) { document.getElementById(id).classList.remove("open") }
+function closeIfBg(e, id) { if (e.target===document.getElementById(id)) closeSheet(id) }
+
+let pendingDelete = null
+function confirmDelete() {
+  pendingDelete = () => deleteProject(currentProject.id)
+  document.getElementById("confirmTitle").innerText = "Delete project?"
+  document.getElementById("confirmText").innerText = `"${currentProject.title}" and all its tasks will be deleted.`
+  document.getElementById("confirmOk").onclick = () => { closeConfirm(); pendingDelete() }
+  document.getElementById("confirmOverlay").classList.add("open")
+}
+function closeConfirm() { document.getElementById("confirmOverlay").classList.remove("open") }
+
+let feedbackType = null
+function openFeedback(type) {
+  feedbackType = type
+  document.getElementById("feedbackSheetTitle").innerText = type === "bug" ? "Report a problem" : "Share an idea"
+  document.getElementById("feedbackText").value = ""
+  document.getElementById("feedbackText").placeholder = type === "bug" ? "Describe the problem..." : "Describe your idea..."
+  document.getElementById("feedbackSheet").classList.add("open")
+  setTimeout(() => document.getElementById("feedbackText").focus(), 300)
+}
+async function submitFeedback() {
+  const text = document.getElementById("feedbackText").value.trim()
+  if (!text) return
+  await sb.from("feedback").insert({ user_id: user?.id || null, type: feedbackType, text })
+  closeSheet("feedbackSheet")
+}
+
+document.getElementById("bgUpload").addEventListener("change", function() {
+  const r = new FileReader()
+  r.onload = e => { document.getElementById("bg").src = e.target.result; localStorage.setItem("bg", e.target.result) }
+  r.readAsDataURL(this.files[0])
+})
+const bg = localStorage.getItem("bg")
+if (bg) document.getElementById("bg").src = bg
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js")
+
+document.addEventListener("touchmove", e => {
+  if (e.touches.length > 1) e.preventDefault()
+}, { passive: false })
+
+let lastTouchEnd = 0
+document.addEventListener("touchend", e => {
+  const now = Date.now()
+  if (now - lastTouchEnd < 300) e.preventDefault()
+  lastTouchEnd = now
+}, { passive: false })
+</script>
+
+</body>
+</html>
