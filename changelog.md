@@ -5,6 +5,20 @@ Format: [Keep a Changelog](https://keepachangelog.com)
 
 -----
 
+## [0.2.1] - 2026-03-08
+
+### Added
+
+- New user auto-redirects to Projects tab on first login
+- Touch event blocking: pinch zoom and double-tap zoom disabled
+
+### Fixed
+
+- Bottom tab bar now respects iPhone safe area (home bar no longer overlaps)
+- viewport-fit=cover added for proper notch/home bar handling
+
+-----
+
 ## [0.2.0] - 2026-03-08
 
 ### Added
