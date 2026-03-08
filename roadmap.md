@@ -12,8 +12,8 @@ Structure: Now → Next → Later
 - [x] Add tasks linked to projects
 - [x] Focus tab with task cards
 - [x] Auth fix for Chrome iOS
-- [ ] Tasks tab back (global list + add task with project picker)
-- [ ] Auth working in Chrome on iPhone confirmed
+- [x] Tasks tab back (global list + add task with project picker)
+- [x] Auth working in Chrome on iPhone confirmed
 - [ ] Feedback button (problem / idea)
 
 -----
