@@ -253,6 +253,8 @@ textarea{height:100px;resize:none;}
     <select id="newTaskPriority">
       <option value="">No priority</option>
       <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option> 
     </select>
     <textarea id="newTaskNotes" placeholder="Notes (optional)" style="height:60px"></textarea>
     <button onclick="addTask()" style="margin-top:12px">Add task</button>
@@ -423,6 +425,9 @@ textarea{height:100px;resize:none;}
       <div style="display:flex;gap:6px;margin-top:10px" id="editTaskPrioritySeg">
         <button class="priority-chip" data-val="" onclick="setEditTaskPriority('',this)" style="background:#2a2a2a;color:#555">None</button>
         <button class="priority-chip" data-val="high" onclick="setEditTaskPriority('high',this)" style="background:#3a0a0a;color:#e74c3c">High</button>
+        <button class="priority-chip" data-val="medium" onclick="setEditTaskPriority('medium',this)" style="background:#3a2a00;color:#f0a500">Medium</button>
+        <button class="priority-chip" data-val="low" onclick="setEditTaskPriority('low',this)" style="background:#0a2a0a;color:#3fb950">Low</button>
+      </div>
       </div>
         
     </div>
@@ -1177,7 +1182,7 @@ function makeTaskCard(t, proj) {
   card.className = "task-card"
   card.style.cssText = "margin-bottom:0;border-radius:16px;transition:transform 0.2s;position:relative;z-index:1;background:rgba(30,30,30,0.85);"
   if (isBlocked) card.style.opacity = "0.6"
-  const prioConfig = { high: {label:'High', color:'#e74c3c', bg:'#3a0a0a'}, bg:'#0a2a0a'} }
+const prioConfig = { high: {label:'High', color:'#e74c3c', bg:'#3a0a0a'}, medium: {label:'Medium', color:'#f0a500', bg:'#3a2a00'}, low: {label:'Low', color:'#3fb950', bg:'#0a2a0a'} }
   const prio = prioConfig[t.priority]
   const prioChip = prio ? `<span style="font-size:10px;font-weight:700;color:${prio.color};background:${prio.bg};padding:1px 6px;border-radius:4px;margin-left:2px">${prio.label}</span>` : ''
   const links = getTaskLinks(t.id)
