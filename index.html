@@ -672,6 +672,9 @@ document.getElementById("bgUpload").addEventListener("change", async function() 
   }
 })
 // ── TOAST ──
+
+let currentUndo = Null
+  
 function showToast(msg, duration=2500) {
   const t = document.getElementById("toast")
   t.innerHTML = msg
