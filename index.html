@@ -158,7 +158,7 @@ textarea{height:100px;resize:none;}
         <button class="filter-tab active" onclick="setTaskFilter(null,this)">All</button>
       </div>
       <button id="filmFilterBtn" onclick="toggleFilmFilter()" style="margin-top:0;padding:6px 12px;background:#222;color:#aaa;font-size:13px;border-radius:20px">🎬</button>
-      <button id="blockedFilterBtn" onclick="toggleBlockedFilter()" style="margin-top:0;padding:6px 12px;background:#222;color:#aaa;font-size:13px;border-radius:20px">🔒</button>
+      <button id="blockedFilterBtn" onclick="toggleBlockedFilter()" style="margin-top:0;padding:6px 12px;background:#222;color:#aaa;font-size:13px;border-radius:20px">⊘</button>
     </div>
     <div id="allTasksList"></div>
   </div>
@@ -323,7 +323,7 @@ textarea{height:100px;resize:none;}
     <div style="display:flex;gap:2px;align-items:center">
       <div id="invTagBtn" onclick="toggleInvTags()" style="font-size:16px;font-weight:700;opacity:0.4;cursor:pointer;padding:4px 8px;user-select:none;font-family:monospace">#</div>
       <div onclick="toggleInvFilm()" id="invFilmBtn" style="font-size:20px;opacity:0.3;cursor:pointer;padding:4px 6px;user-select:none">🎬</div>
-      <div id="invBlockBtn" onclick="toggleInvBlock()" style="font-size:16px;opacity:0.4;cursor:pointer;padding:4px 6px;user-select:none">⛔</div>
+      <div id="invBlockBtn" onclick="toggleInvBlock()" style="font-size:16px;opacity:0.4;cursor:pointer;padding:4px 6px;user-select:none">⊘</div>
     </div>
   </div>
 
@@ -443,7 +443,7 @@ textarea{height:100px;resize:none;}
     <h3 style="margin:0">Edit task</h3>
     <div style="display:flex;gap:4px;align-items:center">
       <div onclick="toggleFilmFlagEdit()" id="editTaskFilmIcon" style="font-size:20px;opacity:0.3;cursor:pointer;padding:4px 6px;user-select:none">🎬</div>
-      <div id="editTaskBlockBtn" onclick="toggleEditTaskBlock()" style="font-size:16px;opacity:0.4;cursor:pointer;padding:4px 6px;user-select:none">⛔</div>
+      <div id="editTaskBlockBtn" onclick="toggleEditTaskBlock()" style="font-size:16px;opacity:0.4;cursor:pointer;padding:4px 6px;user-select:none">⊘</div>
     </div>
   </div>
 
