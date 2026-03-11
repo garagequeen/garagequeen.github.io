@@ -873,7 +873,13 @@ function renderTasks(filterBlocked = false) {
     if (!grouped[cat]) grouped[cat] = []
     grouped[cat].push(t)
   })
-  const namedCats = Object.keys(grouped).filter(c => c !== "").sort()
+  const namedCats = Object.keys(grouped)
+  .filter(c => c !== "")
+  .sort((a, b) => {
+    const numA = parseInt(a.match(/^\d+/)?.[0] || a);
+    const numB = parseInt(b.match(/^\d+/)?.[0] || b);
+    return numA - numB || a.localeCompare(b);
+  });
   const cats = grouped[""] ? [...namedCats, ""] : namedCats
   cats.forEach((cat, catIdx) => {
     const open = grouped[cat].filter(t => t.status !== "done")
