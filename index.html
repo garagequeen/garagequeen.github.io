@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- FIX 1: removed maximum-scale=1 and user-scalable=no — breaks iOS date picker and keyboard -->
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><title>GarageQueen</title>
 <title>Garage Log</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -239,7 +239,7 @@ textarea{height:100px;resize:none;}
     <div id="projectStats" style="font-size:12px;color:#555;flex:1"></div>
     <button id="projectFilmBtn" onclick="toggleProjectFilmFilter()" style="margin:0;padding:4px 10px;font-size:12px;background:#222;color:#aaa;border-radius:20px">🎬</button>
     <button id="projectBlockedBtn" onclick="toggleProjectBlockedFilter()" style="margin:0;padding:4px 10px;font-size:12px;background:#222;color:#aaa;border-radius:20px">⊘ Blocked</button>
-    <button onclick="openAnalyse()" style="margin:0;padding:4px 10px;font-size:16px;background:#222;color:#aaa;border-radius:20px">↻</button>
+    <button onclick="openAnalyse()" style="margin:0;padding:4px 10px;font-size:12px;background:#222;color:#aaa;border-radius:20px">↻</button>
   </div>
   <div style="padding:16px" id="tasksList"></div>
 
