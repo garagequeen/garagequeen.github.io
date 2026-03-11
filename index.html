@@ -4,8 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- FIX 1: removed maximum-scale=1 and user-scalable=no — breaks iOS date picker and keyboard -->
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Garage Log</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><title>GarageQueen</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <link rel="manifest" href="manifest.json">
@@ -680,20 +679,32 @@ function showToast(msg, duration=2500) {
   clearTimeout(t._timer)
   t._timer = setTimeout(() => t.classList.remove("show"), duration)
 }
-let _undoCallback = null
-// FIX 3: capture callback in local const — prevents overwrite when multiple undo toasts fire
+let undoStack = []
+
 function showToastUndo(msg, onUndo) {
-  const callback = onUndo
-  _undoCallback = callback
+
+  undoStack.push(onUndo)
+
   const t = document.getElementById("toast")
-  t.innerHTML = `${msg} <span id="undoBtn" style="color:#3fb950;margin-left:10px;font-weight:600;cursor:pointer">Undo</span>`
+
+  t.innerHTML = `${msg} 
+  <span id="undoBtn" style="color:#3fb950;margin-left:10px;font-weight:600;cursor:pointer">
+  Undo
+  </span>`
+
   t.classList.add("show")
+
   clearTimeout(t._timer)
+
   document.getElementById("undoBtn").onclick = () => {
-    if (callback) { callback(); _undoCallback = null }
+    const cb = undoStack.pop()
+    if (cb) cb()
     t.classList.remove("show")
   }
-  t._timer = setTimeout(() => { t.classList.remove("show"); _undoCallback = null }, 4000)
+
+  t._timer = setTimeout(() => {
+    t.classList.remove("show")
+  }, 4000)
 }
 async function loadAll() {
   const [p, t, inv, obj, tl] = await Promise.all([
