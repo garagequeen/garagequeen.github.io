@@ -9,7 +9,7 @@ Structure: Now → Next → Later
 
 ### Critical
 
-- [ ] Undo item — does not return to list (cause unclear, check console)
+- [x] Undo item — does not return to list (cause unclear, check console)
 - [ ] Date picker — does not show date when adding a vehicle
 - [ ] Convert item → task is broken
 
@@ -18,9 +18,9 @@ Structure: Now → Next → Later
 - [ ] Qty stepper inside sheet — not centered
 - [ ] “Have it” badge — shifts when qty is present; items without qty are misaligned against items with qty
 - [ ] Tapping qty on “have it” card — stretches the card
-- [ ] Sync button — larger than ⊘ Block and 🎬 Video buttons
+- [x] Sync button — larger than ⊘ Block and 🎬 Video buttons
 - [ ] Edit item sheet — opens at Type field, top of sheet not visible (doesn’t scroll to top)
-- [ ] Categories sort lexically: 1, 10, 12, 2, 3… (need natural sort)
+- [x] Categories sort lexically: 1, 10, 12, 2, 3… (need natural sort)
 
 ### Interaction / UX
 
@@ -52,7 +52,7 @@ Structure: Now → Next → Later
 - [ ] ? icon in header → shows What’s New (from CHANGELOG) + Known Bugs
 - [ ] App version shown on login screen (small, subtle)
 - [ ] Sync ↻ button — already added, fix size to match other buttons
-- [ ] Select all tasks in category (long press on header?)
+- [ ] Select all tasks in category (long press on header? - now long plress on task: then select the task)
 - [ ] Pin tasks (swipe right to pin?)
 - [ ] Scroll to top button (appears on scroll down)
 
