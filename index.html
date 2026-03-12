@@ -129,7 +129,7 @@ textarea{height:100px;resize:none;}
 .film-flag{font-size:13px;margin-left:4px;}
 /* Toast */
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:20px;font-size:13px;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none;}
-.toast.show{opacity:1;}
+  .toast.show{opacity:1; pointer-events:auto;}
 </style>
 </head>
 <body>
@@ -2448,7 +2448,7 @@ async function deleteCurrentInvItem() {
   let undone = false
   showToastUndo('Item deleted', () => {
     undone = true
-    invFilter = 'All'
+    invFilter = 'all'
     inventory.splice(idx, 0, deletedItem)
     const s = document.getElementById('invSearch')
     if (s) s.value = ''
