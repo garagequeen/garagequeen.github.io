@@ -141,6 +141,7 @@ textarea{height:100px;resize:none;}
 <div id="login">
   <h2>Garage Log</h2>
   <button onclick="login()">Sign in with Google</button>
+  <div id="versionLogin" style="font-size:11px;color:#333;margin-top:8px:></div>
 </div>
 
 <div id="app" style="display:none">
@@ -207,7 +208,7 @@ textarea{height:100px;resize:none;}
       <button onclick="openFeedback('bug')" style="background:#c0392b;margin-top:10px">🐛 Problem</button>
       <button onclick="openFeedback('idea')" style="margin-top:8px">💡 Idea</button>
     </div>
-    <div class="version">v0.6.6</div>
+    <div class="version" id="versionFooter"></div>
   </div>
   <div class="tabs">
     <button id="tab-focus" class="active" onclick="showTab('focus')">Focus</button>
@@ -606,6 +607,7 @@ textarea{height:100px;resize:none;}
 
 </div>
 <script>
+const APP_VERSION = 'v0.6.7'
 const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { auth: { flowType: 'pkce' } })
@@ -615,6 +617,8 @@ let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
 sb.auth.onAuthStateChange((_e, s) => { if (s && !user) checkUser() })
 window.addEventListener('load', () => checkUser())
+  document.getElementById('versionFooter'.innerText = APP_VERSION
+  document.getElemntById('versionLogin').innerText = APP_VERSION
 function login() {
   sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: window.location.origin } })
 }
