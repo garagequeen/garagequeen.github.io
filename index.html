@@ -618,10 +618,15 @@ let selectMode = false, selectedTaskIds = new Set()
 sb.auth.onAuthStateChange((_e, s) => { if (s && !user) checkUser() })
 window.addEventListener('load', () => {
   checkUser()
-  const vf = document.getElementById('versionFooter')
-  const vl = document.getElementById('versionLogin')
-  if (vf) vf.inner.Text = APP_VERSION
-  if (vl) vl.inner.Text = APP_VERSION
+  try {
+    document.getElementById('versionFooter').innerText = APP_VERSION
+    docement.getElementById('versionLogin').innerText = APP_VERSION
+  } catch(e) {}
+
+  // const vf = document.getElementById('versionFooter')
+  // const vl = document.getElementById('versionLogin')
+  // if (vf) vf.inner.Text = APP_VERSION
+  // if (vl) vl.inner.Text = APP_VERSION
   //document.getElementById('versionFooter').innerText = APP_VERSION - right after checkUser
   //document.getElementById('versionLogin').innerText = APP_VERSION - right after checkUser
 })
