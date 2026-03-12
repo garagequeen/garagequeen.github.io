@@ -1311,13 +1311,16 @@ async function saveEditTask() {
   closeSheet("editTaskSheet")
   showToast("Task saved ✓")
   rerender()
-  if (blockedFilterOn)
-    const stillBlocked = tasks.filter(t => t.project_id == curentProject?.id && !!t.blocked_reason)
-    if (!stillBlocked.length) {
-      blockedFilterOn = false
-      const btn = document.getElemntById('projectBlockedBtn')
-      if (btn) { btn.style.background = '#222'; btn.style.color = 'aaa' }
-    }
+// после rerender()
+if (blockedFilterOn) {
+  const stillBlocked = tasks.filter(t => t.project_id === currentProject?.id && !!t.blocked_reason)
+  if (!stillBlocked.length) {
+    blockedFilterOn = false
+    const btn = document.getElementById('projectBlockedBtn')
+    if (btn) { btn.style.background = '#222'; btn.style.color = '#aaa' }
+  }
+}
+
 }
 async function deleteEditTask() {
   if (!editingTask) return
