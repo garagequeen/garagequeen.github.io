@@ -1188,7 +1188,6 @@ async function doConvertItemToTask(projectId) {
   if (currentProject?.id === projectId) renderTasks()
 }
 
-}
 async function deleteCategory() {
   if (!renamingCategory || !currentProject) return
   const toUpdate = tasks.filter(t => t.project_id === currentProject.id && t.category === renamingCategory)
