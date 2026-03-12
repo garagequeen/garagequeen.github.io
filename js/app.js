@@ -1566,9 +1566,9 @@ function renderInventory() {
     wrapper.appendChild(d)
     el.appendChild(wrapper)
   })
-  //spending overview
+  //spending   // spending overview
   const spent = {}, planned = {}
-  filtere.forEach(i => {
+  filtered.forEach(i => {
     if (!i.price_paid) return
     const cur = i.currency || 'UAH'
     if (i.status === 'have' || i.status === 'low') {
@@ -1578,7 +1578,16 @@ function renderInventory() {
     }
   })
   const symbols = { UAH: '₴', EUR: '€', USD: '$' }
-  const fmt = obj => Object.entries(obj).map(([k,v]) => 
+  const fmt = obj => Object.entries(obj).map(([k,v]) => `${symbols[k]||k}${v.toLocaleString()}`).join(' · ')
+  const spentStr = fmt(spent)
+  const plannedStr = fmt(planned)
+  if (spentStr || plannedStr) {
+    const summary = document.createElement('div')
+    summary.style.cssText = 'font-size:12px;color:#555;padding:12px 4px;border-top:1px solid #222;margin-top:4px'
+    summary.innerHTML = `${spentStr?`💰 Spent: <span style="color:#3fb950">${spentStr}</span>`:''}${spentStr&&plannedStr?' · ':''}${plannedStr?`Planned: <span style="color:#aaa">${plannedStr}</span>`:''}`
+    el.appendChild(summary)
+  }
+
 }
 function invQtyChange(itemId, delta) {
   const span = document.querySelector(`.iqv-val[data-itemid="${itemId}"]`)
