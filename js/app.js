@@ -1760,6 +1760,7 @@ function resetInvSheet() {
     const el = document.getElementById(id); if (el) el.value = ''
   })
   document.getElementById('invPricePaid').value = ''
+  document.getElementById('invCurrency').value = ''
   document.getElementById('invQty').value = ''
   document.getElementById('invQty').style.opacity = '0.3'
   document.getElementById('invTagRow').style.display = 'none'
@@ -1801,6 +1802,7 @@ function openEditInventory(item) {
   document.getElementById('invQty').style.opacity = invStatusValue === 'missing' ? '0.3' : '1'
   document.getElementById('invArticle').value = item.article || ''
   document.getElementById('invPricePaid').value = item.price_paid || ''
+  document.getElementById('invCurrency').value = item.currency || 'UAH'
   document.getElementById('invLocation').value = item.location || ''
   document.getElementById('invUrl').value = item.url || ''
   document.getElementById('invNotes').value = item.notes || ''
@@ -1835,6 +1837,7 @@ async function saveInventoryItem() {
     quantity: qtyRaw ? parseInt(qtyRaw) : null,
     article: document.getElementById('invArticle').value.trim() || null,
     price_paid: pricePaid,
+    currency: document.getElementById('invCurrency').value,
     location: document.getElementById('invLocation').value.trim() || null,
     url: document.getElementById('invUrl').value.trim() || null,
     notes: document.getElementById('invNotes').value.trim() || null,
