@@ -1,5 +1,6 @@
-<style>
+
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-user-select:none;user-select:none;}
+
 /* FIX 2: inputs need text selection for iOS date picker, keyboard, copy/paste */
 input,select,textarea{-webkit-user-select:text!important;user-select:text!important;}
 html,body{margin:0;padding:0;background:#000;color:white;height:100%;overflow:hidden;}
@@ -31,6 +32,7 @@ textarea{height:100px;resize:none;}
 .btn-secondary{background:#333 !important;}
 .seg-btn{background:#222;border:none;color:#aaa;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;transition:background .15s,color .15s;}
 .seg-btn.active{background:#3fb950;color:#111;font-weight:600;}
+
 /* Project card with cover photo + progress overlay */
 .project-card{background:rgba(30,30,30,0.85);border-radius:16px;padding:16px;margin-bottom:14px;cursor:pointer;overflow:hidden;border-left:4px solid transparent;position:relative;min-height:76px;}
 .project-card-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.3;z-index:0;}
@@ -63,6 +65,7 @@ textarea{height:100px;resize:none;}
 .sheet h3{font-size:16px;margin-bottom:4px;}
 .sheet button{width:100%;}
 .priority-chip{border:none;border-radius:6px;font-size:12px;font-weight:600;padding:5px 10px;cursor:pointer;opacity:0.5;transition:opacity .15s;}
+
 /* FIX 7: counter-border — proper flex centering for − N + so they align vertically */
 .counter-border{display:inline-flex;align-items:center;height:32px;border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;}
 .counter-border button{width:32px;height:32px;background:none;border:none;color:#6b6b72;font-size:18px;font-weight:400;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:color .12s,background .12s;padding:0;margin:0;}
@@ -89,6 +92,7 @@ textarea{height:100px;resize:none;}
 .focus-count{font-size:12px;color:#555;padding:4px 0 8px;}
 .empty{text-align:center;padding:60px 20px;color:#555;line-height:1.6;}
 .version{text-align:center;font-size:11px;color:#333;padding:24px 0 4px;}
+
 /* Import */
 .import-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #222;}
 .import-item:last-child{border-bottom:none;}
@@ -98,6 +102,7 @@ textarea{height:100px;resize:none;}
 .import-done{text-decoration:line-through;color:#555;}
 .import-category-header{font-size:11px;color:#3fb950;text-transform:uppercase;letter-spacing:0.08em;padding:14px 0 4px;font-weight:600;}
 .import-count{font-size:13px;color:#aaa;margin:8px 0 12px;}
+
 /* Inventory */
 .inv-card{background:rgba(30,30,30,0.85);border-radius:16px;padding:14px 16px;margin-bottom:10px;cursor:pointer;}
 .inv-name{font-size:15px;font-weight:500;}
@@ -113,9 +118,10 @@ textarea{height:100px;resize:none;}
 .filter-tabs::-webkit-scrollbar{display:none;}
 #taskProjectFilter .filter-tab{background:#222;border-radius:20px;padding:6px 14px;border-bottom:none;color:#aaa;}
 #taskProjectFilter .filter-tab.active{color:#111;}
+
 /* Film flag */
 .film-flag{font-size:13px;margin-left:4px;}
+
 /* Toast */
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:20px;font-size:13px;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none;}
   .toast.show{opacity:1; pointer-events:auto;}
-</style>
