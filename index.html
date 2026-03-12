@@ -141,7 +141,7 @@ textarea{height:100px;resize:none;}
 <div id="login">
   <h2>Garage Log</h2>
   <button onclick="login()">Sign in with Google</button>
-  <div id="versionLogin" style="font-size:11px;color:#333;margin-top:8px:></div>
+  <div id="versionLogin" style="font-size:11px;color:#333;margin-top:8px"></div>
 </div>
 
 <div id="app" style="display:none">
@@ -620,7 +620,7 @@ window.addEventListener('load', () => {
   checkUser()
   try {
     document.getElementById('versionFooter').innerText = APP_VERSION
-    docement.getElementById('versionLogin').innerText = APP_VERSION
+    document.getElementById('versionLogin').innerText = APP_VERSION
   } catch(e) {}
 
   // const vf = document.getElementById('versionFooter')
