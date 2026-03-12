@@ -1588,7 +1588,6 @@ function renderInventory() {
     el.appendChild(summary)
   }
 
-}
 function invQtyChange(itemId, delta) {
   const span = document.querySelector(`.iqv-val[data-itemid="${itemId}"]`)
   if (!span) return
