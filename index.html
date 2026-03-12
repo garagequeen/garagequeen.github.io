@@ -616,9 +616,11 @@ let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLi
 let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
 sb.auth.onAuthStateChange((_e, s) => { if (s && !user) checkUser() })
-window.addEventListener('load', () => checkUser())
+window.addEventListener('load', () => {
+  checkUser()
   document.getElementById('versionFooter').innerText = APP_VERSION
   document.getElementById('versionLogin').innerText = APP_VERSION
+})
 function login() {
   sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: window.location.origin } })
 }
