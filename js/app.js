@@ -1566,7 +1566,8 @@ function renderInventory() {
     wrapper.appendChild(d)
     el.appendChild(wrapper)
   })
-  //spending   // spending overview
+  
+  // spending overview
   const spent = {}, planned = {}
   filtered.forEach(i => {
     if (!i.price_paid) return
@@ -1587,6 +1588,7 @@ function renderInventory() {
     summary.innerHTML = `${spentStr?`💰 Spent: <span style="color:#3fb950">${spentStr}</span>`:''}${spentStr&&plannedStr?' · ':''}${plannedStr?`Planned: <span style="color:#aaa">${plannedStr}</span>`:''}`
     el.appendChild(summary)
   }
+}
 
 function invQtyChange(itemId, delta) {
   const span = document.querySelector(`.iqv-val[data-itemid="${itemId}"]`)
