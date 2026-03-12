@@ -620,8 +620,8 @@ window.addEventListener('load', () => {
   checkUser()
   const vf = document.getElementById('versionFooter')
   const vl = document.getElementById('versionLogin')
-  if (vf) = vf.inner.Text = APP_VERSION
-  if (vl) = vl.inner.Text = APP_VERSION
+  if (vf) vf.inner.Text = APP_VERSION
+  if (vl) vl.inner.Text = APP_VERSION
   //document.getElementById('versionFooter').innerText = APP_VERSION - right after checkUser
   //document.getElementById('versionLogin').innerText = APP_VERSION - right after checkUser
 })
