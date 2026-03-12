@@ -617,7 +617,7 @@ let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
 sb.auth.onAuthStateChange((_e, s) => { if (s && !user) checkUser() })
 window.addEventListener('load', () => checkUser())
-  document.getElementById('versionFooter'.innerText = APP_VERSION
+  document.getElementById('versionFooter').innerText = APP_VERSION
   document.getElemntById('versionLogin').innerText = APP_VERSION
 function login() {
   sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: window.location.origin } })
