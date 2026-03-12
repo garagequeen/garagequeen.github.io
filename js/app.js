@@ -1566,6 +1566,19 @@ function renderInventory() {
     wrapper.appendChild(d)
     el.appendChild(wrapper)
   })
+  //spending overview
+  const spent = {}, planned = {}
+  filtere.forEach(i => {
+    if (!i.price_paid) return
+    const cur = i.currency || 'UAH'
+    if (i.status === 'have' || i.status === 'low') {
+      spent[cur] = (spent[cur] || 0) + i.price_paid
+    } else {
+      planned[cur] = (planned[cur] || 0) + i.price_paid
+    }
+  })
+  const symbols = { UAH: '₴', EUR: '€', USD: '$' }
+  const fmt = obj => Object.entries(obj).map(([k,v]) => 
 }
 function invQtyChange(itemId, delta) {
   const span = document.querySelector(`.iqv-val[data-itemid="${itemId}"]`)
