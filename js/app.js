@@ -1161,6 +1161,11 @@ function convertItemToTask() {
   document.getElementById("copyTaskSheet").classList.add("open")
 }
 async function doConvertItemToTask(projectId) {
+    const existing = tasks.find(t => t.project_id === projectId && t.title.toLowerCase() === item.name.toLowerCase())
+  if (existing) {
+    showToast('Task already exists in this project')
+    return
+  }
   const item = editingInvItem
   if (!item) return
   const { data: newTask, error } = await sb.from('tasks').insert({
