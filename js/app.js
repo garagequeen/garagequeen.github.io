@@ -1161,13 +1161,13 @@ function convertItemToTask() {
   document.getElementById("copyTaskSheet").classList.add("open")
 }
 async function doConvertItemToTask(projectId) {
-    const existing = tasks.find(t => t.project_id === projectId && t.title.toLowerCase() === item.name.toLowerCase())
+  const item = editingInvItem
+  if (!item) return
+  const existing = tasks.find(t => t.project_id === projectId && t.title.toLowerCase() === item.name.toLowerCase())
   if (existing) {
     showToast('Task already exists in this project')
     return
   }
-  const item = editingInvItem
-  if (!item) return
   const { data: newTask, error } = await sb.from('tasks').insert({
     user_id: user.id,
     project_id: projectId,
@@ -1176,7 +1176,8 @@ async function doConvertItemToTask(projectId) {
     status: 'open'
   }).select().single()
   if (error) { showToast('Error ✕'); return }
-    tasks.push(newTask)
+  tasks.push(newTask)
+
   // удаляем айтем из инвентаря
   const itemIdx = inventory.findIndex(i => i.id === item.id)
   if (itemIdx !== -1) inventory.splice(itemIdx, 1)
