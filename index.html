@@ -1324,16 +1324,22 @@ if (blockedFilterOn) {
 }
 async function deleteEditTask() {
   if (!editingTask) return
-  const id = editingTask.id
-  await sb.from("tasks").delete().eq("id", id).eq("user_id", user.id)
-  tasks = tasks.filter(t => t.id !== id)
-  closeSheet("editTaskSheet")
-  showToast("Task deleted")
-  renderTasks()
-  renderProjects()
-  renderFocus()
-  renderAllTasks()
+  const deletedTask = { ...editingTask }
+  const idx = tasks.findIndex(t => t.id === deletedTask.id)
+  tasks = tasks.filter(t => t.id !== deletedTask.id)
+  closeSheet('editTaskSheet')
+  rerender()
+  let undone = false
+  showToastUndo('Task deleted', () => {
+    undone = true
+    tasks.splice(Math.min(idx, tasks.length), 0, deletedTask)
+    rerender()
+  })
+  setTimeout(async () => {
+    if (!undone) await sb.from('tasks').delete().eq('id', deletedTask.id).eq('user_id', user.id)
+  }, 4000)
 }
+
 // ── RENAME PROJECT ──
 let selectedColor = null
 function openRenameProject() {
