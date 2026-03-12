@@ -1171,11 +1171,18 @@ async function doConvertItemToTask(projectId) {
     status: 'open'
   }).select().single()
   if (error) { showToast('Error ✕'); return }
-  tasks.push(newTask)
+    tasks.push(newTask)
+  // удаляем айтем из инвентаря
+  const itemIdx = inventory.findIndex(i => i.id === item.id)
+  if (itemIdx !== -1) inventory.splice(itemIdx, 1)
+  await sb.from('inventory').delete().eq('id', item.id).eq('user_id', user.id)
   closeSheet('copyTaskSheet')
   const proj = projects.find(p => p.id === projectId)
   showToast(`Task created in "${proj?.title}" ✓`)
+  renderInventory()
   if (currentProject?.id === projectId) renderTasks()
+}
+
 }
 async function deleteCategory() {
   if (!renamingCategory || !currentProject) return
