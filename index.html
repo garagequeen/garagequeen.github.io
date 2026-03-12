@@ -618,8 +618,12 @@ let selectMode = false, selectedTaskIds = new Set()
 sb.auth.onAuthStateChange((_e, s) => { if (s && !user) checkUser() })
 window.addEventListener('load', () => {
   checkUser()
-  document.getElementById('versionFooter').innerText = APP_VERSION
-  document.getElementById('versionLogin').innerText = APP_VERSION
+  const vf = document.getElementById('versionFooter')
+  const vl = document.getElementById('versionLogin')
+  if (vf) = vf.inner.Text = APP_VERSION
+  if (vl) = vl.inner.Test = APP_VERSION
+  //document.getElementById('versionFooter').innerText = APP_VERSION - right after checkUser
+  //document.getElementById('versionLogin').innerText = APP_VERSION - right after checkUser
 })
 function login() {
   sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: window.location.origin } })
