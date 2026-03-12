@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- FIX 1: removed maximum-scale=1 and user-scalable=no — breaks iOS date picker and keyboard -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><title>GarageQueen</title>
+<title>Garage Log</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
+  
+</head>
+<body>
+<img id="bg">
+<div id="overlay"></div>
+
+<div class="toast" id="toast"></div>
+
+<div id="login">
+  <h2>Garage Log</h2>
+  <button onclick="login()">Sign in with Google</button>
+  <div id="versionLogin" style="font-size:11px;color:#333;margin-top:8px"></div>
+</div>
+
+<div id="app" style="display:none">
+  <div id="focusTab" class="container">
+    <h2 style="margin-bottom:8px">Focus</h2>
+    <div class="filter-tabs" id="focusProjectFilter" style="margin-bottom:10px"></div>
+    <div id="focusContent"></div>
+  </div>
+  <div id="tasksTab" class="container" style="display:none">
+    <h2 style="margin-bottom:8px">Tasks</h2>
+    <input id="taskSearch" placeholder="Search tasks..." oninput="renderAllTasks()" style="margin-top:0;margin-bottom:0">
+    <div style="display:flex;align-items:center;gap:8px;margin-top:8px;margin-bottom:10px">
+      <div class="filter-tabs" id="taskProjectFilter" style="margin:0;flex:1">
+        <button class="filter-tab active" style="background:#3fb950;color:#111" onclick="setTaskFilter(null,this)">All</button>
+      </div>
+      <button id="filmFilterBtn" onclick="toggleFilmFilter()" style="margin-top:0;padding:6px 12px;background:#222;color:#aaa;font-size:13px;border-radius:20px">🎬</button>
+      <button id="blockedFilterBtn" onclick="toggleBlockedFilter()" style="margin-top:0;padding:6px 12px;background:#222;color:#aaa;font-size:13px;border-radius:20px">⊘ Blocked</button>
+    </div>
+    <div id="allTasksList"></div>
+  </div>
+  <div id="projectsTab" class="container" style="display:none">
+    <div style="display:flex;align-items:center;margin-top:max(env(safe-area-inset-top),44px);margin-bottom:14px">
+      <h2 style="margin-top:0;margin-bottom:0">Projects</h2>
+      <button onclick="openAddProject()" style="margin-left:auto;margin-top:0;padding:6px 14px;font-size:20px;background:none;color:white;font-weight:300">+</button>
+    </div>
+    <div id="projectsList"></div>
+  </div>
+  <div id="inventoryTab" class="container" style="display:none">
+    <div style="display:flex;align-items:center;margin-top:max(env(safe-area-inset-top),44px);margin-bottom:10px">
+      <h2 style="margin:0;flex:1">Inventory</h2>
+      <button onclick="openCSVImport()" style="margin-top:0;padding:6px 10px;font-size:16px;background:none;color:white;font-weight:300">↓</button>
+      <button onclick="exportInventoryCSV()" style="margin-top:0;padding:6px 10px;font-size:16px;background:none;color:white;font-weight:300">↑</button>
+      <button onclick="openAddInventory()" style="margin-left:4px;margin-top:0;padding:6px 14px;font-size:20px;background:none;color:white;font-weight:300">+</button>
+    </div>
+    <input id="invSearch" placeholder="Search inventory..." oninput="renderInventory()" style="margin-top:0;margin-bottom:4px">
+    <div class="filter-tabs" style="margin-top:4px;margin-bottom:4px">
+      <button class="filter-tab active" onclick="setInvFilter('all',this)">All</button>
+      <button class="filter-tab" onclick="setInvFilter('part',this)">Parts</button>
+      <button class="filter-tab" onclick="setInvFilter('tool',this)">Tools</button>
+      <button class="filter-tab" onclick="setInvFilter('consumable',this)">Consumables</button>
+    </div>
+    <div id="inventoryList"></div>
+  </div>
+  <div id="settingsTab" class="container" style="display:none">
+    <h2>Settings</h2>
+    <div class="card" style="margin-bottom:8px">
+      <h3 style="font-size:13px;color:#666;text-transform:uppercase;letter-spacing:0.06em">Garage</h3>
+      <div id="objectsList" style="margin-top:10px"></div>
+      <button onclick="openAddObject()" style="width:100%;margin-top:8px;background:#333">+ Add vehicle</button>
+    </div>
+    <div class="card" style="margin-bottom:8px">
+      <h3 style="font-size:13px;color:#666;text-transform:uppercase;letter-spacing:0.06em">Background</h3>
+      <input type="file" id="bgUpload" accept="image/*" style="display:none">
+      <button onclick="document.getElementById('bgUpload').click()" style="margin-top:10px;background:#333" id="bgBtn">Choose photo</button>
+      <div id="bgName" style="font-size:12px;color:#555;margin-top:6px"></div>
+    </div>
+    <div class="card" style="margin-bottom:8px">
+      <h3 style="font-size:13px;color:#666;text-transform:uppercase;letter-spacing:0.06em">Account</h3>
+      <p id="userEmail" style="color:#aaa;margin-top:8px;font-size:14px"></p>
+      <button onclick="logout()" style="background:#333;margin-top:10px">Logout</button>
+    </div>
+    <div class="card">
+      <h3 style="font-size:13px;color:#666;text-transform:uppercase;letter-spacing:0.06em">Feedback</h3>
+      <button onclick="openFeedback('bug')" style="background:#c0392b;margin-top:10px">🐛 Problem</button>
+      <button onclick="openFeedback('idea')" style="margin-top:8px">💡 Idea</button>
+    </div>
+    <div class="version" id="versionFooter"></div>
+  </div>
+  <div class="tabs">
+    <button id="tab-focus" class="active" onclick="showTab('focus')">Focus</button>
+    <button id="tab-tasks" onclick="showTab('tasks')">Tasks</button>
+    <button id="tab-projects" onclick="showTab('projects')">Projects</button>
+    <button id="tab-inventory" onclick="showTab('inventory')">Inventory</button>
+    <button id="tab-settings" onclick="showTab('settings')">Settings</button>
+  </div>
+
+</div>
+<!-- PROJECT DETAIL -->
+<div id="projectDetail">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closeDetail()">←</button>
+    <div class="detail-title" id="detailTitle"></div>
+    <div class="detail-actions">
+      <button class="btn-secondary" onclick="openImport()" style="font-size:16px;padding:6px 10px">↓</button>
+      <button class="btn-secondary" onclick="exportProjectCSV()" style="font-size:16px;padding:6px 10px">↑</button>
+      <button onclick="openAddTask()">+ Task</button>
+      <button class="btn-secondary" onclick="toggleProjectMenu(event)" style="font-size:18px;padding:6px 12px;position:relative">⋯
+        <div id="projectMenu" style="display:none;position:absolute;right:0;top:36px;background:#222;border-radius:12px;min-width:160px;z-index:200;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.5)">
+          <div onclick="openRenameProject();closeProjectMenu()" style="padding:12px 16px;font-size:14px;border-bottom:1px solid #333">Edit</div>
+          <div onclick="confirmDelete();closeProjectMenu()" style="padding:12px 16px;font-size:14px;color:#c0392b">Delete project</div>
+        </div>
+      </button>
+    </div>
+  </div>
+  <div style="padding:8px 16px 0;display:flex;align-items:center;gap:8px">
+    <div id="projectStats" style="font-size:12px;color:#555;flex:1"></div>
+    <button id="projectFilmBtn" onclick="toggleProjectFilmFilter()" style="margin:0;padding:4px 10px;font-size:12px;background:#222;color:#aaa;border-radius:20px">🎬</button>
+    <button id="projectBlockedBtn" onclick="toggleProjectBlockedFilter()" style="margin:0;padding:4px 10px;font-size:12px;background:#222;color:#aaa;border-radius:20px">⊘ Blocked</button>
+    <button onclick="openAnalyse()" style="margin:0;padding:4px 10px;font-size:12px;background:#222;color:#aaa;border-radius:20px">↻</button>
+  </div>
+  <div style="padding:16px" id="tasksList"></div>
+
+</div>
+<!-- ADD TASK -->
+<div class="sheet-overlay" id="addTaskSheet" onclick="closeIfBg(event,'addTaskSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3>New task</h3>
+    <input id="newTaskTitle" placeholder="Task name" autocomplete="off">
+    <input id="newTaskCategory" placeholder="Category (optional)" autocomplete="off">
+    <select id="newTaskPriority">
+      <option value="">No priority</option>
+      <option value="high">High</option>  
+    </select>
+    <textarea id="newTaskNotes" placeholder="Notes (optional)" style="height:60px"></textarea>
+    <button onclick="addTask()" style="margin-top:12px">Add task</button>
+    <button class="btn-cancel" onclick="closeSheet('addTaskSheet')">Cancel</button>
+  </div>
+
+</div>
+<!-- IMPORT TASKS -->
+<div class="sheet-overlay" id="importSheet" onclick="closeIfBg(event,'importSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button id="importTabText" onclick="switchImportTab('text')" style="flex:1;margin:0;background:#3fb950;color:#111;font-size:13px;padding:6px">📝 Notes</button>
+      <button id="importTabCsv" onclick="switchImportTab('csv')" style="flex:1;margin:0;background:#222;color:#aaa;font-size:13px;padding:6px">📊 CSV</button>
+    </div>
+    <!-- TEXT IMPORT -->
+    <div id="importTabTextContent">
+      <div id="importStep1">
+        <p style="font-size:13px;color:#666;margin-top:0">Paste your notes. Lines with - [ ] or - [x] become tasks. Headers become categories.</p>
+        <textarea id="importText" placeholder="- [ ] fix radiator&#10;- [x] change oil&#10;&#10;Cooling system&#10;- [ ] flush coolant" style="height:160px;margin-top:12px"></textarea>
+        <button onclick="parseImport()" style="margin-top:12px">Parse →</button>
+        <button class="btn-cancel" onclick="closeSheet('importSheet')">Cancel</button>
+      </div>
+      <div id="importStep2" style="display:none">
+        <h3>Review tasks</h3>
+        <div id="importCount" class="import-count"></div>
+        <div id="importPreview"></div>
+        <button onclick="doImport()" id="importBtn" style="margin-top:12px">Import</button>
+        <button class="btn-cancel" onclick="backToImportStep1()">← Back</button>
+      </div>
+    </div>
+    <!-- CSV IMPORT -->
+    <div id="importTabCsvContent" style="display:none">
+      <p style="font-size:13px;color:#666;margin-top:0">CSV columns: title, category, priority, notes, blocked_reason</p>
+      <input type="file" id="taskCsvFileInput" accept=".csv" style="display:none" onchange="parseTaskCSV(event)">
+      <button onclick="document.getElementById('taskCsvFileInput').click()" style="margin-top:8px;background:#333">Choose CSV file</button>
+      <div id="taskCsvFileName" style="font-size:12px;color:#555;margin-top:6px"></div>
+      <div id="taskCsvPreview" style="margin-top:12px;max-height:280px;overflow-y:auto"></div>
+      <div id="taskCsvActions" style="display:none;margin-top:8px">
+        <div id="taskCsvCount" style="font-size:13px;color:#aaa;margin-bottom:8px"></div>
+        <button onclick="doTaskCSVImport()">Import selected</button>
+      </div>
+      <button class="btn-cancel" onclick="closeSheet('importSheet')" style="margin-top:8px">Cancel</button>
+    </div>
+  </div>
+
+</div>
+<!-- ADD/EDIT INVENTORY -->
+<div class="sheet-overlay" id="addInventorySheet" onclick="closeIfBg(event,'addInventorySheet')">
+  <div class="sheet flex-sheet" style="max-height:80vh">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <div style="padding:0 16px;overflow-y:auto;flex:1;background:#1a1a1a">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <h3 id="invSheetTitle" style="margin:0">New item</h3>
+        <div style="display:flex;gap:2px;align-items:center">
+          <div id="invTagBtn" onclick="toggleInvTags()" style="font-size:16px;font-weight:700;opacity:0.4;cursor:pointer;padding:4px 8px;user-select:none;font-family:monospace">#</div>
+          <div onclick="toggleInvFilm()" id="invFilmBtn" style="font-size:20px;opacity:0.3;cursor:pointer;padding:4px 6px;user-select:none">🎬</div>
+          <div id="invBlockBtn" onclick="toggleInvBlock()" style="font-size:15px;opacity:0.4;cursor:pointer;padding:4px 6px;user-select:none">⊘</div>
+        </div>
+      </div>
+      <div id="invTagChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+      <div id="invTagRow" style="display:none;margin-bottom:12px">
+        <div style="position:relative">
+          <input id="invTagInput" placeholder="Add tags, comma separated..." autocomplete="off"
+            oninput="showInvTagSuggestions()"
+            onkeydown="handleInvTagKey(event)"
+            onblur="setTimeout(()=>{if(document.activeElement.id!=='invTagInput')document.getElementById('invTagSuggestions').style.display='none'},300)"
+            style="margin:0">
+          <div id="invTagSuggestions" style="display:none;position:absolute;left:0;right:0;top:100%;background:#222;border-radius:0 0 8px 8px;z-index:10;max-height:120px;overflow-y:auto"></div>
+        </div>
+      </div>
+      <div id="invBlockRow" style="display:none;margin-bottom:10px">
+        <input id="invBlockReason" placeholder="Blocked reason..." autocomplete="off" style="margin:0;border-color:#c0392b">
+      </div>
+      <input id="invName" placeholder="Item name" autocomplete="off" style="font-size:17px;font-weight:600;padding:12px 14px">
+      <div style="margin-top:12px">
+        <div style="font-size:11px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Type</div>
+        <div style="display:flex;gap:6px" id="invTypeSeg">
+          <button class="seg-btn active" data-val="part" onclick="setInvSeg('type','part',this)">Part</button>
+          <button class="seg-btn" data-val="tool" onclick="setInvSeg('type','tool',this)">Tool</button>
+          <button class="seg-btn" data-val="consumable" onclick="setInvSeg('type','consumable',this)">Consumable</button>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:11px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Status</div>
+        <div id="invStatusDrum" style="position:relative;height:108px;overflow:hidden;border-radius:12px;background:#1a1a1a;border:1px solid #333;touch-action:none;user-select:none;-webkit-overflow-scrolling:none">
+          <div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:36px;background:rgba(63,185,80,0.1);border-top:1px solid rgba(63,185,80,0.3);border-bottom:1px solid rgba(63,185,80,0.3);pointer-events:none;z-index:1"></div>
+          <div id="invStatusDrumList" style="position:absolute;left:0;right:0;top:0"></div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:11px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Quantity</div>
+        <input id="invQty" type="number" min="0" placeholder="—" style="width:100px;text-align:center">
+      </div>
+      <textarea id="invNotes" placeholder="Notes" style="height:72px;margin-top:14px"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="invArticle" placeholder="Article / part №" autocomplete="off" style="flex:1;margin:0">
+        <input id="invPricePaid" placeholder="Price paid" type="number" min="0" step="0.01" style="flex:1;margin:0">
+      </div>
+      <input id="invLocation" placeholder="Location" autocomplete="off" style="margin-top:8px">
+      <input id="invUrl" placeholder="URL" autocomplete="off" style="margin-top:8px">
+      <div id="invLinkedTasks" style="display:none;margin-top:14px"></div>
+      <button id="invConvertTaskBtn" onclick="convertItemToTask()" style="display:none;margin-top:12px;width:100%;background:#333;margin-bottom:16px;font-size:13px">Convert to task...</button>
+    </div>
+    <div style="flex-shrink:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #222;display:flex;gap:8px;background:#1a1a1a">
+      <button class="btn-cancel" onclick="closeSheet('addInventorySheet')" style="flex:1;margin:0">Cancel</button>
+      <button class="btn-danger" id="invDeleteBtn" style="display:none;flex:0 0 70px;margin:0;font-size:13px" onclick="deleteCurrentInvItem()">Delete</button>
+      <button onclick="saveInventoryItem()" style="flex:2;margin:0" id="invSaveBtn">Save</button>
+    </div>
+  </div>
+
+</div>
+<!-- CSV IMPORT -->
+<div class="sheet-overlay" id="csvImportSheet" onclick="closeIfBg(event,'csvImportSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3>Import CSV</h3>
+    <p style="font-size:13px;color:#666;margin-top:6px">Supports Notion export format. Columns: Tags, part name, Number, Price, notes, URL</p>
+    <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="parseCSVFile(event)">
+    <button onclick="document.getElementById('csvFileInput').click()" style="margin-top:12px;background:#333">Choose CSV file</button>
+    <div id="csvFileName" style="font-size:12px;color:#555;margin-top:6px"></div>
+    <div id="csvPreview" style="margin-top:12px;max-height:300px;overflow-y:auto"></div>
+    <div id="csvImportActions" style="display:none">
+      <div id="csvCount" style="font-size:13px;color:#aaa;margin-top:8px"></div>
+      <button onclick="doCSVImport()" style="margin-top:8px">Import selected</button>
+    </div>
+    <button class="btn-cancel" onclick="closeSheet('csvImportSheet')">Cancel</button>
+  </div>
+
+</div>
+<!-- CONFIRM -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3 id="confirmTitle"></h3>
+    <p id="confirmText"></p>
+    <div class="confirm-actions">
+      <button style="background:#333;margin-top:0" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-danger" style="margin-top:0" id="confirmOk">Delete</button>
+    </div>
+  </div>
+
+</div>
+<!-- EDIT TASK -->
+<div class="sheet-overlay" id="editTaskSheet" onclick="closeIfBg(event,'editTaskSheet')">
+  <div class="sheet flex-sheet" style="max-height:80vh">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <div style="padding:0 16px;overflow-y:auto;flex:1">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <h3 style="margin:0">Edit task</h3>
+        <div style="display:flex;gap:4px;align-items:center">
+          <div onclick="toggleFilmFlagEdit()" id="editTaskFilmIcon" style="font-size:20px;opacity:0.3;cursor:pointer;padding:4px 6px;user-select:none">🎬</div>
+          <div id="editTaskBlockBtn" onclick="toggleEditTaskBlock()" style="font-size:15px;opacity:0.4;cursor:pointer;padding:4px 6px;user-select:none">⊘</div>
+        </div>
+      </div>
+      <div id="editTaskBlockRow" style="display:none;margin-bottom:10px">
+        <input id="editTaskBlocked" placeholder="Blocked reason (clear to unblock)" autocomplete="off" style="margin:0;border-color:#c0392b">
+      </div>
+      <!-- FIX 5+6: category chip — text-transform removed from INPUT (still shown on chip), focus delay increased -->
+      <div id="editTaskCategoryRow" style="margin-bottom:6px">
+        <span id="editTaskCategoryChip" onclick="focusEditTaskCategory()" style="display:inline-block;font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.08em;font-weight:600;cursor:pointer;padding:2px 0"></span>
+        <input id="editTaskCategory" placeholder="+ Category" autocomplete="off"
+          style="display:none;margin:0;font-size:11px;letter-spacing:.08em;padding:4px 8px;height:auto"
+          onblur="blurEditTaskCategory()"
+          onkeydown="if(event.key==='Enter')this.blur()">
+      </div>
+      <input id="editTaskTitle" placeholder="Task name" autocomplete="off"
+        style="font-size:17px;font-weight:600;padding:12px 14px;text-align:left;direction:ltr">
+      <div style="display:flex;gap:6px;margin-top:10px" id="editTaskPrioritySeg">
+        <button class="priority-chip" data-val="" onclick="setEditTaskPriority('',this)" style="background:#2a2a2a;color:#555">None</button>
+        <button class="priority-chip" data-val="high" onclick="setEditTaskPriority('high',this)" style="background:#3a0a0a;color:#e74c3c">High</button>
+      </div>
+      <textarea id="editTaskNotes" placeholder="Notes (optional)" style="height:72px;margin-top:12px"></textarea>
+      <div style="margin-top:14px">
+        <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Parts needed</div>
+        <div id="editTaskPartsList_part" style="margin-bottom:6px"></div>
+        <button onclick="openPartPicker('part')" style="width:100%;background:#222;color:#aaa;font-size:13px;margin:0">+ Add part</button>
+      </div>
+      <div style="margin-top:12px">
+        <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Consumables needed</div>
+        <div id="editTaskPartsList_consumable" style="margin-bottom:6px"></div>
+        <button onclick="openPartPicker('consumable')" style="width:100%;background:#222;color:#aaa;font-size:13px;margin:0">+ Add consumable</button>
+      </div>
+      <div style="margin-top:12px">
+        <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Tools needed</div>
+        <div id="editTaskPartsList_tool" style="margin-bottom:6px"></div>
+        <button onclick="openPartPicker('tool')" style="width:100%;background:#222;color:#aaa;font-size:13px;margin:0">+ Add tool</button>
+      </div>
+      <button class="btn-secondary" style="margin-top:12px;width:100%;margin-bottom:16px" onclick="openCopyTask()">Copy to project...</button>
+    </div>
+    <div style="flex-shrink:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #222;display:flex;gap:8px;background:#1a1a1a">
+      <button class="btn-cancel" onclick="closeSheet('editTaskSheet')" style="flex:1;margin:0">Cancel</button>
+      <button class="btn-danger" onclick="deleteEditTask()" style="flex:0 0 70px;margin:0;font-size:13px">Delete</button>
+      <button onclick="saveEditTask()" style="flex:2;margin:0">Save</button>
+    </div>
+  </div>
+
+</div>
+<!-- ANALYSE -->
+<div class="sheet-overlay" id="analyseSheet" onclick="closeIfBg(event,'analyseSheet')">
+  <div class="sheet flex-sheet" style="max-height:80vh">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <div style="padding:0 16px;overflow-y:auto;flex:1">
+      <h3 style="margin-bottom:4px">Analyse parts</h3>
+      <div style="font-size:12px;color:#555;margin-bottom:12px">Suggested matches between tasks and inventory</div>
+      <div id="analyseList"></div>
+    </div>
+    <div style="flex-shrink:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #222;background:#1a1a1a;display:flex;gap:8px">
+      <button class="btn-cancel" onclick="closeSheet('analyseSheet')" style="flex:1;margin:0">Close</button>
+      <button onclick="applyAllAnalyse()" style="flex:2;margin:0" id="analyseApplyBtn">Link all</button>
+    </div>
+  </div>
+</div>
+<!-- PART PICKER -->
+<div class="sheet-overlay" id="partPickerSheet" onclick="closeIfBg(event,'partPickerSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3 id="partPickerTitle">Parts needed</h3>
+    <input id="partPickerSearch" placeholder="Search..." autocomplete="off" oninput="renderPartPickerList()">
+    <div id="partPickerList" style="margin-top:8px;max-height:300px;overflow-y:auto"></div>
+    <button class="btn-cancel" onclick="closeSheet('partPickerSheet')" style="margin-top:8px">Cancel</button>
+  </div>
+</div>
+<div class="sheet-overlay" id="renameProjectSheet" onclick="closeIfBg(event,'renameProjectSheet')">
+  <div class="sheet flex-sheet" style="max-height:80vh">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <div style="padding:0 16px;overflow-y:auto;flex:1">
+      <h3 style="margin-bottom:12px">Edit project</h3>
+      <input id="renameProjectInput" placeholder="Project name" autocomplete="off">
+      <div style="font-size:11px;color:#555;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.5px">Color</div>
+      <div class="project-colors" id="colorPicker"></div>
+      <div style="font-size:11px;color:#555;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.5px">Vehicle</div>
+      <select id="projectSettingsVehicle">
+        <option value="">No vehicle</option>
+      </select>
+      <div style="font-size:11px;color:#555;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.5px">Cover photo</div>
+      <input type="file" id="projectCoverUpload" accept="image/*" style="display:none">
+      <button onclick="document.getElementById('projectCoverUpload').click()" style="background:#333;width:100%;margin:0">Choose cover photo</button>
+      <div id="projectCoverName" style="font-size:12px;color:#555;margin-top:4px"></div>
+      <button id="removeCoverBtn" onclick="removeCoverPhoto()" style="margin-top:6px;background:none;color:#c0392b;font-size:13px;display:none;padding:4px 0;width:auto">Remove photo</button>
+      <div style="height:16px"></div>
+    </div>
+    <div style="flex-shrink:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #222;display:flex;gap:8px;background:#1a1a1a">
+      <button class="btn-cancel" onclick="closeSheet('renameProjectSheet')" style="flex:1;margin:0">Cancel</button>
+      <button onclick="saveRenameProject()" style="flex:2;margin:0">Save</button>
+    </div>
+  </div>
+
+</div>
+<!-- SERVICE LOG -->
+<div class="sheet-overlay" id="serviceLogSheet" onclick="closeIfBg(event,'serviceLogSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3 id="serviceLogTitle">Service log</h3>
+    <div id="serviceLogSummary" style="margin-top:8px;padding:10px;background:#111;border-radius:10px;font-size:13px;color:#aaa;line-height:1.8"></div>
+    <div id="serviceLogList" style="max-height:180px;overflow-y:auto;margin-top:10px"></div>
+    <h3 style="margin-top:16px;font-size:13px;color:#aaa">Add entry</h3>
+    <input id="svcDate" type="date" style="text-align:left;-webkit-appearance:none;appearance:none;display:block;width:100%;box-sizing:border-box;min-height:44px;color-scheme:dark;">
+    <input id="svcMileage" placeholder="Mileage (optional)" type="number" min="0">
+    <textarea id="svcDesc" placeholder="What was done..." style="height:80px"></textarea>
+    <button onclick="saveServiceLog()" style="margin-top:12px">Add entry</button>
+    <button onclick="exportServiceLog()" style="margin-top:8px;background:#333">↑ Export CSV</button>
+    <button class="btn-cancel" onclick="closeSheet('serviceLogSheet')">Close</button>
+  </div>
+
+</div>
+<!-- RENAME CATEGORY -->
+<div class="sheet-overlay" id="renameCatSheet" onclick="closeIfBg(event,'renameCatSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3 id="renameCatTitle">Rename category</h3>
+    <input id="renameCatInput" placeholder="New name" autocomplete="off">
+    <button onclick="saveRenameCategory()" style="margin-top:12px">Save</button>
+    <button onclick="deleteCategory()" style="margin-top:8px;background:none;color:#c0392b;font-size:13px;padding:6px 0">Remove category from all tasks</button>
+    <button class="btn-cancel" onclick="closeSheet('renameCatSheet')">Cancel</button>
+  </div>
+
+</div>
+<!-- COPY TASK -->
+<div class="sheet-overlay" id="copyTaskSheet" onclick="closeIfBg(event,'copyTaskSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3>Copy task to...</h3>
+    <div id="copyTaskProjectList" style="margin-top:12px"></div>
+    <button class="btn-cancel" onclick="closeSheet('copyTaskSheet')" style="margin-top:8px">Cancel</button>
+  </div>
+
+</div>
+<!-- ADD/EDIT OBJECT -->
+<div class="sheet-overlay" id="addObjectSheet" onclick="closeIfBg(event,'addObjectSheet')">
+  <div class="sheet flex-sheet" style="max-height:85vh">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <div style="padding:0 16px;overflow-y:auto;flex:1">
+      <h3 id="objSheetTitle" style="margin-bottom:12px">New vehicle</h3>
+      <input id="objName" placeholder="Name (e.g. BMW E23 Fjord Blau)" autocomplete="off">
+      <select id="objType" style="margin-top:8px">
+        <option value="car">Car</option>
+        <option value="motorcycle">Motorcycle</option>
+        <option value="other">Other</option>
+      </select>
+      <input id="objMake" placeholder="Make (e.g. BMW)" autocomplete="off" style="margin-top:8px">
+      <input id="objModel" placeholder="Model (e.g. 733i)" autocomplete="off" style="margin-top:8px">
+      <input id="objYear" placeholder="Year" type="number" min="1900" max="2099" style="margin-top:8px">
+      <input id="objVin" placeholder="VIN (optional)" autocomplete="off" style="margin-top:8px">
+      <input id="objColorCode" placeholder="Color code (optional)" autocomplete="off" style="margin-top:8px">
+      <input id="objMileage" placeholder="Mileage (optional)" type="number" min="0" style="margin-top:8px">
+      <!-- FIX: date inputs get color-scheme:dark so they render properly on iOS -->
+      <input id="objPurchaseDate" placeholder="Purchase date (optional)" type="date" style="margin-top:8px;-webkit-appearance:none;appearance:none;display:block;width:100%;box-sizing:border-box;text-align:left;min-height:44px;color-scheme:dark;">
+      <input id="objPurchasePrice" placeholder="Purchase price (optional)" type="number" min="0" step="0.01" style="margin-top:8px;margin-bottom:16px">
+    </div>
+    <div style="flex-shrink:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #222;display:flex;gap:8px;background:#1a1a1a">
+      <button class="btn-cancel" onclick="closeSheet('addObjectSheet')" style="flex:1;margin:0">Cancel</button>
+      <button class="btn-danger" id="objDeleteBtn" style="display:none;flex:0 0 70px;margin:0;font-size:13px" onclick="deleteObject()">Delete</button>
+      <button onclick="saveObject()" style="flex:2;margin:0" id="objSaveBtn">Add vehicle</button>
+    </div>
+  </div>
+
+</div>
+<!-- ADD PROJECT -->
+<div class="sheet-overlay" id="addProjectSheet" onclick="closeIfBg(event,'addProjectSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3>New project</h3>
+    <input id="newProjectName" placeholder="Project name" autocomplete="off">
+    <button onclick="addProject()" style="margin-top:12px">Add project</button>
+    <button class="btn-cancel" onclick="closeSheet('addProjectSheet')">Cancel</button>
+  </div>
+
+</div>
+<!-- BLOCK TASK -->
+<div class="sheet-overlay" id="blockTaskSheet" onclick="closeIfBg(event,'blockTaskSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3>Block task</h3>
+    <div id="blockTaskName" style="font-size:13px;color:#aaa;margin-top:4px;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+    <input id="blockReason" placeholder="e.g. waiting for part, need help..." autocomplete="off">
+    <button onclick="saveBlockTask()" style="margin-top:12px">Block task</button>
+    <button class="btn-cancel" onclick="closeSheet('blockTaskSheet')">Cancel</button>
+  </div>
+
+</div>
+<!-- FEEDBACK -->
+<div class="sheet-overlay" id="feedbackSheet" onclick="closeIfBg(event,'feedbackSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3 id="feedbackSheetTitle">Feedback</h3>
+    <textarea id="feedbackText" style="margin-top:12px"></textarea>
+    <button onclick="submitFeedback()" style="margin-top:12px">Send</button>
+    <button class="btn-cancel" onclick="closeSheet('feedbackSheet')">Cancel</button>
+  </div>
+
+</div>
+
+
+<link rel="stylesheet" href="style.css">
+<script src="js/app.js"></script>
+  
+</body>
+</html>
