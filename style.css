@@ -81,7 +81,20 @@ textarea{height:100px;resize:none;}
 .confirm-box p{font-size:13px;color:#aaa;margin-bottom:20px;line-height:1.5;}
 .confirm-actions{display:flex;gap:8px;}
 .confirm-actions button{flex:1;margin-top:0;}
-.focus-card{background:rgba(30,30,30,0.85);border-radius:16px;padding:20px;margin-bottom:14px;}
+.focus-card {
+  scroll-snap-align: center;
+  min-height: calc(100svh - 220px);
+  border-radius: 16px;
+  background: #1a1a1a;
+  padding: 24px 20px 28px;
+  margin: 6px 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+}
 .focus-project{font-size:11px;color:#3fb950;letter-spacing:0.05em;margin-bottom:6px;}
 .focus-category{font-size:11px;color:#666;letter-spacing:0.03em;}
 .focus-title{font-size:22px;font-weight:600;margin-bottom:8px;}
