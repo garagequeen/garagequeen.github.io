@@ -2141,7 +2141,7 @@ function renderFocus() {
     const proj = pm[t.project_id]
     const d = document.createElement("div")
     d.className = "focus-card"
-    d.style.cssText = "position:relative;overflow:hidden;padding-bottom:28px"
+    d.style.cssText = "position:relative;overflow:hidden;"
     const catLabel = t.category ? `<div style="position:absolute;bottom:0;left:0;right:0;padding:4px 20px;background:rgba(0,0,0,0.35);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:${proj?.color||'#555'}">${proj?`<span style="opacity:0.8">${proj.title}</span>${t.category?` · `:''}`:''}${t.category||''}</div>` : proj ? `<div style="position:absolute;bottom:0;left:0;right:0;padding:4px 20px;background:rgba(0,0,0,0.35);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:${proj.color||'#3fb950'};opacity:0.8">${proj.title}</div>` : ''
   d.innerHTML = `
       <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
