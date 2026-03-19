@@ -1,3 +1,4 @@
+
 const APP_VERSION = 'v0.6.7'
 const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
@@ -127,7 +128,7 @@ function renderProjects() {
     return
   }
   el.innerHTML = ""
-  projects.filter(p => open.some(t => t.project_id === p.id)).forEach(p => {
+  projects.forEach(p => {
     const open = tasks.filter(t => t.project_id === p.id && t.status !== "done").length
     const done = tasks.filter(t => t.project_id === p.id && t.status === "done").length
     const total = open + done
