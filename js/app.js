@@ -127,7 +127,7 @@ function renderProjects() {
     return
   }
   el.innerHTML = ""
-  projects.forEach(p => {
+  projects.filter(p => open.some(t => t.project_id === p.id)).forEach(p => {
     const open = tasks.filter(t => t.project_id === p.id && t.status !== "done").length
     const done = tasks.filter(t => t.project_id === p.id && t.status === "done").length
     const total = open + done
@@ -2109,7 +2109,7 @@ function renderFocus() {
     // FIX 4b: All button gets correct active styles on render
     const allActive = focusProjectId === null
     filterEl.innerHTML = `<button class="filter-tab${allActive?' active':''}" style="${allActive?'background:#3fb950;color:#111':''}" onclick="setFocusProject(null,this)">All</button>`
-    projects.forEach(p => {
+    projects.filter(p => open.some(t => t.project_id === p.id)).forEach(p => {
       const btn = document.createElement("button")
       const isActive = focusProjectId === p.id
       const color = p.color || '#3fb950'
