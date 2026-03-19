@@ -2136,7 +2136,7 @@ function renderFocus() {
     return
   }
   const pm = {}; projects.forEach(p => pm[p.id] = p)
-  el.innerHTML = `<div class="focus-count">${open.length} task${open.length!==1?"s":""} available</div>`
+  el.innerHTML = `<div class="focus-count">${open.length} task${open.length!==1?"s":""} available</div><div class="focus-drum" id="focusDrum"></div>`
   open.forEach(t => {
     const proj = pm[t.project_id]
     const d = document.createElement("div")
@@ -2152,14 +2152,14 @@ function renderFocus() {
         <button class="btn-skip" onclick="skipFocusCard(this)">Skip</button>
       </div>
       ${catLabel}`
-    el.appendChild(d)
+    document.getElementById('focusDrum').appendChild(d)
   })
   const sentinel = document.createElement("div")
   sentinel.className = "empty"
   sentinel.style.display = "none"
   sentinel.id = "focusStartOver"
   sentinel.innerHTML = `All skipped.<br><button onclick="renderFocus()" style="margin-top:16px;display:inline-block">↺ Start over</button>`
-  el.appendChild(sentinel)
+  document.getElementById('focusDrum').appendChild(sentinel)
 }
 function skipFocusCard(btn) {
   btn.closest(".focus-card").remove()
