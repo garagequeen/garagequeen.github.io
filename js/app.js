@@ -1488,8 +1488,9 @@ function renderInventory() {
     toggleBg.style.cssText = `position:absolute;left:0;top:0;bottom:0;width:80px;background:${isHave?'#c0392b':'#3fb950'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;border-radius:16px 0 0 16px;opacity:0;transition:opacity .15s;text-align:center;padding:0 6px;`
     toggleBg.innerText = isHave ? '✕ Missing' : '✓ Have it'
     const d = document.createElement("div")
+    const isLinkedBlocked = taskLinks.some(l => l.inventory_id === item.id && tasks.find(t => t.id === l.task_id && t.blocked_reason?.startsWith('⊘ Missing:')))
     d.className = "inv-card"
-    d.style.cssText = "position:relative;z-index:1;transition:transform .2s;margin-bottom:0;border-radius:16px;"
+    d.style.cssText = `position:relative;z-index:1;transition:transform .2s;margin-bottom:0;border-radius:16px;${isLinkedBlocked ? 'border-left:3px solid #c0392b;' : ''}`
     d.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <div style="flex:1;min-width:0">
