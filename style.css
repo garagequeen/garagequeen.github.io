@@ -141,17 +141,51 @@ textarea{height:100px;resize:none;}
 
 /* focus tab */
 #focusTab {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: calc(49px + env(safe-area-inset-bottom));
   overflow: hidden;
-  padding-bottom: 0 !important;
+  padding: 0 !important;
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 34px - env(safe-area-inset-bottom));
+  background: transparent;
+  z-index: 2;
+}
+
+#focusTab > h2 {
+  padding: 0 20px;
+  margin-top: max(env(safe-area-inset-top), 44px);
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+#focusTab > #focusProjectFilter {
+  padding: 0 20px;
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+#focusTab > #focusContent {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+}
+
+.focus-count {
+  font-size: 12px;
+  color: #555;
+  padding: 4px 0 8px;
+  flex-shrink: 0;
 }
 
 .focus-drum {
+  flex: 1;
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
-  flex: 1;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -162,16 +196,15 @@ textarea{height:100px;resize:none;}
 .focus-card {
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  height: calc(100dvh - 34px - env(safe-area-inset-bottom) - 12px);
-  min-height: unset;
+  flex-shrink: 0;
+  height: 100%;
   border-radius: 16px;
   background: #1a1a1a;
   padding: 24px 20px;
-  margin: 6px 0;
+  margin: 3px 0;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  flex-shrink: 0;
 }
