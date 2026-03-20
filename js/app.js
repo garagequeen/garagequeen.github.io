@@ -8,7 +8,7 @@ let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLi
 let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
 sb.auth.onAuthStateChange((_e, s) => { if (s && !user) checkUser() })
-window.addEventListener('load', () => {
+window.addEventListener('load', () => {ыф
   checkUser()
   try {
     document.getElementById('versionFooter').innerText = APP_VERSION
@@ -1827,6 +1827,7 @@ function resetInvSheet() {
   document.getElementById('invSaleFields').style.display = 'none'
   document.getElementById('invSoldFields').style.display = 'none'
   document.getElementById('invSalePrice').value = ''
+  document.getElementById('invSaleCurrency').value = 'UAH'
   document.getElementById('invSoldFor').value = ''
   invListingsValue = []
   renderInvListings()
@@ -1866,6 +1867,7 @@ function openEditInventory(item) {
   document.getElementById('invSaleFields').style.display = showSale ? 'block' : 'none'
   document.getElementById('invSoldFields').style.display = item.status === 'sold' ? 'block' : 'none'
   document.getElementById('invSalePrice').value = item.sale_price || ''
+  document.getElementById('invSaleCurrency').value = item.sale_currency || 'UAH'
   document.getElementById('invSoldFor').value = item.sold_for || ''
   invListingsValue = item.listings ? [...item.listings] : []
   renderInvListings()
@@ -1902,6 +1904,7 @@ async function saveInventoryItem() {
     currency: document.getElementById('invCurrency').value,
     listings: invListingsValue.length ? invListingsValue : null,
     sale_price: document.getElementById('invSalePrice').value ? parseFloat(document.getElementById('invSalePrice').value) : null,
+    sale_currency: document.getElementById('invSaleCurrency').value || 'UAH',
     sold_for: document.getElementById('invSoldFor').value ? parseFloat(document.getElementById('invSoldFor').value) : null,
     location: document.getElementById('invLocation').value.trim() || null,
     url: document.getElementById('invUrl').value.trim() || null,
