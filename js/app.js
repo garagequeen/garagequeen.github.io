@@ -1803,6 +1803,16 @@ function renderInvListings() {
       <span onclick="removeInvListing(${i})" style="color:#555;cursor:pointer;padding:2px 6px;font-size:16px">×</span>
     </div>`).join('')
 }
+
+function invSheetQtyChange(delta) {
+  const input = document.getElementById('invQty')
+  const display = document.getElementById('invQtyDisplay')
+  const cur = input.value === '' ? 0 : (parseInt(input.value) || 0)
+  const newVal = Math.max(0, cur + delta)
+  input.value = newVal
+  display.innerText = newVal
+}
+
 function resetInvSheet() {
   invTagsValue = []
   invStatusValue = 'missing'
@@ -1815,7 +1825,7 @@ function resetInvSheet() {
   document.getElementById('invPricePaid').value = ''
   document.getElementById('invCurrency').value = ''
   document.getElementById('invQty').value = ''
-  document.getElementById('invQty').style.opacity = '0.3'
+  document.getElementById('invQtyDisplay').innerText = '—'
   document.getElementById('invTagRow').style.display = 'none'
   document.getElementById('invTagBtn').style.opacity = '0.4'
   document.getElementById('invFilmBtn').style.opacity = '0.3'
@@ -1835,6 +1845,8 @@ function resetInvSheet() {
   renderInvTagChips()
   initInvDrum()
 }
+
+
 function openAddInventory() {
   editingInvItem = null
   document.getElementById('invSheetTitle').innerText = 'New item'
