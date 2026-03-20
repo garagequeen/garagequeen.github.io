@@ -232,7 +232,10 @@ function closeDetail() {
   document.getElementById("projectDetail").classList.remove("open")
   currentProject = null
   closeProjectMenu()
-  let isContentValue = false
+  blockedFilterOn = false
+  projectFilmFilterOn = false
+}
+ let isContentValue = false
 function toggleIsContent() {
   isContentValue = !isContentValue
   const toggle = document.getElementById('isContentToggle')
@@ -240,9 +243,7 @@ function toggleIsContent() {
   toggle.style.background = isContentValue ? '#e91e63' : '#333'
   thumb.style.left = isContentValue ? '20px' : '2px'
 }
-  blockedFilterOn = false
-  projectFilmFilterOn = false
-}
+
 function toggleProjectMenu(e) {
   e.stopPropagation()
   const m = document.getElementById("projectMenu")
