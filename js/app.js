@@ -228,6 +228,14 @@ function closeDetail() {
   document.getElementById("projectDetail").classList.remove("open")
   currentProject = null
   closeProjectMenu()
+  let isContentValue = false
+function toggleIsContent() {
+  isContentValue = !isContentValue
+  const toggle = document.getElementById('isContentToggle')
+  const thumb = document.getElementById('isContentThumb')
+  toggle.style.background = isContentValue ? '#e91e63' : '#333'
+  thumb.style.left = isContentValue ? '20px' : '2px'
+}
   blockedFilterOn = false
   projectFilmFilterOn = false
 }
@@ -789,7 +797,7 @@ async function saveRenameProject() {
       cover_url = data.publicUrl + "?t=" + Date.now()
     } catch(e) { console.error(e) }
   }
-  const { error } = await sb.from("projects").update({ title, color: selectedColor, object_id, cover_url }).eq("id", currentProject.id).eq("user_id", user.id)
+  const { error } = await sb.from("projects").update({ title, color: selectedColor, object_id, cover_url, is_content: isContentValue }).eq("id", currentProject.id).eq("user_id", user.id)
   if (error) { showToast("Error saving project ✕"); return }
   Object.assign(currentProject, { title, color: selectedColor, object_id, cover_url })
   const p = projects.find(x => x.id === currentProject.id)
@@ -821,6 +829,11 @@ function switchImportTab(tab) {
   document.getElementById("importTabText").style.background = isText ? "#3fb950" : "#222"
   document.getElementById("importTabText").style.color = isText ? "#111" : "#aaa"
   document.getElementById("importTabCsv").style.background = isText ? "#222" : "#3fb950"
+  isContentValue = !!currentProject.is_content
+const toggle = document.getElementById('isContentToggle')
+const thumb = document.getElementById('isContentThumb')
+toggle.style.background = isContentValue ? '#e91e63' : '#333'
+thumb.style.left = isContentValue ? '20px' : '2px'
   document.getElementById("importTabCsv").style.color = isText ? "#aaa" : "#111"
 }
 let parsedTaskCSVItems = []
