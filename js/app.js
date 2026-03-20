@@ -222,7 +222,11 @@ function openDetail(p) {
   currentProject = p
   document.getElementById("detailTitle").innerText = p.title
   document.getElementById("projectDetail").classList.add("open")
-  renderTasks()
+  if (p.is_content) {
+    renderContentProject()
+  } else {
+    renderTasks()
+  }
 }
 function closeDetail() { 
   document.getElementById("projectDetail").classList.remove("open")
@@ -324,6 +328,64 @@ function renderTasks(filterBlocked = false) {
     }
   })
 }
+function renderContentProject() {
+  const el = document.getElementById("tasksList")
+  const filmTasks = tasks.filter(t => t.film_flag && t.status !== 'done')
+  const pm = {}; projects.forEach(p => pm[p.id] = p)
+  if (!filmTasks.length) {
+    el.innerHTML = `<div class="empty">No 🎬 tasks yet.<br><span style="font-size:13px">Mark tasks with 🎬 in any project.</span></div>`
+    return
+  }
+  el.innerHTML = ""
+  const toFilm = filmTasks.filter(t => !t.filmed)
+  const filmed = filmTasks.filter(t => t.filmed)
+  if (toFilm.length) {
+    const h = document.createElement("div")
+    h.className = "category-header"
+    h.innerText = `To film — ${toFilm.length}`
+    el.appendChild(h)
+    toFilm.forEach(t => {
+      const proj = pm[t.project_id]
+      el.appendChild(makeContentTaskCard(t, proj))
+    })
+  }
+  if (filmed.length) {
+    const h = document.createElement("div")
+    h.className = "category-header"
+    h.innerText = `Filmed — ${filmed.length}`
+    el.appendChild(h)
+    filmed.forEach(t => {
+      const proj = pm[t.project_id]
+      el.appendChild(makeContentTaskCard(t, proj))
+    })
+  }
+}
+
+function makeContentTaskCard(t, proj) {
+  const d = document.createElement("div")
+  d.className = "task-card"
+  d.style.cssText = "background:rgba(30,30,30,0.85);border-radius:16px;margin-bottom:10px;cursor:pointer;"
+  d.innerHTML = `
+    <div class="task-body" style="flex:1">
+      <div class="task-title">${t.title}</div>
+      <div class="task-meta" style="color:${proj?.color||'#555'}">${proj?.title||''}</div>
+    </div>
+    <button onclick="event.stopPropagation();toggleFilmed('${t.id}',this)" style="margin:0;padding:6px 12px;font-size:12px;background:${t.filmed?'#3fb950':'#222'};color:${t.filmed?'#111':'#aaa'};width:auto">${t.filmed?'Filmed ✓':'Mark filmed'}</button>`
+  d.onclick = () => openEditTask(t)
+  return d
+}
+
+async function toggleFilmed(taskId, btn) {
+  const t = tasks.find(x => x.id === taskId)
+  if (!t) return
+  t.filmed = !t.filmed
+  btn.style.background = t.filmed ? '#3fb950' : '#222'
+  btn.style.color = t.filmed ? '#111' : '#aaa'
+  btn.innerText = t.filmed ? 'Filmed ✓' : 'Mark filmed'
+  await sb.from('tasks').update({ filmed: t.filmed }).eq('id', taskId).eq('user_id', user.id)
+  renderContentProject()
+}
+
 function toggleTaskSelect(id) {
   if (selectedTaskIds.has(id)) selectedTaskIds.delete(id)
   else selectedTaskIds.add(id)
