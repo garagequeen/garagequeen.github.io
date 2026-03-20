@@ -1885,7 +1885,12 @@ function openEditInventory(item) {
   renderInvTagChips()
   renderItemLinkedTasks(item.id)
   document.getElementById('addInventorySheet').classList.add('open')
-  setTimeout(() => initInvDrum(), 50)
+    setTimeout(() => {
+    initInvDrum()
+    setDrumStatus(invStatusValue, false)
+    const scrollEl = document.querySelector('#addInventorySheet [style*="overflow-y:auto"]')
+    if (scrollEl) scrollEl.scrollTop = 0
+  }, 50)
 }
 async function saveInventoryItem() {
   const name = document.getElementById('invName').value.trim()
