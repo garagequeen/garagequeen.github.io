@@ -33,7 +33,7 @@
   </div>
   <div id="tasksTab" class="container" style="display:none">
     <h2 style="margin-bottom:8px">Tasks</h2>
-    <input id="taskSearch" placeholder="Search tasks..." oninput="renderAllTasks()" style="margin-top:0;margin-bottom:0">
+    <input id="taskSearch" placeholder="⌕" oninput="renderAllTasks()" style="margin-top:0;margin-bottom:0">
     <div style="display:flex;align-items:center;gap:8px;margin-top:8px;margin-bottom:10px">
       <div class="filter-tabs" id="taskProjectFilter" style="margin:0;flex:1">
         <button class="filter-tab active" style="background:#3fb950;color:#111" onclick="setTaskFilter(null,this)">All</button>
@@ -57,7 +57,7 @@
       <button onclick="exportInventoryCSV()" style="margin-top:0;padding:6px 10px;font-size:16px;background:none;color:white;font-weight:300">↑</button>
       <button onclick="openAddInventory()" style="margin-left:4px;margin-top:0;padding:6px 14px;font-size:20px;background:none;color:white;font-weight:300">+</button>
     </div>
-    <input id="invSearch" placeholder="Search inventory..." oninput="renderInventory()" style="margin-top:0;margin-bottom:4px">
+    <input id="invSearch" placeholder="⌕" oninput="renderInventory()" style="margin-top:0;margin-bottom:4px">
     <div class="filter-tabs" style="margin-top:4px;margin-bottom:4px">
       <button class="filter-tab active" onclick="setInvFilter('all',this)">All</button>
       <button class="filter-tab" onclick="setInvFilter('part',this)">Parts</button>
@@ -359,7 +359,7 @@
   <div class="sheet">
     <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
     <h3 id="partPickerTitle">Parts needed</h3>
-    <input id="partPickerSearch" placeholder="Search..." autocomplete="off" oninput="renderPartPickerList()">
+    <input id="partPickerSearch" placeholder="⌕" autocomplete="off" oninput="renderPartPickerList()">
     <div id="partPickerList" style="margin-top:8px;max-height:300px;overflow-y:auto"></div>
     <button class="btn-cancel" onclick="closeSheet('partPickerSheet')" style="margin-top:8px">Cancel</button>
   </div>
