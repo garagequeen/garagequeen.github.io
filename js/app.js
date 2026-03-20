@@ -1829,8 +1829,7 @@ function resetInvSheet() {
   document.getElementById('invTagRow').style.display = 'none'
   document.getElementById('invTagBtn').style.opacity = '0.4'
   document.getElementById('invFilmBtn').style.opacity = '0.3'
-  document.getElementById('invBlockBtn').style.opacity = '0.4'
-  document.getElementById('invBlockRow').style.display = 'none'
+
   document.getElementById('invTagSuggestions').style.display = 'none'
   document.querySelectorAll('#invTypeSeg .seg-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.val === 'part')
@@ -1886,11 +1885,7 @@ function openEditInventory(item) {
   document.getElementById('invNotes').value = item.notes || ''
   document.getElementById('invTagInput').value = ''
   document.getElementById('invTagSuggestions').style.display = 'none'
-  const blockRow = document.getElementById('invBlockRow')
-  const blockBtn = document.getElementById('invBlockBtn')
-  blockRow.style.display = invBlockedValue ? 'block' : 'none'
-  blockBtn.style.opacity = invBlockedValue ? '1' : '0.4'
-  document.getElementById('invBlockReason').value = item.blocked_reason || ''
+
   document.getElementById('invTagRow').style.display = 'none'
   document.getElementById('invTagBtn').style.opacity = '0.4'
   document.querySelectorAll('#invTypeSeg .seg-btn').forEach(b => {
