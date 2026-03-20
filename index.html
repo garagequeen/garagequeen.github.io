@@ -193,7 +193,6 @@
         <div style="display:flex;gap:2px;align-items:center">
           <div id="invTagBtn" onclick="toggleInvTags()" style="font-size:16px;font-weight:700;opacity:0.4;cursor:pointer;padding:4px 8px;user-select:none;font-family:monospace">#</div>
           <div onclick="toggleInvFilm()" id="invFilmBtn" style="font-size:20px;opacity:0.3;cursor:pointer;padding:4px 6px;user-select:none">🎬</div>
-          <div id="invBlockBtn" onclick="toggleInvBlock()" style="font-size:15px;opacity:0.4;cursor:pointer;padding:4px 6px;user-select:none">⊘</div>
         </div>
       </div>
       <div id="invTagChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
@@ -207,9 +206,7 @@
           <div id="invTagSuggestions" style="display:none;position:absolute;left:0;right:0;top:100%;background:#222;border-radius:0 0 8px 8px;z-index:10;max-height:120px;overflow-y:auto"></div>
         </div>
       </div>
-      <div id="invBlockRow" style="display:none;margin-bottom:10px">
-        <input id="invBlockReason" placeholder="Blocked reason..." autocomplete="off" style="margin:0;border-color:#c0392b">
-      </div>
+      
       <input id="invName" placeholder="Item name" autocomplete="off" style="font-size:17px;font-weight:600;padding:12px 14px">
       <div style="margin-top:12px;display:flex;gap:12px;align-items:flex-start">
         <div style="flex:0 0 130px">
