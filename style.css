@@ -162,7 +162,8 @@ textarea{height:100px;resize:none;}
 .focus-card {
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  min-height: 100%;
+  height: calc(100dvh - 34px - env(safe-area-inset-bottom) - 12px);
+  min-height: unset;
   border-radius: 16px;
   background: #1a1a1a;
   padding: 24px 20px;
