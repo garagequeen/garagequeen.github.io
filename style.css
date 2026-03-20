@@ -81,20 +81,7 @@ textarea{height:100px;resize:none;}
 .confirm-box p{font-size:13px;color:#aaa;margin-bottom:20px;line-height:1.5;}
 .confirm-actions{display:flex;gap:8px;}
 .confirm-actions button{flex:1;margin-top:0;}
-.focus-card {
-  scroll-snap-align: center;
-  min-height: calc(100svh - 220px);
-  border-radius: 16px;
-  background: #1a1a1a;
-  padding: 24px 20px 28px;
-  margin: 6px 0;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-shrink: 0;
-}
+
 .focus-project{font-size:11px;color:#3fb950;letter-spacing:0.05em;margin-bottom:6px;}
 .focus-category{font-size:11px;color:#666;letter-spacing:0.03em;}
 .focus-title{font-size:22px;font-weight:600;margin-bottom:8px;}
@@ -127,7 +114,7 @@ textarea{height:100px;resize:none;}
 .inv-status.for_sale{background:#1a2a3a;color:#3498db;}
 .inv-status.sold{background:#2a2a2a;color:#555;}
 .inv-status.other{background:#2a1a3a;color:#9b59b6;}
-.filter-tabs{display:flex;gap:8px;margin-bottom:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.filter-tabs{display:flex;gap:8px;margin-bottom:6px;overflow-x:auto;padding-bottom:3px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .filter-tabs::-webkit-scrollbar{display:none;}
 #taskProjectFilter .filter-tab{background:#222;border-radius:20px;padding:6px 14px;border-bottom:none;color:#aaa;}
 #taskProjectFilter .filter-tab.active{color:#111;}
