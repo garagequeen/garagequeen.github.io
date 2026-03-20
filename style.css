@@ -145,7 +145,7 @@ textarea{height:100px;resize:none;}
   padding-bottom: 0 !important;
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 49px - env(safe-area-inset-bottom));
+  height: calc(100dvh - 34px - env(safe-area-inset-bottom));
 }
 
 .focus-drum {
@@ -155,7 +155,6 @@ textarea{height:100px;resize:none;}
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  padding-bottom: calc(49px + env(safe-area-inset-bottom));
 }
 
 .focus-drum::-webkit-scrollbar { display: none; }
