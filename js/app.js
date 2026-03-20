@@ -1825,6 +1825,13 @@ function resetInvSheet() {
   document.querySelectorAll('#invTypeSeg .seg-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.val === 'part')
   })
+  document.getElementById('invSaleFields').style.display = 'none'
+  document.getElementById('invSoldFields').style.display = 'none'
+  document.getElementById('invSalePrice').value = ''
+  document.getElementById('invStorageLocation').value = ''
+  document.getElementById('invSoldFor').value = ''
+  invListingsValue = []
+  renderInvListings()
   renderInvTagChips()
   initInvDrum()
 }
@@ -1863,6 +1870,8 @@ function openEditInventory(item) {
   document.getElementById('invListedOn').value = item.listed_on || ''
   document.getElementById('invStorageLocation').value = item.storage_location || ''
   document.getElementById('invSoldFor').value = item.sold_for || ''
+  invListingsValue = item.listings ? [...item.listings] : []
+  renderInvListings()
   document.getElementById('invLocation').value = item.location || ''
   document.getElementById('invUrl').value = item.url || ''
   document.getElementById('invNotes').value = item.notes || ''
@@ -1898,6 +1907,10 @@ async function saveInventoryItem() {
     article: document.getElementById('invArticle').value.trim() || null,
     price_paid: pricePaid,
     currency: document.getElementById('invCurrency').value,
+    listings: invListingsValue.length ? invListingsValue : null,
+    sale_price: document.getElementById('invSalePrice').value ? parseFloat(document.getElementById('invSalePrice').value) : null,
+    storage_location: document.getElementById('invStorageLocation').value.trim() || null,
+    sold_for: document.getElementById('invSoldFor').value ? parseFloat(document.getElementById('invSoldFor').value) : null,
     location: document.getElementById('invLocation').value.trim() || null,
     url: document.getElementById('invUrl').value.trim() || null,
     notes: document.getElementById('invNotes').value.trim() || null,
