@@ -1464,7 +1464,9 @@ function setInvFilter(f, btn) {
 function renderInventory() {
   const el = document.getElementById("inventoryList")
   const search = (document.getElementById("invSearch")?.value || "").toLowerCase().trim()
-  let filtered = invFilter === "all" ? inventory : inventory.filter(i => i.type === invFilter)
+  let filtered = invFilter === "all" ? inventory : 
+  invFilter === "for_sale" ? inventory.filter(i => i.status === "for_sale" || i.status === "sold") :
+  inventory.filter(i => i.type === invFilter)
   if (search) filtered = filtered.filter(i =>
     i.name.toLowerCase().includes(search) ||
     (i.location||"").toLowerCase().includes(search) ||
