@@ -152,7 +152,22 @@ textarea{height:100px;resize:none;}
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   padding: 8px 0;
+  scrollbar-width: none;
 }
-
 .focus-drum::-webkit-scrollbar { display: none; }
-.focus-drum { scrollbar-width: none; }
+
+.focus-card {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  min-height: calc(100dvh - 220px);
+  border-radius: 16px;
+  background: #1a1a1a;
+  padding: 24px 20px;
+  margin: 6px 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+}
