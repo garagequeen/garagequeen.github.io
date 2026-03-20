@@ -1608,7 +1608,6 @@ let invTagsValue = []
 let invStatusValue = 'missing'
 let invTypeValue = 'part'
 let invFilmValue = false
-let invBlockedValue = false
 const INV_STATUSES = [
   { val: 'missing',  label: 'Missing',     color: '#c0392b' },
   { val: 'have',     label: 'Have it',     color: '#3fb950' },
@@ -1716,15 +1715,7 @@ function toggleInvFilm() {
   invFilmValue = !invFilmValue
   document.getElementById('invFilmBtn').style.opacity = invFilmValue ? '1' : '0.3'
 }
-function toggleInvBlock() {
-  invBlockedValue = !invBlockedValue
-  const row = document.getElementById('invBlockRow')
-  const btn = document.getElementById('invBlockBtn')
-  row.style.display = invBlockedValue ? 'block' : 'none'
-  btn.style.opacity = invBlockedValue ? '1' : '0.4'
-  if (invBlockedValue) setTimeout(() => document.getElementById('invBlockReason').focus(), 100)
-  else document.getElementById('invBlockReason').value = ''
-}
+
 function renderInvTagChips() {
   const el = document.getElementById('invTagChips')
   if (!el) return
@@ -1818,8 +1809,7 @@ function resetInvSheet() {
   invStatusValue = 'missing'
   invTypeValue = 'part'
   invFilmValue = false
-  invBlockedValue = false
-  ;['invName','invArticle','invLocation','invUrl','invNotes','invTagInput','invBlockReason'].forEach(id => {
+  ;['invName','invArticle','invLocation','invUrl','invNotes','invTagInput'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = ''
   })
   document.getElementById('invPricePaid').value = ''
@@ -1865,7 +1855,6 @@ function openEditInventory(item) {
   invStatusValue = item.status || 'missing'
   invTypeValue = item.type || 'part'
   invFilmValue = !!item.film_flag
-  invBlockedValue = !!item.blocked_reason
   invTagsValue = item.tags ? [...item.tags] : []
   document.getElementById('invFilmBtn').style.opacity = invFilmValue ? '1' : '0.3'
   document.getElementById('invQty').value = item.quantity != null ? item.quantity : ''
@@ -1918,7 +1907,6 @@ async function saveInventoryItem() {
     url: document.getElementById('invUrl').value.trim() || null,
     notes: document.getElementById('invNotes').value.trim() || null,
     tags: invTagsValue.length ? invTagsValue : null,
-    blocked_reason: invBlockedValue ? (document.getElementById('invBlockReason').value.trim() || null) : null,
   }
   if (editingInvItem) {
     const { error } = await sb.from('inventory').update(data).eq('id', editingInvItem.id).eq('user_id', user.id)
