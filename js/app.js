@@ -2192,15 +2192,13 @@ function renderFocus() {
     d.className = "focus-card"
     d.style.cssText = "position:relative;overflow:hidden;display:flex;flex-direction:column;"
     const catLabel = t.category ? `<div style="position:absolute;bottom:0;left:0;right:0;padding:4px 20px;background:rgba(0,0,0,0.35);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:${proj?.color||'#555'}">${proj?`<span style="opacity:0.8">${proj.title}</span>${t.category?` · `:''}`:''}${t.category||''}</div>` : proj ? `<div style="position:absolute;bottom:0;left:0;right:0;padding:4px 20px;background:rgba(0,0,0,0.35);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:${proj.color||'#3fb950'};opacity:0.8">${proj.title}</div>` : ''
-  d.innerHTML = `
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
-        <div class="focus-title">${t.title}</div>
-        ${t.notes?`<div class="focus-notes">${t.notes}</div>`:""}
-        <div class="focus-actions">
+ d.innerHTML = `
+      <div class="focus-title">${t.title}</div>
+      ${t.notes?`<div class="focus-notes">${t.notes}</div>`:""}
+      <div class="focus-actions">
         <button onclick="completeTask('${t.id}')">Complete</button>
         <button class="btn-skip" onclick="openBlockTask('${t.id}')">Block</button>
         <button class="btn-skip" onclick="skipFocusCard(this)">Skip</button>
-      </div>
       </div>
       ${catLabel}`
     document.getElementById('focusDrum').appendChild(d)
