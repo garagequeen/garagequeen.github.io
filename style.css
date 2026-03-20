@@ -169,7 +169,7 @@ textarea{height:100px;resize:none;}
   scroll-snap-align: center;
   scroll-snap-stop: always;
   flex-shrink: 0;
-  height: calc(100dvh - 210px - var(--tabs-height, 83px));
+  height: calc(100dvh - 206px - var(--tabs-height, 83px));
   border-radius: 16px;
   background: #1a1a1a;
   padding: 24px 20px;
