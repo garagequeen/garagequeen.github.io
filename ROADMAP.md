@@ -30,13 +30,12 @@ Structure: Now → Next → Later
 ## Next
 
 - [ ] Shared projects — доступ механику/партнёру по email
-- [ ] Система продажи запчастей:
-  - [ ] Цена продажи (отдельно от price_paid)
-  - [ ] Куда выложила (OLX / Telegram / др.)
-  - [ ] Продано за сколько
-  - [ ] Фото на айтем (Supabase Storage)
-  - [ ] Локация (гараж/полка)
-  - [ ] Генерация поста для телеги через AI
+- [ ] Sale system:
+  - [ ] sale price (separetely from price_paid)
+  - [ ] source (OLX / Telegram / other)
+  - [ ] sold for
+  - [ ] photo of the item (Supabase Storage)
+  - [ ] location (garage/shelf)
 - [ ] Save task on tap outside (without Save button) — discuss tradeoffs
 - [ ] Block on task — add shortcut to remove quickly (swipe or inline button)
 - [ ] Category collapse state — persist between renders
@@ -64,7 +63,7 @@ Structure: Now → Next → Later
 
 - [ ] Expenses section in project detail (via task → inventory links)
 - [ ] Vehicle summary: total spent / by category
-- [ ] Конвертация валют (опционально)
+- [ ] Currency convertation (optional)
 
 -----
 
@@ -87,10 +86,9 @@ Structure: Now → Next → Later
 
 ## Later
 
-- [ ] VIN интеграция + рекомендации запчастей по модели
+- [ ] VIN integration + recomendation of parts
 - [ ] Service log — comfortable view in landscape mode
 - [ ] Telegram chatbot for quick input
-- [ ] AI photo analysis
 - [ ] Import directly from Notes folder (iOS Shortcuts?)
 - [ ] Project archive (hide without deleting)
 - [ ] Duplicate project
@@ -129,19 +127,19 @@ Structure: Now → Next → Later
 - [x] Tasks — deleteEditTask with undo toast
 - [x] Focus — complete, skip, block, start over, filter by project
 - [x] Focus — category + project label at bottom of card
-- [x] Focus — барабан scroll-snap (одна таска = один свайп)
-- [x] Focus — фильтр показывает только проекты с открытыми незаблокированными тасками
+- [x] Focus — scroll-drum scroll-snap (one task = one swipe)
+- [x] Focus — filter shows only open and non-blocked tasks
 - [x] Inventory — Edit item: drum status, type segment, tag chips, sticky buttons
 - [x] Inventory — Swipe left delete (undo), swipe right toggle Have↔Missing
 - [x] Inventory — Inline qty stepper on card (−N+), auto-save
 - [x] Inventory — Tag suggestions with global delete
 - [x] Inventory — film_flag + blocked_reason
-- [x] Inventory — Convert item → task (проверка дубликата + удаление айтема)
-- [x] Inventory — Currency field (₴/€/$) на айтеме
-- [x] Inventory — Spending overview (Spent / Planned по валютам с учётом qty)
+- [x] Inventory — Convert item → task (duplicate check before adding)
+- [x] Inventory — Currency field (₴/€/$) for item
+- [x] Inventory — Spending overview (Spent / Planned by currency including qty)
 - [x] Garage — add/edit/delete vehicle, sticky footer
 - [x] Service log — entries with date and mileage
 - [x] Background photo (Supabase Storage)
 - [x] Undo: task delete, project delete, category delete, item delete
 - [x] App version constant + shown on login and settings
-- [x] Рефакторинг — index.html / style.css / js/app.js
+- [x] Refactor — index.html / style.css / js/app.js
