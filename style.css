@@ -157,7 +157,7 @@ textarea{height:100px;resize:none;}
 .focus-drum {
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
-  height: calc(100dvh - 160px);
+  height: calc(100dvh - 160px - var(--tabs-height));
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -169,7 +169,7 @@ textarea{height:100px;resize:none;}
   scroll-snap-align: center;
   scroll-snap-stop: always;
   flex-shrink: 0;
-  height: calc(100dvh - 160px - 60px - env(safe-area-inset-bottom) - 12px);
+  height: calc(100dvh - 160px - var(--tabs-height) - 12px);
   border-radius: 16px;
   background: #1a1a1a;
   padding: 24px 20px;
