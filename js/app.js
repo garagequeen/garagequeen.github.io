@@ -1867,7 +1867,6 @@ function openEditInventory(item) {
   document.getElementById('invSaleFields').style.display = showSale ? 'block' : 'none'
   document.getElementById('invSoldFields').style.display = item.status === 'sold' ? 'block' : 'none'
   document.getElementById('invSalePrice').value = item.sale_price || ''
-  document.getElementById('invListedOn').value = item.listed_on || ''
   document.getElementById('invStorageLocation').value = item.storage_location || ''
   document.getElementById('invSoldFor').value = item.sold_for || ''
   invListingsValue = item.listings ? [...item.listings] : []
