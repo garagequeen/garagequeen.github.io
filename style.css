@@ -138,3 +138,18 @@ textarea{height:100px;resize:none;}
 /* Toast */
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 20px;border-radius:20px;font-size:13px;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none;}
   .toast.show{opacity:1; pointer-events:auto;}
+
+/* focus tab */
+#focusTab {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+.focus-drum {
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  height: calc(100dvh - 160px);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 8px 0;
+}
