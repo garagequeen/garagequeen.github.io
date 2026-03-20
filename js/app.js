@@ -8,7 +8,7 @@ let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLi
 let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
 sb.auth.onAuthStateChange((_e, s) => { if (s && !user) checkUser() })
-window.addEventListener('load', () => {ыф
+window.addEventListener('load', () => {
   checkUser()
   try {
     document.getElementById('versionFooter').innerText = APP_VERSION
