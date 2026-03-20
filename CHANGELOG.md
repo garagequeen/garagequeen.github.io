@@ -9,20 +9,20 @@ Format: [Keep a Changelog](https://keepachangelog.com)
 
 ### Added
 
-- Focus — барабан scroll-snap: одна таска на экран, один свайп = одна карточка
-- Focus — фильтр по проектам показывает только проекты с открытыми незаблокированными тасками
-- Inventory — поле currency (₴/€/$) на каждом айтеме, дефолт ₴ UAH
-- Inventory — Spending overview внизу списка: Spent / Planned по валютам с учётом qty
-- Convert item → task — проверка дубликата перед созданием
-- Convert item → task — айтем удаляется после успешной конвертации
+- Focus — scroll-snap: one task one screen; one swipe = one task
+- Focus — filter only shows open and non-blocked tasks
+- Inventory — currency (₴/€/$) for each item, default ₴ UAH
+- Inventory — Spending overview under items: Spent / Planned inluding qty
+- Convert item → task — check for fuplicate before craetion
+- Convert item → task — item deleted after successful convertation
 
 ### Changed
 
-- Рефакторинг: index.html разделён на index.html / style.css / js/app.js
+- Refactoring: index.html splitted for index.html / style.css / js/app.js
 
 ### Fixed
 
-- Convert item → task — починили (editingInvItem порядок объявления)
+- Convert item → task — fixed (editingInvItem correct order)
 
 -----
 
@@ -30,14 +30,14 @@ Format: [Keep a Changelog](https://keepachangelog.com)
 
 ### Added
 
-- deleteEditTask — undo toast с 4-секундной задержкой перед удалением из БД
-- APP_VERSION константа — единый источник версии, отображается на экране логина и в настройках
+- deleteEditTask — undo toast with 4 sec delay before db deletion
+- APP_VERSION const - single source of verison, shown on the load screen
 
 ### Fixed
 
-- Toast pointer-events — теперь кнопка Undo кликабельна
-- versionLogin HTML — сломанный style атрибут исправлен
-- docement typo — исправлено на document.getElementById
+- Toast pointer-events — fixed Undo
+- versionLogin HTML — fixed style attribute
+- docement typo — fixed document.getElementById
 
 -----
 
