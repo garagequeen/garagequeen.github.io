@@ -132,6 +132,12 @@ textarea{height:100px;resize:none;}
 #taskProjectFilter .filter-tab{background:#222;border-radius:20px;padding:6px 14px;border-bottom:none;color:#aaa;}
 #taskProjectFilter .filter-tab.active{color:#111;}
 
+.filter-tab.active {
+  background: #3fb950;
+  color: #111;
+  font-weight: 600;
+}
+
 /* Film flag */
 .film-flag{font-size:13px;margin-left:4px;}
 
