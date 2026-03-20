@@ -1774,6 +1774,35 @@ function removeInvTag(i) {
   invTagsValue.splice(i, 1)
   renderInvTagChips()
 }
+// ── LISTINGS ──
+let invListingsValue = []
+
+function addInvListing() {
+  const platform = document.getElementById('invListingPlatform').value
+  const url = document.getElementById('invListingUrl').value.trim()
+  invListingsValue.push({ platform, url: url || null })
+  document.getElementById('invListingUrl').value = ''
+  renderInvListings()
+}
+
+function removeInvListing(i) {
+  invListingsValue.splice(i, 1)
+  renderInvListings()
+}
+
+function renderInvListings() {
+  const el = document.getElementById('invListingsList')
+  if (!el) return
+  if (!invListingsValue.length) { el.innerHTML = ''; return }
+  el.innerHTML = invListingsValue.map((l, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #222">
+      <span style="font-size:12px;color:#3498db;min-width:70px">${l.platform}</span>
+      ${l.url
+        ? `<a href="${l.url}" target="_blank" onclick="event.stopPropagation()" style="flex:1;font-size:12px;color:#3498db;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">🔗 ${l.url}</a>`
+        : `<span style="flex:1;font-size:12px;color:#555">no link</span>`}
+      <span onclick="removeInvListing(${i})" style="color:#555;cursor:pointer;padding:2px 6px;font-size:16px">×</span>
+    </div>`).join('')
+}
 function resetInvSheet() {
   invTagsValue = []
   invStatusValue = 'missing'
