@@ -14,6 +14,8 @@ window.addEventListener('load', () => {
     document.getElementById('versionFooter').innerText = APP_VERSION
     document.getElementById('versionLogin').innerText = APP_VERSION
   } catch(e) {}
+  const tabsH = document.querySelector('.tabs').offsetHeight
+  document.documentElement.style.setProperty('--tabs-height', tabsH + 'px')
 
 })
 function login() {
