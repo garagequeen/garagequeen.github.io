@@ -142,25 +142,28 @@ textarea{height:100px;resize:none;}
 /* focus tab */
 #focusTab {
   overflow: hidden;
-  padding-bottom: 0;
+  padding-bottom: 0 !important;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
 }
 
 .focus-drum {
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
-  height: calc(100dvh - 160px - 49px - env(safe-area-inset-bottom));
+  flex: 1;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
+  padding-bottom: calc(49px + env(safe-area-inset-bottom));
 }
+
 .focus-drum::-webkit-scrollbar { display: none; }
 
 .focus-card {
-  scroll-snap-align: center;
+  scroll-snap-align: start;
   scroll-snap-stop: always;
-  height: calc(100dvh - 172px - 49px - env(safe-area-inset-bottom));
-  min-height: unset;
-  max-height: unset;
+  min-height: 100%;
   border-radius: 16px;
   background: #1a1a1a;
   padding: 24px 20px;
