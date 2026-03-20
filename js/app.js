@@ -2430,3 +2430,6 @@ function _renderAllTasksPage() {
     el.appendChild(btn)
   }
 }
+window.toggleIsContent = toggleIsContent
+window.toggleFilmed = toggleFilmed
+window.renderContentProject = renderContentProject
