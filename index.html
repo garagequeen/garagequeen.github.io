@@ -397,6 +397,15 @@
       <input id="renameProjectInput" placeholder="Project name" autocomplete="off">
       <div style="font-size:11px;color:#555;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.5px">Color</div>
       <div class="project-colors" id="colorPicker"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px">
+  <div>
+    <div style="font-size:13px;color:white">Content project</div>
+    <div style="font-size:11px;color:#555;margin-top:2px">🎬 tasks from all projects collect here</div>
+  </div>
+  <div id="isContentToggle" onclick="toggleIsContent()" style="width:44px;height:26px;border-radius:13px;background:#333;position:relative;cursor:pointer;transition:background .2s">
+    <div id="isContentThumb" style="width:22px;height:22px;border-radius:11px;background:white;position:absolute;top:2px;left:2px;transition:left .2s"></div>
+  </div>
+</div>
       <div style="font-size:11px;color:#555;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.5px">Vehicle</div>
       <select id="projectSettingsVehicle">
         <option value="">No vehicle</option>
