@@ -228,7 +228,14 @@
       </div>
       <div style="margin-top:14px">
         <div style="font-size:11px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Quantity</div>
-        <input id="invQty" type="number" min="0" placeholder="—" style="width:100px;text-align:center">
+        <div class="counter-border" style="margin-top:0">
+      <button onclick="invSheetQtyChange(-1)">−</button>
+        <div class="cb-div"></div>
+        <div class="cb-num" id="invQtyDisplay">—</div>
+        <div class="cb-div"></div>
+      <button onclick="invSheetQtyChange(1)">+</button>
+    </div>
+<input id="invQty" type="number" min="0" style="display:none">
       </div>
       <textarea id="invNotes" placeholder="Notes" style="height:72px;margin-top:14px"></textarea>
       <div style="display:flex;gap:8px;margin-top:8px">
