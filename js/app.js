@@ -1694,6 +1694,10 @@ function setDrumStatus(val, animate) {
   highlightDrumItem(idx)
   const qty = document.getElementById('invQty')
   if (qty) qty.style.opacity = val === 'missing' ? '0.3' : '1'
+  const saleFields = document.getElementById('invSaleFields')
+  if (saleFields) saleFields.style.display = (val === 'for_sale' || val === 'sold') ? 'block' : 'none'
+  const soldFields = document.getElementById('invSoldFields')
+  if (soldFields) soldFields.style.display = val === 'sold' ? 'block' : 'none'
 }
 function setInvSeg(kind, val, btn) {
   document.querySelectorAll('#invTypeSeg .seg-btn').forEach(b => { b.classList.remove('active') })
@@ -1823,6 +1827,13 @@ function openEditInventory(item) {
   document.getElementById('invArticle').value = item.article || ''
   document.getElementById('invPricePaid').value = item.price_paid || ''
   document.getElementById('invCurrency').value = item.currency || 'UAH'
+  const showSale = item.status === 'for_sale' || item.status === 'sold'
+  document.getElementById('invSaleFields').style.display = showSale ? 'block' : 'none'
+  document.getElementById('invSoldFields').style.display = item.status === 'sold' ? 'block' : 'none'
+  document.getElementById('invSalePrice').value = item.sale_price || ''
+  document.getElementById('invListedOn').value = item.listed_on || ''
+  document.getElementById('invStorageLocation').value = item.storage_location || ''
+  document.getElementById('invSoldFor').value = item.sold_for || ''
   document.getElementById('invLocation').value = item.location || ''
   document.getElementById('invUrl').value = item.url || ''
   document.getElementById('invNotes').value = item.notes || ''
