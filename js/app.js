@@ -1498,6 +1498,8 @@ function renderInventory() {
           ${item.tags?.length?`<div style="margin-top:4px">${item.tags.map(t=>`<span style="font-size:11px;background:#1a2a1a;color:#3fb950;padding:1px 6px;border-radius:4px;margin-right:4px">#${t}</span>`).join("")}</div>`:""}
           ${item.notes?`<div style="font-size:12px;color:#555;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.notes}</div>`:""}
           ${item.url?`<div style="font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a href="${item.url}" onclick="event.stopPropagation()" target="_blank" style="color:#3498db">🔗 ${item.url}</a></div>`:""}
+          ${(item.status === 'for_sale' || item.status === 'sold') && item.sale_price ? `<div style="font-size:12px;color:#3498db;margin-top:4px">${item.status === 'sold' ? 'Sold' : 'For sale'}: ${item.sale_price} ${item.sale_currency || '₴'}</div>` : ''}
+${item.listings?.length ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">${item.listings.map(l => `<a href="${l.url||'#'}" onclick="event.stopPropagation()" target="_blank" style="font-size:11px;color:#3498db;background:#1a2a3a;padding:2px 8px;border-radius:4px">${l.platform}</a>`).join('')}</div>` : ''}
         </div>
         <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:80px">
           <span class="inv-status ${item.status}" style="margin:0;text-align:center;width:100%">${statusLabel[item.status]||item.status}</span>
