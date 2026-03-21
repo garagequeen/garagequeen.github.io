@@ -434,6 +434,11 @@ function applyMultiselectCategory() {
   exitSelectMode()
 }
 function openAddTask() {
+  const dl = document.getElementById("taskCategoryList")
+  if (dl && currentProject) {
+    const cats = [...new Set(tasks.filter(t => t.project_id === currentProject.id && t.category).map(t => t.category))]
+    dl.innerHTML = cats.map(c => `<option value="${c}">`).join('')
+  }
   document.getElementById("addTaskSheet").classList.add("open")
   setTimeout(() => document.getElementById("newTaskTitle").focus(), 300)
 }
