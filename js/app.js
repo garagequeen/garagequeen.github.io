@@ -1044,6 +1044,20 @@ function toggleProjectFilmFilter() {
   }
   renderTasks(blockedFilterOn)
 }
+
+let allCollapsed = false
+function toggleCollapseAll() {
+  const cats = [...new Set(tasks.filter(t => t.project_id === currentProject?.id && t.category).map(t => t.category))]
+  allCollapsed = !allCollapsed
+  if (allCollapsed) {
+    cats.forEach(c => collapsedCats.add(c))
+  } else {
+    cats.forEach(c => collapsedCats.delete(c))
+  }
+  document.getElementById('collapseAllBtn').innerText = allCollapsed ? '⊞' : '⊟'
+  renderTasks(blockedFilterOn)
+}
+
 function toggleBlockedFilter() {
   blockedFilterOn = !blockedFilterOn
   const btn = document.getElementById("blockedFilterBtn")
