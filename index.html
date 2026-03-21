@@ -133,7 +133,7 @@
     <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
     <h3>New task</h3>
     <input id="newTaskTitle" placeholder="Task name" autocomplete="off">
-    <input id="newTaskCategory" placeholder="Category (optional)" autocomplete="off" list="taskCategoryList"> <datalist id="taskCategoryList"></datalist>
+    <div style="position:relative">   <input id="newTaskCategory" placeholder="Category (optional)" autocomplete="off"     oninput="showTaskCatSuggestions()"     onblur="setTimeout(()=>document.getElementById('taskCatSuggestions').style.display='none',200)">   <div id="taskCatSuggestions" style="display:none;position:absolute;left:0;right:0;top:100%;background:#222;border-radius:0 0 8px 8px;z-index:10;max-height:120px;overflow-y:auto"></div> </div>
     <select id="newTaskPriority">
       <option value="">No priority</option>
       <option value="high">High</option>  
