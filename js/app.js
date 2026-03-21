@@ -478,12 +478,17 @@ async function addTask() {
   document.getElementById("newTaskCategory").value = ""
   document.getElementById("newTaskNotes").value = ""
   document.getElementById("newTaskPriority").value = ""
+  const catName = document.getElementById("newTaskCategory").value.trim()
   closeSheet("addTaskSheet")
+  showToast(catName ? `Task added to "${catName}" ✓` : "Task added ✓") 
   const { data, error } = await sb.from("tasks").insert(newTask).select().single()
   if (error) { showToast("Error saving task ✕"); return }
   tasks.unshift(data)
   rerender()
 }
+
+
+
 async function completeTask(id) {
   const task = tasks.find(t => t.id === id)
   if (!task) return
