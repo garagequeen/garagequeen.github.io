@@ -4,6 +4,38 @@ const SUPA_URL = "https://fqmmlntmpybijmvrsfxx.supabase.co"
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk"
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY, { auth: { flowType: 'pkce' } })
 const PROJECT_COLORS = ['#3fb950','#f0a500','#c0392b','#3498db','#9b59b6','#1abc9c','#e67e22','#e91e63']
+const PROJECT_TYPES = {
+  general: {
+    label: 'General',
+    color: '#9b59b6',
+    bg: '#1a0a2a',
+    svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`
+  },
+  vehicle: {
+    label: 'Vehicle',
+    color: '#3498db',
+    bg: '#1a2a3a',
+    svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="16" r="1"/><circle cx="20" cy="16" r="1"/></svg>`
+  },
+  content: {
+    label: 'Content',
+    color: '#e91e63',
+    bg: '#2a1a1a',
+    svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e91e63" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`
+  },
+  build: {
+    label: 'Build',
+    color: '#f0a500',
+    bg: '#2a1a00',
+    svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0a500" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`
+  },
+  home: {
+    label: 'Home',
+    color: '#1abc9c',
+    bg: '#0a2a2a',
+    svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1abc9c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`
+  }
+}
 let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLinks = [], currentProject = null, invFilter = 'all', editingInvItem = null, taskProjectFilter = null, filmFilterOn = false, blockedFilterOn = false
 let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
