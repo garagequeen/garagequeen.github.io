@@ -1,143 +1,131 @@
 # Changelog — Garage Log
 
 All notable changes documented here.
-Format: [Keep a Changelog](https://keepachangelog.com)
+Format: Keep a Changelog
 
------
+---
 
-## [0.6.8] - 2026-03-20
+## [0.7.1] - 2026-03-21
 
 ### Added
-
-- Focus — scroll-snap: one task one screen; one swipe = one task
-- Focus — filter only shows open and non-blocked tasks
-- Inventory — currency (₴/€/$) for each item, default ₴ UAH
-- Inventory — Spending overview under items: Spent / Planned inluding qty
-- Convert item → task — check for fuplicate before craetion
-- Convert item → task — item deleted after successful convertation
+- Content project flag (is_content) — collects all 🎬 tasks from all projects
+- Content project view — grouped by To film / Filmed with toggle button
+- filmed boolean field on tasks
+- Sale system: sale_price, sale_currency, sold_for, listings (platform + URL)
+- For sale fields appear immediately on drum status change (no save needed)
+- For sale filter tab in inventory
+- Sale price and listings shown directly on inventory card
+- Qty stepper (- N +) in inventory edit sheet, centered
+- Type buttons (Part/Tool/Consumable) moved left of status drum
+- Blocked inventory item — red left border if linked to blocked task
+- invSaleCurrency field connected to save/reset/open
 
 ### Changed
-
-- Refactoring: index.html splitted for index.html / style.css / js/app.js
+- Removed block field from inventory item (auto-block via task links only)
+- Currency select width increased to 90px (H no longer clipped)
+- Edit item sheet scrolls to top on open
+- Duplicate .focus-card CSS removed
 
 ### Fixed
+- Filter tabs in inventory now highlight active state correctly
+- toggleIsContent was nested inside closeDetail — moved to top level
 
-- Convert item → task — fixed (editingInvItem correct order)
+---
 
------
+## [0.7.0] - 2026-03-20
+
+### Added
+- Focus — scroll-snap drum: one task per screen, one swipe per card
+- Focus — filter shows only projects with open unblocked tasks
+- Inventory — currency field (UAH/EUR/USD) per item, default UAH
+- Inventory — spending overview: Spent / Planned by currency including qty
+- Inventory — sale_price, listed_on, sold_for, storage_location columns
+- Inventory — listings (jsonb): platform + URL, multiple per item
+- Convert item → task — duplicate check before creating
+- Convert item → task — item deleted after successful conversion
+
+### Changed
+- Refactor: index.html split into index.html / style.css / js/app.js
+
+### Fixed
+- Convert item → task — fixed (editingInvItem declaration order)
+- Toast pointer-events — Undo button now clickable
+
+---
 
 ## [0.6.7] - 2026-03-12
 
 ### Added
-
-- deleteEditTask — undo toast with 4 sec delay before db deletion
-- APP_VERSION const - single source of verison, shown on the load screen
+- deleteEditTask — undo toast with 4s delay before DB delete
+- APP_VERSION constant — shown on login screen and in settings footer
 
 ### Fixed
+- versionLogin HTML — broken style attribute fixed
+- docement typo fixed
 
-- Toast pointer-events — fixed Undo
-- versionLogin HTML — fixed style attribute
-- docement typo — fixed document.getElementById
-
------
+---
 
 ## [0.6.x] - 2026-03-11
 
 ### Added
-
 - Tasks — deleteEditTask with undo
-- Tasks — Long press → multiselect → Complete / Category / Delete
-- Tasks — Collapse/expand categories with count badge
-- Tasks — Blocked chip filter inside project list
+- Tasks — long press multiselect (Complete / Category / Delete)
+- Tasks — collapse/expand categories with count badge
+- Tasks — blocked chip filter inside project list
 - Inventory — film_flag + blocked_reason columns
-- Inventory — Tag suggestions with global delete
-- Inventory — Swipe right to toggle Have↔Missing
-- Focus — film filter 🎬
-- Focus — blocked filter
+- Inventory — tag suggestions with global delete
+- Inventory — swipe right to toggle Have/Missing
+- Focus — film filter and blocked filter
 
 ### Fixed
-
-- Qty stepper − N + alignment (flex centering)
-- Tasks "All" button correct default/active/inactive states
+- Qty stepper alignment (flex centering)
+- Tasks All button correct states
 - New category input — mixed case + autofocus
-- Priority simplified — only High | null
+- Priority simplified to High or null
 - font-size 16px on inputs (prevents iOS zoom)
-- Blocked filter auto-reset after saveEditTask()
-- invFilter reset on swipe-delete undo
+- Blocked filter auto-reset after saveEditTask
 
------
+---
 
-## [0.4.2] - 2026-03-09
-
-### Added
-
-- Project cover photo fills entire card background
-- Progress overlay — light fill grows left→right as tasks complete
-
-### Fixed
-
-- Settings tab scroll — version now reachable
-- Inventory — gap between search and filters removed
-
------
-
-## [0.4.1] - 2026-03-09
+## [0.4.x] - 2026-03-09
 
 ### Added
-
-- 🎬 Film flag on tasks
-- Cover photo for projects (Supabase Storage)
-- Progress bar on project cards
+- Project cover photo fills card background
+- Progress overlay on project cards
+- Film flag on tasks
 - Copy task to another project
+- Garage section — add/edit/delete vehicles
+- Service log — entries with date and mileage
 
-### Fixed
-
-- Swipe delete — touchend + stopPropagation
-- Task filter capsules — box-shadow color accent
-
------
-
-## [0.4.0] - 2026-03-09
-
-### Added
-
-- Garage section in Settings — add/edit/delete vehicles
-- Focus — project name shown in project color
-- Task filters — capsule style with project color
-- Inventory — search field
-
------
+---
 
 ## [0.3.x] - 2026-03-08/09
 
 ### Added
-
 - Tasks tab — search + filter by project
-- Block task — reason input, badge on card, hidden from Focus
-- Swipe left on task → Delete button
-- Rename project sheet — name + color picker
+- Block task with reason, badge on card, hidden from Focus
+- Swipe left to delete task
+- Rename project — name + color picker
 - Import parser — text/notes + CSV
 - Background photo saved to Supabase Storage
-- Feedback button (🐛 Problem / 💡 Idea)
+- Feedback button (Problem / Idea)
 - Safe area support everywhere
 
------
+---
 
 ## [0.2.0] - 2026-03-08
 
 ### Added
-
 - Projects clickable → detail screen with task list
 - Focus tab — cards with Skip button
 - Delete project with confirmation
 - Auth fix: flowType pkce for Chrome on iOS
 
------
+---
 
 ## [0.1.0] - 2026-03-01
 
 ### Added
-
 - Initial version
 - Google OAuth login
 - Tasks list, Projects list, Focus tab
