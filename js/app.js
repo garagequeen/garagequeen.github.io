@@ -453,6 +453,19 @@ function showTaskCatSuggestions() {
   box.style.display = 'block'
   box.innerHTML = matches.map(c => `<div onclick="document.getElementById('newTaskCategory').value='${c}';document.getElementById('taskCatSuggestions').style.display='none'" style="padding:10px 12px;font-size:14px;border-bottom:1px solid #333;cursor:pointer">${c}</div>`).join('')
 }
+
+function showEditTaskCatSuggestions() {
+  const input = document.getElementById('editTaskCategory')
+  const box = document.getElementById('editTaskCatSuggestions')
+  if (!box) return
+  const q = input.value.trim().toLowerCase()
+  const cats = [...new Set(tasks.filter(t => t.project_id === editingTask?.project_id && t.category).map(t => t.category))]
+  const matches = q ? cats.filter(c => c.toLowerCase().includes(q)) : cats
+  if (!matches.length) { box.style.display = 'none'; return }
+  box.style.display = 'block'
+  box.innerHTML = matches.map(c => `<div onclick="document.getElementById('editTaskCategory').value='${c}';document.getElementById('editTaskCatSuggestions').style.display='none';blurEditTaskCategory()" style="padding:10px 12px;font-size:14px;border-bottom:1px solid #333;cursor:pointer">${c}</div>`).join('')
+}
+
 function rerender() {
   renderProjects()
   renderFocus()
