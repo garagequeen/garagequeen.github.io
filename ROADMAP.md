@@ -8,7 +8,7 @@ Structure: Now → Next → Later
 ## Now — v0.7.1 · Open Bugs
 
 ### Layout / Visual
-- [ ] Qty stepper — stretches card on tap in inventory list
+- [x] Qty stepper — stretches card on tap in inventory list
 - [ ] "Have it" badge shifts when qty present
 - [ ] Focus card content alignment (center vs bottom)
 
