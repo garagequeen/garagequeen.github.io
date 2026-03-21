@@ -39,6 +39,10 @@ const PROJECT_TYPES = {
 let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLinks = [], currentProject = null, invFilter = 'all', editingInvItem = null, taskProjectFilter = null, filmFilterOn = false, blockedFilterOn = false
 let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
+let selectedColor = null
+let selectedProjectType = 'general'
+let isContentValue = false
+let allCollapsed = false
 sb.auth.onAuthStateChange((_e, s) => { if (s && !user) checkUser() })
 window.addEventListener('load', () => {
   checkUser()
@@ -895,7 +899,7 @@ typePicker.innerHTML = Object.entries(PROJECT_TYPES).map(([key, t]) => `
     <div style="width:32px;height:32px;border-radius:8px;background:${t.bg};display:flex;align-items:center;justify-content:center">${t.svg}</div>
     <div style="font-size:14px;color:${selectedProjectType===key?t.color:'#aaa'}">${t.label}</div>
   </div>`).join('')
-  let selectedProjectType = 'general'
+  
 
 function selectProjectType(key) {
   selectedProjectType = key
