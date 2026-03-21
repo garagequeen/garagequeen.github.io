@@ -183,11 +183,11 @@ function renderProjects() {
     const info = document.createElement("div")
     info.className = "project-info"
     const ptype = PROJECT_TYPES[p.project_type] || PROJECT_TYPES.general
-info.innerHTML = `
+    info.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px">
         <div style="width:24px;height:24px;border-radius:6px;background:${ptype.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0">${ptype.svg}</div>
         <div class="project-title">${p.title}</div>
-      </div>`
+      </div>
       ${vehicle?`<div style="font-size:11px;color:#888;margin-top:2px">${vehicle.name}</div>`:""}
       <div class="project-meta">${open} open${done?" · "+done+" done":""}${total?" · "+pct+"%":""}</div>`
     d.appendChild(info)
