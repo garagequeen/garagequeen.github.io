@@ -884,6 +884,27 @@ async function deleteEditTask() {
 let selectedColor = null
 function openRenameProject() {
   selectedColor = currentProject.color || '#3fb950'
+  selectedProjectType = currentProject.project_type || 'general'
+const typePicker = document.getElementById('projectTypePicker')
+typePicker.innerHTML = Object.entries(PROJECT_TYPES).map(([key, t]) => `
+  <div onclick="selectProjectType('${key}')" id="ptype_${key}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;background:${selectedProjectType===key?t.bg:'#222'};border:1px solid ${selectedProjectType===key?t.color:'transparent'}">
+    <div style="width:32px;height:32px;border-radius:8px;background:${t.bg};display:flex;align-items:center;justify-content:center">${t.svg}</div>
+    <div style="font-size:14px;color:${selectedProjectType===key?t.color:'#aaa'}">${t.label}</div>
+  </div>`).join('')
+  let selectedProjectType = 'general'
+
+function selectProjectType(key) {
+  selectedProjectType = key
+  Object.keys(PROJECT_TYPES).forEach(k => {
+    const el = document.getElementById(`ptype_${k}`)
+    const t = PROJECT_TYPES[k]
+    if (!el) return
+    el.style.background = k === key ? t.bg : '#222'
+    el.style.borderColor = k === key ? t.color : 'transparent'
+    el.querySelector('div:last-child').style.color = k === key ? t.color : '#aaa'
+  })
+}
+  
   document.getElementById("renameProjectInput").value = currentProject.title
   document.getElementById("projectCoverUpload").value = ""
   document.getElementById("projectCoverName").innerText = currentProject.cover_url ? "Current photo saved ✓" : ""
@@ -926,11 +947,11 @@ async function saveRenameProject() {
       cover_url = data.publicUrl + "?t=" + Date.now()
     } catch(e) { console.error(e) }
   }
-  const { error } = await sb.from("projects").update({ title, color: selectedColor, object_id, cover_url, is_content: isContentValue }).eq("id", currentProject.id).eq("user_id", user.id)
+  const { error } = await sb.from("projects").update({ title, color: selectedColor, object_id, cover_url, is_content: isContentValue, project_type: selectedProjectType }).eq("id", currentProject.id).eq("user_id", user.id)
   if (error) { showToast("Error saving project ✕"); return }
-  Object.assign(currentProject, { title, color: selectedColor, object_id, cover_url })
+  Object.assign(currentProject, { title, color: selectedColor, object_id, cover_url, project_type: selectedProjectType })
   const p = projects.find(x => x.id === currentProject.id)
-  if (p) Object.assign(p, { title, color: selectedColor, object_id, cover_url })
+  if (p) Object.assign(p, { title, color: selectedColor, object_id, cover_url, project_type: selectedProjectType })
   document.getElementById("detailTitle").innerText = title
   closeSheet("renameProjectSheet")
   showToast("Project saved ✓")
