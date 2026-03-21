@@ -275,7 +275,7 @@ function closeDetail() {
   blockedFilterOn = false
   projectFilmFilterOn = false
 }
- let isContentValue = false
+ 
 function toggleIsContent() {
   isContentValue = !isContentValue
   const toggle = document.getElementById('isContentToggle')
@@ -889,7 +889,6 @@ async function deleteEditTask() {
 }
 
 // ── RENAME PROJECT ──
-let selectedColor = null
 function openRenameProject() {
   selectedColor = currentProject.color || '#3fb950'
   selectedProjectType = currentProject.project_type || 'general'
@@ -899,19 +898,6 @@ typePicker.innerHTML = Object.entries(PROJECT_TYPES).map(([key, t]) => `
     <div style="width:32px;height:32px;border-radius:8px;background:${t.bg};display:flex;align-items:center;justify-content:center">${t.svg}</div>
     <div style="font-size:14px;color:${selectedProjectType===key?t.color:'#aaa'}">${t.label}</div>
   </div>`).join('')
-  
-
-function selectProjectType(key) {
-  selectedProjectType = key
-  Object.keys(PROJECT_TYPES).forEach(k => {
-    const el = document.getElementById(`ptype_${k}`)
-    const t = PROJECT_TYPES[k]
-    if (!el) return
-    el.style.background = k === key ? t.bg : '#222'
-    el.style.borderColor = k === key ? t.color : 'transparent'
-    el.querySelector('div:last-child').style.color = k === key ? t.color : '#aaa'
-  })
-}
   
   document.getElementById("renameProjectInput").value = currentProject.title
   document.getElementById("projectCoverUpload").value = ""
@@ -941,6 +927,19 @@ function selectProjectType(key) {
   })
   document.getElementById("renameProjectSheet").classList.add("open")
 }
+
+function selectProjectType(key) {
+  selectedProjectType = key
+  Object.keys(PROJECT_TYPES).forEach(k => {
+    const el = document.getElementById(`ptype_${k}`)
+    const t = PROJECT_TYPES[k]
+    if (!el) return
+    el.style.background = k === key ? t.bg : '#222'
+    el.style.borderColor = k === key ? t.color : 'transparent'
+    el.querySelector('div:last-child').style.color = k === key ? t.color : '#aaa'
+  })
+}
+
 async function saveRenameProject() {
   const title = document.getElementById("renameProjectInput").value.trim()
   if (!title || !currentProject) return
@@ -987,11 +986,6 @@ function switchImportTab(tab) {
   document.getElementById("importTabText").style.background = isText ? "#3fb950" : "#222"
   document.getElementById("importTabText").style.color = isText ? "#111" : "#aaa"
   document.getElementById("importTabCsv").style.background = isText ? "#222" : "#3fb950"
-  isContentValue = !!currentProject.is_content
-const toggle = document.getElementById('isContentToggle')
-const thumb = document.getElementById('isContentThumb')
-toggle.style.background = isContentValue ? '#e91e63' : '#333'
-thumb.style.left = isContentValue ? '20px' : '2px'
   document.getElementById("importTabCsv").style.color = isText ? "#aaa" : "#111"
 }
 let parsedTaskCSVItems = []
@@ -1106,7 +1100,6 @@ function toggleProjectFilmFilter() {
   renderTasks(blockedFilterOn)
 }
 
-let allCollapsed = false
 function toggleCollapseAll() {
   const cats = [...new Set(tasks.filter(t => t.project_id === currentProject?.id && t.category).map(t => t.category))]
   allCollapsed = !allCollapsed
