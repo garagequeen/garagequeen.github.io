@@ -599,6 +599,10 @@ async function completeTask(id) {
   renderFocus()
   renderTasks()
   renderProjects()
+  // check if completing this task unblocks others
+  const unblocked = taskDeps.filter(d => d.depends_on === id)
+  unblocked.forEach(d => checkAutoDep(d.task_id))
+  if (unblocked.length) { renderTasks(); renderAllTasks() }
 }
 // ── IMPORT ──
 let parsedImportItems = []
