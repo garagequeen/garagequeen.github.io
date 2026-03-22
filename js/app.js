@@ -874,6 +874,91 @@ function openEditTask(t) {
   }, 300)
   renderEditTaskParts()
 }
+
+function renderEditTaskDeps() {
+  if (!editingTask) return
+  const el = document.getElementById('editTaskDepsList')
+  if (!el) return
+  const deps = taskDeps.filter(d => d.task_id === editingTask.id)
+  if (!deps.length) { el.innerHTML = ''; return }
+  el.innerHTML = deps.map(d => {
+    const t = tasks.find(x => x.id === d.depends_on)
+    if (!t) return ''
+    const proj = projects.find(p => p.id === t.project_id)
+    const isDone = t.status === 'done'
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #222">
+      <span style="font-size:14px">${isDone ? '✅' : '⏳'}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;color:${isDone?'#555':'white'};${isDone?'text-decoration:line-through':''}">${t.title}</div>
+        ${proj?`<div style="font-size:11px;color:#555">${proj.title}</div>`:''}
+      </div>
+      <span onclick="removeTaskDep('${d.id}')" style="color:#555;cursor:pointer;padding:2px 6px;font-size:16px">×</span>
+    </div>`
+  }).join('')
+}
+
+function openDepPicker() {
+  document.getElementById('depPickerSearch').value = ''
+  renderDepPickerList()
+  document.getElementById('depPickerSheet').classList.add('open')
+}
+
+function renderDepPickerList() {
+  const el = document.getElementById('depPickerList')
+  const search = document.getElementById('depPickerSearch').value.toLowerCase().trim()
+  const alreadyDep = taskDeps.filter(d => d.task_id === editingTask?.id).map(d => d.depends_on)
+  let items = tasks.filter(t => t.id !== editingTask?.id && !alreadyDep.includes(t.id) && t.status !== 'done')
+  if (search) items = items.filter(t => t.title.toLowerCase().includes(search))
+  const pm = {}; projects.forEach(p => pm[p.id] = p)
+  if (!items.length) { el.innerHTML = '<div style="color:#555;font-size:13px;padding:8px 0">No tasks found</div>'; return }
+  el.innerHTML = items.map(t => {
+    const proj = pm[t.project_id]
+    return `<div onclick="addTaskDep('${t.id}')" style="padding:10px 0;border-bottom:1px solid #1a1a1a;cursor:pointer">
+      <div style="font-size:14px">${t.title}</div>
+      ${proj?`<div style="font-size:11px;color:#555">${proj.title}</div>`:''}
+    </div>`
+  }).join('')
+}
+
+async function addTaskDep(dependsOnId) {
+  if (!editingTask) return
+  const { data, error } = await sb.from('task_dependencies').insert({
+    task_id: editingTask.id,
+    depends_on: dependsOnId,
+    user_id: user.id
+  }).select().single()
+  if (error) { showToast('Error ✕'); return }
+  taskDeps.push(data)
+  closeSheet('depPickerSheet')
+  renderEditTaskDeps()
+  checkAutoDep(editingTask.id)
+}
+
+async function removeTaskDep(depId) {
+  await sb.from('task_dependencies').delete().eq('id', depId)
+  taskDeps = taskDeps.filter(d => d.id !== depId)
+  renderEditTaskDeps()
+  checkAutoDep(editingTask.id)
+}
+
+function checkAutoDep(taskId) {
+  const t = tasks.find(x => x.id === taskId)
+  if (!t) return
+  const deps = taskDeps.filter(d => d.task_id === taskId)
+  if (!deps.length) return
+  const blocking = deps.map(d => tasks.find(x => x.id === d.depends_on)).filter(x => x && x.status !== 'done')
+  if (blocking.length > 0) {
+    const reason = `⏳ Waiting: ${blocking.map(x => x.title).join(', ')}`
+    if (t.blocked_reason !== reason) {
+      t.blocked_reason = reason
+      sb.from('tasks').update({ blocked_reason: reason }).eq('id', taskId).eq('user_id', user.id)
+    }
+  } else if (t.blocked_reason?.startsWith('⏳ Waiting:')) {
+    t.blocked_reason = null
+    sb.from('tasks').update({ blocked_reason: null }).eq('id', taskId).eq('user_id', user.id)
+  }
+}
+
 async function saveEditTask() {
   const title = document.getElementById("editTaskTitle").value.trim()
   if (!title || !editingTask) return
