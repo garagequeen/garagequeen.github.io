@@ -190,7 +190,7 @@ function renderProjects() {
     info.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div class="project-title">${p.title}</div>
-        <div style="opacity:0.15">${ptype.svg}</div>
+        <div style="opacity:0.35">${ptype.svg}</div>
       </div>
       ${vehicle?`<div style="font-size:11px;color:#888;margin-top:2px">${vehicle.name}</div>`:""}
       <div class="project-meta">${open} open${done?" · "+done+" done":""}${total?" · "+pct+"%":""}</div>`
