@@ -873,7 +873,9 @@ function openEditTask(t) {
     inp.scrollLeft = 0
   }, 300)
   renderEditTaskParts()
+  renderEditTaskDeps()
 }
+
 
 function renderEditTaskDeps() {
   if (!editingTask) return
