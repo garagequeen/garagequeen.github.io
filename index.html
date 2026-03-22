@@ -557,6 +557,16 @@
     <button class="btn-cancel" onclick="closeSheet('quickCaptureSheet')">Cancel</button>
   </div>
 </div>
+
+<div class="sheet-overlay" id="depPickerSheet" onclick="closeIfBg(event,'depPickerSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3>Blocked by task</h3>
+    <input id="depPickerSearch" placeholder="Search tasks..." autocomplete="off" oninput="renderDepPickerList()">
+    <div id="depPickerList" style="margin-top:8px;max-height:300px;overflow-y:auto"></div>
+    <button class="btn-cancel" onclick="closeSheet('depPickerSheet')" style="margin-top:8px">Cancel</button>
+  </div>
+</div>
   
 <script src="js/app.js"></script>
   
