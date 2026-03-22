@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <!-- FIX 1: removed maximum-scale=1 and user-scalable=no — breaks iOS date picker and keyboard -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><title>GarageQueen</title>
+
 <link rel="stylesheet" href="style.css">
 <title>Garage Log</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -536,6 +537,8 @@
   </div>
 
 </div>
+
+<button id="quickCaptureBtn" onclick="openQuickCapture()" style="position:fixed;right:20px;bottom:calc(60px + env(safe-area-inset-bottom));width:52px;height:52px;border-radius:50%;background:#3fb950;color:#111;font-size:28px;font-weight:300;z-index:10;padding:0;margin:0;box-shadow:0 4px 16px rgba(63,185,80,0.4)">+</button>
 
 <script src="js/app.js"></script>
   
