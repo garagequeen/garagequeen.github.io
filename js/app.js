@@ -483,6 +483,36 @@ function openAddTask() {
   setTimeout(() => document.getElementById("newTaskTitle").focus(), 300)
 }
 
+function openQuickCapture() {
+  const sel = document.getElementById('quickCaptureProject')
+  sel.innerHTML = '<option value="">— Choose project —</option>'
+  projects.forEach(p => {
+    const opt = document.createElement('option')
+    opt.value = p.id
+    opt.innerText = p.title
+    sel.appendChild(opt)
+  })
+  if (currentProject) sel.value = currentProject.id
+  document.getElementById('quickCaptureTitle').value = ''
+  document.getElementById('quickCaptureSheet').classList.add('open')
+  setTimeout(() => document.getElementById('quickCaptureTitle').focus(), 300)
+}
+
+async function saveQuickCapture() {
+  const title = document.getElementById('quickCaptureTitle').value.trim()
+  const projectId = document.getElementById('quickCaptureProject').value
+  if (!title || !projectId) { showToast('Add title and project'); return }
+  const { data, error } = await sb.from('tasks').insert({
+    title, user_id: user.id, project_id: projectId, status: 'open',
+    created_at: new Date().toISOString()
+  }).select().single()
+  if (error) { showToast('Error ✕'); return }
+  tasks.unshift(data)
+  closeSheet('quickCaptureSheet')
+  showToast('Task added ✓')
+  rerender()
+}
+
 function showTaskCatSuggestions() {
   const input = document.getElementById('newTaskCategory')
   const box = document.getElementById('taskCatSuggestions')
