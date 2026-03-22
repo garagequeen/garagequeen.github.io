@@ -540,6 +540,19 @@
 
 <button id="quickCaptureBtn" onclick="openQuickCapture()" style="position:fixed;right:20px;bottom:calc(60px + env(safe-area-inset-bottom));width:52px;height:52px;border-radius:50%;background:#3fb950;color:#111;font-size:28px;font-weight:300;z-index:10;padding:0;margin:0;box-shadow:0 4px 16px rgba(63,185,80,0.4)">+</button>
 
+<div class="sheet-overlay" id="quickCaptureSheet" onclick="closeIfBg(event,'quickCaptureSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3>Quick capture</h3>
+    <input id="quickCaptureTitle" placeholder="What needs to be done?" autocomplete="off">
+    <select id="quickCaptureProject" style="margin-top:8px">
+      <option value="">— Choose project —</option>
+    </select>
+    <button onclick="saveQuickCapture()" style="margin-top:12px">Add task</button>
+    <button class="btn-cancel" onclick="closeSheet('quickCaptureSheet')">Cancel</button>
+  </div>
+</div>
+  
 <script src="js/app.js"></script>
   
 </body>
