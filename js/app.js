@@ -36,7 +36,7 @@ const PROJECT_TYPES = {
     svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1abc9c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`
   }
 }
-let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLinks = [], currentProject = null, invFilter = 'all', editingInvItem = null, taskProjectFilter = null, filmFilterOn = false, blockedFilterOn = false
+let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLinks = [], taskDeps = [], currentProject = null, invFilter = 'all', editingInvItem = null, taskProjectFilter = null, filmFilterOn = false, blockedFilterOn = false
 let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
 let selectedColor = null
@@ -131,18 +131,20 @@ function showToastUndo(msg, onUndo) {
   t._timer = setTimeout(() => { t.classList.remove("show"); _undoCallback = null }, 4000)
 }
 async function loadAll() {
-  const [p, t, inv, obj, tl] = await Promise.all([
+const [p, t, inv, obj, tl, td] = await Promise.all([
     sb.from("projects").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("tasks").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("inventory").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("objects").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-    sb.from("task_inventory").select("*")
+    sb.from("task_inventory").select("*"),
+    sb.from("task_dependencies").select("*").eq("user_id", user.id)
   ])
   projects = p.data || []
   tasks = t.data || []
   inventory = inv.data || []
   objects = obj.data || []
   taskLinks = tl.data || []
+  taskDeps = td.data || []
   renderProjects()
   renderFocus()
   renderAllTasks()
