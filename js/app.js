@@ -2840,3 +2840,13 @@ function _renderAllTasksPage() {
 window.toggleIsContent = toggleIsContent
 window.toggleFilmed = toggleFilmed
 window.renderContentProject = renderContentProject
+window.openServiceJournal = openServiceJournal
+window.exportServiceLogHTML = exportServiceLogHTML
+window.saveTaskToLog = saveTaskToLog
+window.openTripChecklist = openTripChecklist
+window.openQuickCapture = openQuickCapture
+window.saveQuickCapture = saveQuickCapture
+window.openDepPicker = openDepPicker
+window.addTaskDep = addTaskDep
+window.removeTaskDep = removeTaskDep
+window.setEditTaskPlace = setEditTaskPlace
