@@ -836,6 +836,14 @@ function setEditTaskPriority(val, btn) {
   document.querySelectorAll('#editTaskPrioritySeg .priority-chip').forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
 }
+let editTaskPlaceValue = ''
+
+function setEditTaskPlace(val, btn) {
+  editTaskPlaceValue = val
+  document.querySelectorAll('#editTaskPlaceSeg .seg-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+}
+
 function toggleFilmFlagEdit() {
   editTaskFilmFlagValue = !editTaskFilmFlagValue
   document.getElementById('editTaskFilmIcon').style.opacity = editTaskFilmFlagValue ? '1' : '0.3'
@@ -852,6 +860,7 @@ function openEditTask(t) {
   editingTask = t
   editTaskFilmFlagValue = !!t.film_flag
   editTaskPriorityValue = t.priority || ''
+  editTaskPlaceValue = t.place || ''
   document.getElementById('editTaskTitle').value = t.title
   document.getElementById('editTaskNotes').value = t.notes || ''
   document.getElementById('editTaskBlocked').value = t.blocked_reason || ''
@@ -869,6 +878,10 @@ function openEditTask(t) {
   document.querySelectorAll('#editTaskPrioritySeg .priority-chip').forEach(b => {
     b.classList.toggle('active', b.dataset.val === editTaskPriorityValue)
   })
+  document.querySelectorAll('#editTaskPlaceSeg .seg-btn').forEach(b => {
+  b.classList.toggle('active', b.dataset.val === editTaskPlaceValue)
+  })
+  
   document.getElementById('editTaskSheet').classList.add('open')
   setTimeout(() => {
     const inp = document.getElementById('editTaskTitle')
@@ -975,6 +988,7 @@ async function saveEditTask() {
     notes: document.getElementById("editTaskNotes").value.trim() || null,
     blocked_reason: document.getElementById("editTaskBlocked").value.trim() || null,
     film_flag: editTaskFilmFlagValue,
+    place: editTaskPlaceValue || null,
   }
   const { error } = await sb.from("tasks").update(updates).eq("id", editingTask.id).eq("user_id", user.id)
   if (error) { showToast("Error saving task ✕"); return }
@@ -982,7 +996,7 @@ async function saveEditTask() {
   closeSheet("editTaskSheet")
   showToast("Task saved ✓")
   rerender()
-// после rerender()
+
 if (blockedFilterOn) {
   const stillBlocked = tasks.filter(t => t.project_id === currentProject?.id && !!t.blocked_reason)
   if (!stillBlocked.length) {
