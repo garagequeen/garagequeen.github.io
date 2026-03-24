@@ -162,11 +162,11 @@ textarea{height:100px;resize:none;}
   scroll-snap-align: center;
   scroll-snap-stop: always;
   flex-shrink: 0;
-  height: calc(100dvh - 220px - var(--tabs-height, 34px));
+  height: calc(82dvh - 274px - var(--tabs-height, 34px));
   border-radius: 16px;
   background: #1a1a1a;
   padding: 24px 20px;
-  margin: 6px 0;
+  margin: 90px 0;
   position: relative;
   overflow: hidden;
   display: flex;
