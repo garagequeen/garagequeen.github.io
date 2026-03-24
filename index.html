@@ -461,8 +461,9 @@
     <input id="svcDate" type="date" style="text-align:left;-webkit-appearance:none;appearance:none;display:block;width:100%;box-sizing:border-box;min-height:44px;color-scheme:dark;">
     <input id="svcMileage" placeholder="Mileage (optional)" type="number" min="0">
     <textarea id="svcDesc" placeholder="What was done..." style="height:80px"></textarea>
-    <button onclick="saveServiceLog()" style="margin-top:12px">Add entry</button>
     <button onclick="exportServiceLog()" style="margin-top:8px;background:#333">↑ Export CSV</button>
+    <button onclick="openServiceJournal()" style="margin-top:8px;background:#333">📋 View journal</button>
+    <button class="btn-cancel" onclick="closeSheet('serviceLogSheet')">Close</button>
     <button class="btn-cancel" onclick="closeSheet('serviceLogSheet')">Close</button>
   </div>
 
@@ -592,6 +593,31 @@
     </div>
   </div>
 </div>
+
+<div class="sheet-overlay" id="serviceJournalSheet" onclick="closeIfBg(event,'serviceJournalSheet')">
+  <div class="sheet flex-sheet" style="max-height:90vh">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <div style="padding:0 16px;overflow-y:auto;flex:1;font-family:'IBM Plex Mono',monospace">
+      <div id="serviceJournalContent"></div>
+    </div>
+    <div style="flex-shrink:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #222;display:flex;gap:8px;background:#1a1a1a">
+      <button class="btn-cancel" onclick="closeSheet('serviceJournalSheet')" style="flex:1;margin:0">Close</button>
+      <button onclick="exportServiceLogHTML()" style="flex:1;margin:0;background:#333">↑ Export</button>
+    </div>
+  </div>
+</div>  
+
+<div class="sheet-overlay" id="addToLogSheet" onclick="closeIfBg(event,'addToLogSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3>Add to service log?</h3>
+    <div id="addToLogTaskName" style="font-size:13px;color:#aaa;margin-top:4px;margin-bottom:12px"></div>
+    <input id="addToLogMileage" placeholder="Mileage (optional)" type="number" min="0">
+    <input id="addToLogDate" type="date" style="margin-top:8px;-webkit-appearance:none;appearance:none;display:block;width:100%;box-sizing:border-box;text-align:left;min-height:44px;color-scheme:dark;">
+    <button onclick="saveTaskToLog()" style="margin-top:12px">Add to log</button>
+    <button class="btn-cancel" onclick="closeSheet('addToLogSheet')">Skip</button>
+  </div>
+</div>  
   
 <script src="js/app.js"></script>
   
