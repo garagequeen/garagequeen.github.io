@@ -30,6 +30,11 @@
   <div id="focusTab" class="container">
     <h2 style="margin-bottom:8px">Focus</h2>
     <div class="filter-tabs" id="focusProjectFilter" style="margin-bottom:10px"></div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button onclick="openTripChecklist('garage')" style="margin:0;padding:6px 12px;font-size:13px;background:#222;color:#aaa;border-radius:20px">🔧 Garage</button>
+      <button onclick="openTripChecklist('home')" style="margin:0;padding:6px 12px;font-size:13px;background:#222;color:#aaa;border-radius:20px">🏠 Home</button>
+      <button onclick="openTripChecklist('car')" style="margin:0;padding:6px 12px;font-size:13px;background:#222;color:#aaa;border-radius:20px">🚗 Car</button>
+    </div>
     <div id="focusContent"></div>
   </div>
   <div id="tasksTab" class="container" style="display:none">
