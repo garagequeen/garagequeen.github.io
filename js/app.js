@@ -1249,6 +1249,57 @@ function toggleCollapseAll() {
   renderTasks(blockedFilterOn)
 }
 
+function openTripChecklist(place) {
+  const labels = { garage: '🔧 Garage', home: '🏠 Home', car: '🚗 Car' }
+  const placeTasks = tasks.filter(t => t.place === place && t.status !== 'done')
+  document.getElementById('tripChecklistTitle').innerText = `Going to ${labels[place] || place}`
+  document.getElementById('tripChecklistMeta').innerText = `${placeTasks.length} task${placeTasks.length !== 1 ? 's' : ''} for this location`
+  const el = document.getElementById('tripChecklistItems')
+  el.innerHTML = ''
+  if (!placeTasks.length) {
+    el.innerHTML = `<div class="empty" style="padding:20px 0">No tasks for this location.<br><span style="font-size:13px">Mark tasks with 🔧 Garage in Edit task.</span></div>`
+    document.getElementById('tripChecklistSheet').classList.add('open')
+    return
+  }
+  // tasks section
+  const taskHeader = document.createElement('div')
+  taskHeader.style.cssText = 'font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px'
+  taskHeader.innerText = 'Tasks'
+  el.appendChild(taskHeader)
+  const pm = {}; projects.forEach(p => pm[p.id] = p)
+  placeTasks.forEach(t => {
+    const proj = pm[t.project_id]
+    const d = document.createElement('div')
+    d.style.cssText = 'padding:8px 0;border-bottom:1px solid #222;cursor:pointer'
+    d.innerHTML = `<div style="font-size:14px">${t.title}</div>${proj ? `<div style="font-size:11px;color:${proj.color||'#555'}">${proj.title}</div>` : ''}`
+    d.onclick = () => { closeSheet('tripChecklistSheet'); openEditTask(t) }
+    el.appendChild(d)
+  })
+  // items to bring
+  const neededItems = []
+  placeTasks.forEach(t => {
+    const links = getTaskLinks(t.id)
+    links.forEach(l => {
+      const item = inventory.find(i => i.id === l.inventory_id)
+      if (item && !neededItems.find(x => x.id === item.id)) neededItems.push(item)
+    })
+  })
+  if (neededItems.length) {
+    const itemHeader = document.createElement('div')
+    itemHeader.style.cssText = 'font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px'
+    itemHeader.innerText = 'Items needed'
+    el.appendChild(itemHeader)
+    neededItems.forEach(item => {
+      const d = document.createElement('div')
+      const ok = item.status === 'have' || item.status === 'low'
+      d.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #222'
+      d.innerHTML = `<span>${ok ? '✅' : '❌'}</span><div style="flex:1"><div style="font-size:14px">${item.name}</div><div style="font-size:11px;color:#555">${item.location || item.status}</div></div>`
+      el.appendChild(d)
+    })
+  }
+  document.getElementById('tripChecklistSheet').classList.add('open')
+}
+
 function toggleBlockedFilter() {
   blockedFilterOn = !blockedFilterOn
   const btn = document.getElementById("blockedFilterBtn")
