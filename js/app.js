@@ -599,6 +599,10 @@ async function completeTask(id) {
   renderFocus()
   renderTasks()
   renderProjects()
+  if (!isDone) {
+    const t = tasks.find(x => x.id === id)
+    if (t) setTimeout(() => offerAddToLog(t), 500)
+  }
   // check if completing this task unblocks others
   const unblocked = taskDeps.filter(d => d.depends_on === id)
   unblocked.forEach(d => checkAutoDep(d.task_id))
@@ -1614,6 +1618,118 @@ function exportServiceLog() {
   const name = serviceLogObject ? serviceLogObject.name.replace(/\s+/g,"-") : "service-log"
   downloadCSV(`${name}-service-log.csv`, rows)
 }
+function openServiceJournal() {
+  const obj = serviceLogObject
+  if (!obj) return
+  const info = [obj.make, obj.model, obj.year].filter(Boolean).join(' · ')
+  const rows = _serviceLogCache.map(e => {
+    const dateStr = e.date ? new Date(e.date).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : ''
+    const km = e.mileage ? e.mileage.toLocaleString() + ' km' : ''
+    return `<div style="display:grid;grid-template-columns:110px 1fr 90px;gap:8px;padding:10px 0;border-bottom:0.5px solid #333;font-size:13px">
+      <div style="color:#555">${dateStr}</div>
+      <div>${e.title || e.description || ''}</div>
+      <div style="text-align:right;color:#555;white-space:nowrap">${km}</div>
+    </div>`
+  }).join('')
+  document.getElementById('serviceJournalContent').innerHTML = `
+    <div style="border:1px solid #444;border-bottom:2px solid #444;padding:16px;margin-top:8px">
+      <div style="font-size:10px;color:#555;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Maintenance record</div>
+      <div style="font-size:18px;font-weight:500;letter-spacing:.04em">${obj.name}</div>
+      <div style="font-size:11px;color:#555;margin-top:4px">${info}</div>
+      ${obj.vin ? `<div style="font-size:11px;color:#555">VIN: ${obj.vin}</div>` : ''}
+    </div>
+    <div style="display:grid;grid-template-columns:110px 1fr 90px;gap:8px;padding:8px 0 6px;border-bottom:1.5px solid #444;font-size:10px;color:#555;letter-spacing:.1em;text-transform:uppercase">
+      <div>Date</div><div>Work performed</div><div style="text-align:right">Odometer</div>
+    </div>
+    ${rows}
+    <div style="border-top:2px solid #444;padding:8px 0;margin-top:0;display:flex;justify-content:space-between;font-size:10px;color:#555;letter-spacing:.06em">
+      <span>Garage Log · garagequeen.github.io</span>
+      <span>p. 1</span>
+    </div>`
+  document.getElementById('serviceJournalSheet').classList.add('open')
+}
+
+function exportServiceLogHTML() {
+  const obj = serviceLogObject
+  if (!obj || !_serviceLogCache.length) return
+  const rows = _serviceLogCache.map(e => {
+    const dateStr = e.date ? new Date(e.date).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : ''
+    const km = e.mileage ? e.mileage.toLocaleString() + ' km' : ''
+    return `<tr><td>${dateStr}</td><td>${e.title || e.description || ''}</td><td style="text-align:right;white-space:nowrap">${km}</td></tr>`
+  }).join('')
+  const info = [obj.make, obj.model, obj.year].filter(Boolean).join(' · ')
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Service log — ${obj.name}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'IBM Plex Mono',monospace;background:white;color:#111;padding:40px;max-width:700px;margin:0 auto;}
+  .header{border:1.5px solid #111;border-bottom:3px double #111;padding:16px 20px;}
+  .label{font-size:10px;color:#555;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;}
+  .car{font-size:20px;font-weight:500;}
+  .meta{font-size:11px;color:#555;margin-top:4px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;border:1.5px solid #111;border-top:none;}
+  th{font-size:10px;color:#555;letter-spacing:.1em;text-transform:uppercase;text-align:left;padding:8px 12px 6px;border-bottom:1.5px solid #111;font-weight:400;}
+  td{padding:10px 12px;border-bottom:0.5px solid #ccc;vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .footer{border:1.5px solid #111;border-top:3px double #111;padding:8px 12px;display:flex;justify-content:space-between;font-size:10px;color:#555;}
+  @media print{body{padding:20px;}}
+</style></head><body>
+  <div class="header">
+    <div class="label">Maintenance record</div>
+    <div class="car">${obj.name}</div>
+    <div class="meta">${info}</div>
+    ${obj.vin ? `<div class="meta">VIN: ${obj.vin}</div>` : ''}
+  </div>
+  <table>
+    <thead><tr><th style="width:120px">Date</th><th>Work performed</th><th style="width:100px;text-align:right">Odometer</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">
+    <span>Garage Log · garagequeen.github.io</span>
+    <span>Generated ${new Date().toLocaleDateString('en-GB')}</span>
+  </div>
+</body></html>`
+  const blob = new Blob([html], { type: 'text/html' })
+  window.open(URL.createObjectURL(blob), '_blank')
+}
+
+let addToLogTaskId = null
+let addToLogObjectId = null
+
+function offerAddToLog(task) {
+  const proj = projects.find(p => p.id === task.project_id)
+  if (!proj?.object_id) return
+  addToLogTaskId = task.id
+  addToLogObjectId = proj.object_id
+  document.getElementById('addToLogTaskName').innerText = task.title
+  document.getElementById('addToLogDate').value = new Date().toISOString().split('T')[0]
+  const obj = objects.find(o => o.id === proj.object_id)
+  document.getElementById('addToLogMileage').value = obj?.mileage || ''
+  document.getElementById('addToLogSheet').classList.add('open')
+}
+
+async function saveTaskToLog() {
+  const obj = objects.find(o => o.id === addToLogObjectId)
+  if (!obj) return
+  const task = tasks.find(t => t.id === addToLogTaskId)
+  const mileage = document.getElementById('addToLogMileage').value ? parseInt(document.getElementById('addToLogMileage').value) : null
+  const date = document.getElementById('addToLogDate').value || new Date().toISOString().split('T')[0]
+  await sb.from('service_log').insert({
+    user_id: user.id,
+    object_id: obj.id,
+    date,
+    mileage,
+    title: task?.title || ''
+  })
+  if (mileage && (!obj.mileage || mileage > obj.mileage)) {
+    await sb.from('objects').update({ mileage }).eq('id', obj.id).eq('user_id', user.id)
+    obj.mileage = mileage
+    renderObjects()
+  }
+  closeSheet('addToLogSheet')
+  showToast('Added to service log ✓')
+}
+
 // ── COPY TASK ──
 function openCopyTask() {
   if (!editingTask) return
