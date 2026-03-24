@@ -574,6 +574,20 @@
   </div>
 </div>
   
+<div class="sheet-overlay" id="tripChecklistSheet" onclick="closeIfBg(event,'tripChecklistSheet')">
+  <div class="sheet flex-sheet" style="max-height:85vh">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <div style="padding:0 16px;overflow-y:auto;flex:1">
+      <h3 id="tripChecklistTitle" style="margin-bottom:4px">Going to garage</h3>
+      <div style="font-size:12px;color:#555;margin-bottom:12px" id="tripChecklistMeta"></div>
+      <div id="tripChecklistItems"></div>
+    </div>
+    <div style="flex-shrink:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #222;background:#1a1a1a">
+      <button class="btn-cancel" onclick="closeSheet('tripChecklistSheet')" style="width:100%;margin:0">Close</button>
+    </div>
+  </div>
+</div>
+  
 <script src="js/app.js"></script>
   
 </body>
