@@ -342,6 +342,12 @@
     </div>
       <input id="editTaskTitle" placeholder="Task name" autocomplete="off"
         style="font-size:17px;font-weight:600;padding:12px 14px;text-align:left;direction:ltr">
+      <div style="display:flex;gap:6px;margin-top:10px" id="editTaskPlaceSeg">
+  <button class="seg-btn" data-val="" onclick="setEditTaskPlace('',this)" style="font-size:12px;padding:5px 10px">Any</button>
+  <button class="seg-btn" data-val="home" onclick="setEditTaskPlace('home',this)" style="font-size:12px;padding:5px 10px">🏠 Home</button>
+  <button class="seg-btn" data-val="garage" onclick="setEditTaskPlace('garage',this)" style="font-size:12px;padding:5px 10px">🔧 Garage</button>
+  <button class="seg-btn" data-val="car" onclick="setEditTaskPlace('car',this)" style="font-size:12px;padding:5px 10px">🚗 Car</button>
+</div>
       <div style="display:flex;gap:6px;margin-top:10px" id="editTaskPrioritySeg">
         <button class="priority-chip" data-val="" onclick="setEditTaskPriority('',this)" style="background:#2a2a2a;color:#555">None</button>
         <button class="priority-chip" data-val="high" onclick="setEditTaskPriority('high',this)" style="background:#3a0a0a;color:#e74c3c">High</button>
