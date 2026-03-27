@@ -14,6 +14,10 @@ All notable changes documented here.
 - Task dependencies — auto-unblocks when blocking task is completed
 - task_dependencies table in Supabase
 - place column on tasks (home / garage / car / other) — UI pending
+- Removed "Blocked" from Tasks filter for smoother look
+- Adjusted Focus card - always on top
+- Added -> Add to inventory button from task to item
+- Adjusted Project edit button
 
 ---
 
