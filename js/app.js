@@ -2849,4 +2849,38 @@ window.saveQuickCapture = saveQuickCapture
 window.openDepPicker = openDepPicker
 window.addTaskDep = addTaskDep
 window.removeTaskDep = removeTaskDep
+async function convertTaskToItem() {
+  if (!editingTask) return
+  const task = editingTask
+  const { data: newItem, error } = await sb.from('inventory').insert({
+    user_id: user.id,
+    name: task.title,
+    notes: task.notes || null,
+    type: 'part',
+    status: 'missing',
+  }).select().single()
+  if (error) { showToast('Error ✕'); return }
+  inventory.push(newItem)
+
+  const deletedTask = { ...task }
+  const idx = tasks.findIndex(t => t.id === task.id)
+  tasks = tasks.filter(t => t.id !== task.id)
+  closeSheet('editTaskSheet')
+  rerender()
+
+  let undone = false
+  showToastUndo('Added to inventory ✓', async () => {
+    undone = true
+    tasks.splice(Math.min(idx, tasks.length), 0, deletedTask)
+    inventory = inventory.filter(i => i.id !== newItem.id)
+    await sb.from('inventory').delete().eq('id', newItem.id).eq('user_id', user.id)
+    rerender()
+  })
+  setTimeout(async () => {
+    if (!undone) {
+      await sb.from('tasks').delete().eq('id', deletedTask.id).eq('user_id', user.id)
+    }
+  }, 4000)
+}
+window.convertTaskToItem = convertTaskToItem
 window.setEditTaskPlace = setEditTaskPlace
