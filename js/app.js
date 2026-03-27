@@ -824,7 +824,6 @@ card.addEventListener("touchend", () => {
     card.style.transform = "translateX(0)"
     deleteBg.style.opacity = "0"
   }
-  })
 })
   wrapper.appendChild(deleteBg)
   wrapper.appendChild(card)
