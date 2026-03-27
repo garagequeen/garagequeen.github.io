@@ -159,7 +159,7 @@ textarea{height:100px;resize:none;}
 .focus-drum::-webkit-scrollbar { display: none; }
 
 .focus-card {
-  scroll-snap-align: center;
+  scroll-snap-align: start;
   scroll-snap-stop: always;
   flex-shrink: 0;
   height: calc(82dvh - 274px - var(--tabs-height, 34px));
