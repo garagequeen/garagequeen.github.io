@@ -8,16 +8,16 @@ Structure: Now → Next → Later
 ## Now — v0.7.4 · In Progress
 
 ### In Progress
-- [ ] Task place field UI (home / garage / car) — column added, UI done, filter pending
+- [x] Task place field UI (home / garage / car) — column added, UI done, filter pending
 - [ ] Pre-trip checklist — show tasks + items needed for a location
 
 ### Open Bugs
-- [ ] Focus card content alignment (center vs bottom)
+- [x] Focus card content alignment (center vs bottom)
 - [ ] Qty stepper stretches inventory card on tap
-- [ ] Blocked filter stays active after unblocking task
+- [x] Blocked filter stays active after unblocking task
 - [ ] Not all CSVs can be imported
 - [ ] No button to add entry in service log from Settings
-- [ ] Swipe actions lag (touch event conflict)
+- [x] Swipe actions lag (touch event conflict)
 - [ ] Long task lists hard to scroll through
 
 ---
@@ -25,8 +25,8 @@ Structure: Now → Next → Later
 ## Next
 
 ### Quick Wins
-- [ ] Convert task → inventory item (reverse of existing convert item → task)
-- [ ] Project menu ⋯ — Edit on top, Delete below (clearer hierarchy)
+- [x] Convert task → inventory item (reverse of existing convert item → task)
+- [x] Project menu ⋯ — Edit on top, Delete below (clearer hierarchy)
 - [ ] Pin projects — stick important projects to top
 - [ ] Collapse all / expand all icon — replace ⊟ with clearer symbol
 - [ ] Changelog integrated — ? icon shows What's New + Known Bugs
