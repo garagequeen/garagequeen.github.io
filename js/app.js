@@ -790,28 +790,42 @@ function makeTaskCard(t, proj) {
   }, { passive: true })
   card.addEventListener('touchmove', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null } }, { passive: true })
   card.addEventListener('touchend', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null } }, { passive: true })
-  let startX = 0, currentX = 0, swiping = false
-  card.addEventListener("touchstart", e => { startX = e.touches[0].clientX; swiping = true; currentX = 0 }, { passive: true })
-  card.addEventListener("touchmove", e => {
-    if (!swiping) return
-    currentX = e.touches[0].clientX - startX
-    if (currentX < 0) {
-      const dx = Math.max(currentX, -80)
-      card.style.transform = `translateX(${dx}px)`
-      deleteBg.style.opacity = Math.min(1, Math.abs(dx) / 60).toString()
-    }
-  }, { passive: true })
-  card.addEventListener("touchend", () => {
-    swiping = false
-    if (currentX < -50) {
-      card.style.transform = "translateX(-70px)"
-      deleteBg.style.opacity = "1"
-      openSwipeCard = card
-    } else {
-      card.style.transform = "translateX(0)"
-      deleteBg.style.opacity = "0"
-    }
+let startX = 0, startY = 0, currentX = 0, swiping = false, swipeDir = null
+card.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX
+  startY = e.touches[0].clientY
+  swiping = true; currentX = 0; swipeDir = null
+}, { passive: true })
+card.addEventListener("touchmove", e => {
+  if (!swiping) return
+  const dx = e.touches[0].clientX - startX
+  const dy = e.touches[0].clientY - startY
+  if (!swipeDir) {
+    if (Math.abs(dx) > Math.abs(dy) + 3) swipeDir = 'x'
+    else if (Math.abs(dy) > Math.abs(dx) + 3) swipeDir = 'y'
+    else return
+  }
+  if (swipeDir !== 'x') return
+  e.preventDefault()
+  currentX = dx
+  if (currentX < 0) {
+    const ddx = Math.max(currentX, -80)
+    card.style.transform = `translateX(${ddx}px)`
+    deleteBg.style.opacity = Math.min(1, Math.abs(ddx) / 60).toString()
+  }
+}, { passive: false })
+card.addEventListener("touchend", () => {
+  swiping = false; swipeDir = null
+  if (currentX < -50) {
+    card.style.transform = "translateX(-70px)"
+    deleteBg.style.opacity = "1"
+    openSwipeCard = card
+  } else {
+    card.style.transform = "translateX(0)"
+    deleteBg.style.opacity = "0"
+  }
   })
+})
   wrapper.appendChild(deleteBg)
   wrapper.appendChild(card)
   return wrapper
@@ -1996,25 +2010,38 @@ ${item.listings?.length ? `<div style="margin-top:4px;display:flex;flex-wrap:wra
         </div>
       </div>`
     d.onclick = () => openEditInventory(item)
-    let sx = 0, cx = 0, sw = false
-    d.addEventListener("touchstart", e => { sx = e.touches[0].clientX; sw = true; cx = 0 }, { passive: true })
-    d.addEventListener("touchmove", e => {
-      if (!sw) return
-      cx = e.touches[0].clientX - sx
-      if (cx < 0) {
-        const dx = Math.max(cx, -80)
-        d.style.transform = `translateX(${dx}px)`
-        deleteBg.style.opacity = Math.min(1, Math.abs(dx)/60).toString()
-        toggleBg.style.opacity = "0"
-      } else if (cx > 0) {
-        const dx = Math.min(cx, 90)
-        d.style.transform = `translateX(${dx}px)`
-        toggleBg.style.opacity = Math.min(1, dx/60).toString()
-        deleteBg.style.opacity = "0"
-      }
-    }, { passive: true })
+let sx = 0, sy = 0, cx = 0, sw = false, swipeDir = null
+d.addEventListener("touchstart", e => {
+  sx = e.touches[0].clientX
+  sy = e.touches[0].clientY
+  sw = true; cx = 0; swipeDir = null
+}, { passive: true })
+d.addEventListener("touchmove", e => {
+  if (!sw) return
+  const dx = e.touches[0].clientX - sx
+  const dy = e.touches[0].clientY - sy
+  if (!swipeDir) {
+    if (Math.abs(dx) > Math.abs(dy) + 3) swipeDir = 'x'
+    else if (Math.abs(dy) > Math.abs(dx) + 3) swipeDir = 'y'
+    else return
+  }
+  if (swipeDir !== 'x') return
+  e.preventDefault()
+  cx = dx
+  if (cx < 0) {
+    const ddx = Math.max(cx, -80)
+    d.style.transform = `translateX(${ddx}px)`
+    deleteBg.style.opacity = Math.min(1, Math.abs(ddx)/60).toString()
+    toggleBg.style.opacity = "0"
+  } else if (cx > 0) {
+    const ddx = Math.min(cx, 90)
+    d.style.transform = `translateX(${ddx}px)`
+    toggleBg.style.opacity = Math.min(1, ddx/60).toString()
+    deleteBg.style.opacity = "0"
+  }
+}, { passive: false })
     d.addEventListener("touchend", () => {
-      sw = false
+      sw = false; swipeDir = null
       if (cx < -60) {
         const deletedItem = Object.assign({}, item)
         const origIdx = inventory.findIndex(i => i.id === deletedItem.id)
