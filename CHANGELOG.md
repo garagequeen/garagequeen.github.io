@@ -3,6 +3,18 @@
 All notable changes documented here.
 
 ---
+## [0.7.5] - 2026-03-28
+
+### Added
+- Clients project type — new SVG icon, client list per project
+- Client CRUD — name, phone, notes, undo on delete
+- clients table in Supabase with RLS
+- Convert task → inventory item (with undo)
+
+### Fixed
+- Swipe actions lag — direction detection before preventDefault
+- Project menu ⋯ replaced with pencil icon in header
+- Delete project moved to Edit project sheet footer (consistent with other sheets)
 
 ## [0.7.4] - 2026-03-24
 
