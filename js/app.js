@@ -2700,29 +2700,22 @@ function setFocusProject(id, btn) {
   renderFocus()
 }
 //-- helper -- 
-function scheduledApptRow(a) {
+function scheduledApptRow(a, compact) {
   const client = clients.find(c => c.id === a.client_id)
-  const time = a.time ? a.time.slice(0,5) + ' · ' : ''
-  const d = new Date(a.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-  const duration = a.duration_minutes ? ` · ${a.duration_minutes} min` : ''
-  return `<div onclick="openEditAppointment(appointments.find(x=>x.id==='${a.id}'))" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #222;cursor:pointer">
-    <div style="width:8px;height:8px;border-radius:50%;background:#06b6d4;flex-shrink:0;margin-left:6px"></div>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(a.title || client?.name || 'Appointment')}</div>
-      <div style="font-size:11px;color:#555;margin-top:2px">${time}${d}${duration}${client ? ' · ' + sanitize(client.name) : ''}</div>
-    </div>
+  const time = a.time ? a.time.slice(0,5) : ''
+  return `<div onclick="openEditAppointment(appointments.find(x=>x.id==='${a.id}'))" style="display:flex;align-items:center;gap:8px;padding:${compact?'4px':'8px'} 0;border-bottom:1px solid #1a1a1a;cursor:pointer">
+    <div style="width:6px;height:6px;border-radius:50%;background:#06b6d4;flex-shrink:0;margin-left:4px"></div>
+    <div style="font-size:${compact?'12px':'13px'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;color:${compact?'#aaa':'white'}">${sanitize(a.title || client?.name || 'Appointment')}</div>
+    ${time ? `<div style="font-size:11px;color:#555;flex-shrink:0">${time}</div>` : ''}
   </div>`
 }
 
-function scheduledTaskRow(t, proj, accentColor) {
-  const time = t.due_time ? t.due_time.slice(0,5) + ' · ' : ''
-  const d = t.due_date ? new Date(t.due_date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''
-  return `<div onclick="openEditTask(tasks.find(x=>x.id==='${t.id}'))" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #222;cursor:pointer">
-    <div onclick="event.stopPropagation();completeTask('${t.id}')" style="width:20px;height:20px;border:2px solid #444;border-radius:5px;flex-shrink:0"></div>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(t.title)}</div>
-      <div style="font-size:11px;color:#555;margin-top:2px">${time}${d}${proj ? ' · ' + proj.title : ''}</div>
-    </div>
+function scheduledTaskRow(t, proj, accentColor, compact) {
+  const time = t.due_time ? t.due_time.slice(0,5) : ''
+  return `<div onclick="openEditTask(tasks.find(x=>x.id==='${t.id}'))" style="display:flex;align-items:center;gap:8px;padding:${compact?'4px':'8px'} 0;border-bottom:1px solid #1a1a1a;cursor:pointer">
+    <div onclick="event.stopPropagation();completeTask('${t.id}')" style="width:${compact?'16px':'20px'};height:${compact?'16px':'20px'};border:2px solid #444;border-radius:5px;flex-shrink:0"></div>
+    <div style="font-size:${compact?'12px':'13px'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;color:${compact?'#aaa':'white'}">${sanitize(t.title)}</div>
+    ${time ? `<div style="font-size:11px;color:#555;flex-shrink:0">${time}</div>` : ''}
   </div>`
 }
 
@@ -2766,20 +2759,31 @@ const pm = {}; projects.forEach(p => pm[p.id] = p)
   const upcomingTasks = open.filter(t => t.due_date && t.due_date > today).sort((a,b) => a.due_date.localeCompare(b.due_date) || (a.due_time||'').localeCompare(b.due_time||''))
   const overdueTasks = open.filter(t => t.due_date && t.due_date < today).sort((a,b) => a.due_date.localeCompare(b.due_date))
 
+  const SCHED_LIMIT = 2
+
   let scheduledHtml = ''
   if (overdueTasks.length) {
-    scheduledHtml += `<div style="font-size:11px;color:#c0392b;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px">Overdue</div>`
-    scheduledHtml += overdueTasks.map(t => scheduledTaskRow(t, pm[t.project_id], '#c0392b')).join('')
+    const visible = overdueTasks.slice(0, SCHED_LIMIT)
+    const hidden = overdueTasks.slice(SCHED_LIMIT)
+    scheduledHtml += `<div style="font-size:11px;color:#c0392b;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 2px">Overdue</div>`
+    scheduledHtml += visible.map(t => scheduledTaskRow(t, pm[t.project_id], '#c0392b', true)).join('')
+    if (hidden.length) scheduledHtml += `<div onclick="this.outerHTML='${hidden.map(t => scheduledTaskRow(t, pm[t.project_id], '#c0392b', false)).join('').replace(/'/g,"&#39;")}'" style="font-size:11px;color:#555;padding:4px 0;cursor:pointer">+ ${hidden.length} more</div>`
   }
   if (todayTasks.length || todayAppts.length) {
-    scheduledHtml += `<div style="font-size:11px;color:#f0a500;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px">Today</div>`
-    scheduledHtml += todayAppts.map(a => scheduledApptRow(a)).join('')
-    scheduledHtml += todayTasks.map(t => scheduledTaskRow(t, pm[t.project_id], '#f0a500')).join('')
+    const allToday = [...todayAppts.map(a => ({_type:'appt',data:a})), ...todayTasks.map(t => ({_type:'task',data:t}))]
+    const visible = allToday.slice(0, SCHED_LIMIT)
+    const hidden = allToday.slice(SCHED_LIMIT)
+    scheduledHtml += `<div style="font-size:11px;color:#f0a500;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 2px">Today</div>`
+    scheduledHtml += visible.map(x => x._type === 'appt' ? scheduledApptRow(x.data, true) : scheduledTaskRow(x.data, pm[x.data.project_id], '#f0a500', true)).join('')
+    if (hidden.length) scheduledHtml += `<div onclick="this.outerHTML='${hidden.map(x => x._type==='appt' ? scheduledApptRow(x.data,false) : scheduledTaskRow(x.data,pm[x.data.project_id],'#f0a500',false)).join('').replace(/'/g,"&#39;")}'" style="font-size:11px;color:#555;padding:4px 0;cursor:pointer">+ ${hidden.length} more</div>`
   }
   if (upcomingAppts.length || upcomingTasks.length) {
-    scheduledHtml += `<div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px">Upcoming</div>`
-    scheduledHtml += upcomingAppts.map(a => scheduledApptRow(a)).join('')
-    scheduledHtml += upcomingTasks.map(t => scheduledTaskRow(t, pm[t.project_id], '#555')).join('')
+    const allUpcoming = [...upcomingAppts.map(a => ({_type:'appt',data:a})), ...upcomingTasks.map(t => ({_type:'task',data:t}))]
+    const visible = allUpcoming.slice(0, SCHED_LIMIT)
+    const hidden = allUpcoming.slice(SCHED_LIMIT)
+    scheduledHtml += `<div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 2px">Upcoming</div>`
+    scheduledHtml += visible.map(x => x._type === 'appt' ? scheduledApptRow(x.data, true) : scheduledTaskRow(x.data, pm[x.data.project_id], '#555', true)).join('')
+    if (hidden.length) scheduledHtml += `<div onclick="this.outerHTML='${hidden.map(x => x._type==='appt' ? scheduledApptRow(x.data,false) : scheduledTaskRow(x.data,pm[x.data.project_id],'#555',false)).join('').replace(/'/g,"&#39;")}'" style="font-size:11px;color:#555;padding:4px 0;cursor:pointer">+ ${hidden.length} more</div>`
   }
 
   el.innerHTML = `
