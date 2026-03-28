@@ -2761,30 +2761,69 @@ const pm = {}; projects.forEach(p => pm[p.id] = p)
 
   const SCHED_LIMIT = 2
 
-  let scheduledHtml = ''
-  if (overdueTasks.length) {
-    const visible = overdueTasks.slice(0, SCHED_LIMIT)
-    const hidden = overdueTasks.slice(SCHED_LIMIT)
-    scheduledHtml += `<div style="font-size:11px;color:#c0392b;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 2px">Overdue</div>`
-    scheduledHtml += visible.map(t => scheduledTaskRow(t, pm[t.project_id], '#c0392b', true)).join('')
-    if (hidden.length) scheduledHtml += `<div onclick="this.outerHTML='${hidden.map(t => scheduledTaskRow(t, pm[t.project_id], '#c0392b', false)).join('').replace(/'/g,"&#39;")}'" style="font-size:11px;color:#555;padding:4px 0;cursor:pointer">+ ${hidden.length} more</div>`
+// collection all with prioo
+const allScheduled = [
+  ...overdueTasks.map(t => ({ type: 'overdue', data: t })),
+  ...todayAppts.map(a => ({ type: 'today_appt', data: a })),
+  ...todayTasks.map(t => ({ type: 'today_task', data: t })),
+  ...upcomingAppts.map(a => ({ type: 'upcoming_appt', data: a })),
+  ...upcomingTasks.map(t => ({ type: 'upcoming_task', data: t })),
+]
+
+// take only 2 
+const visibleScheduled = allScheduled.slice(0, SCHED_LIMIT)
+const hiddenScheduled = allScheduled.slice(SCHED_LIMIT)
+
+let scheduledHtml = ''
+
+// render for 2 elements
+visibleScheduled.forEach(x => {
+  if (x.type === 'overdue') {
+    scheduledHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#c0392b', true)
+  } else if (x.type === 'today_task') {
+    scheduledHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#f0a500', true)
+  } else if (x.type === 'today_appt') {
+    scheduledHtml += scheduledApptRow(x.data, true)
+  } else if (x.type === 'upcoming_task') {
+    scheduledHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#555', true)
+  } else if (x.type === 'upcoming_appt') {
+    scheduledHtml += scheduledApptRow(x.data, true)
   }
-  if (todayTasks.length || todayAppts.length) {
-    const allToday = [...todayAppts.map(a => ({_type:'appt',data:a})), ...todayTasks.map(t => ({_type:'task',data:t}))]
-    const visible = allToday.slice(0, SCHED_LIMIT)
-    const hidden = allToday.slice(SCHED_LIMIT)
-    scheduledHtml += `<div style="font-size:11px;color:#f0a500;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 2px">Today</div>`
-    scheduledHtml += visible.map(x => x._type === 'appt' ? scheduledApptRow(x.data, true) : scheduledTaskRow(x.data, pm[x.data.project_id], '#f0a500', true)).join('')
-    if (hidden.length) scheduledHtml += `<div onclick="this.outerHTML='${hidden.map(x => x._type==='appt' ? scheduledApptRow(x.data,false) : scheduledTaskRow(x.data,pm[x.data.project_id],'#f0a500',false)).join('').replace(/'/g,"&#39;")}'" style="font-size:11px;color:#555;padding:4px 0;cursor:pointer">+ ${hidden.length} more</div>`
+})
+
+// more button
+if (hiddenScheduled.length) {
+  scheduledHtml += `<div id="showMoreScheduled" style="font-size:11px;color:#555;padding:4px 0;cursor:pointer">+ ${hiddenScheduled.length} more</div>`
+}
+
+// вставка в DOM
+el.innerHTML = `
+  ${scheduledHtml ? `<div style="background:#1a1a1a;border-radius:16px;padding:8px 12px;margin-bottom:12px">${scheduledHtml}</div>` : ''}
+  <div class="focus-count">${open.length} task${open.length!==1?"s":""} available</div>
+  <div class="focus-drum" id="focusDrum"></div>
+`
+
+if (hiddenScheduled.length) {
+  document.getElementById('showMoreScheduled').onclick = function () {
+    let moreHtml = ''
+
+    hiddenScheduled.forEach(x => {
+      if (x.type === 'overdue') {
+        moreHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#c0392b', false)
+      } else if (x.type === 'today_task') {
+        moreHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#f0a500', false)
+      } else if (x.type === 'today_appt') {
+        moreHtml += scheduledApptRow(x.data, false)
+      } else if (x.type === 'upcoming_task') {
+        moreHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#555', false)
+      } else if (x.type === 'upcoming_appt') {
+        moreHtml += scheduledApptRow(x.data, false)
+      }
+    })
+
+    this.outerHTML = moreHtml
   }
-  if (upcomingAppts.length || upcomingTasks.length) {
-    const allUpcoming = [...upcomingAppts.map(a => ({_type:'appt',data:a})), ...upcomingTasks.map(t => ({_type:'task',data:t}))]
-    const visible = allUpcoming.slice(0, SCHED_LIMIT)
-    const hidden = allUpcoming.slice(SCHED_LIMIT)
-    scheduledHtml += `<div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 2px">Upcoming</div>`
-    scheduledHtml += visible.map(x => x._type === 'appt' ? scheduledApptRow(x.data, true) : scheduledTaskRow(x.data, pm[x.data.project_id], '#555', true)).join('')
-    if (hidden.length) scheduledHtml += `<div onclick="this.outerHTML='${hidden.map(x => x._type==='appt' ? scheduledApptRow(x.data,false) : scheduledTaskRow(x.data,pm[x.data.project_id],'#555',false)).join('').replace(/'/g,"&#39;")}'" style="font-size:11px;color:#555;padding:4px 0;cursor:pointer">+ ${hidden.length} more</div>`
-  }
+}
 
   el.innerHTML = `
     ${scheduledHtml ? `<div style="background:#1a1a1a;border-radius:16px;padding:8px 12px;margin-bottom:12px">${scheduledHtml}</div>` : ''}
