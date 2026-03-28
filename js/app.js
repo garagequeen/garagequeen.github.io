@@ -774,9 +774,17 @@ function makeTaskCard(t, proj) {
     const allOk = links.every(l => { const i = inventory.find(x => x.id === l.inventory_id); return i && i.status !== 'missing' })
     return `<span style="font-size:12px;margin-left:4px">${allOk ? '✅' : '❌'}</span>`
   })() : ''
+  const today = new Date().toISOString().split('T')[0]
+  const isOverdue = t.due_date && t.due_date < today && t.status !== 'done'
+  const duePart = t.due_date ? (() => {
+    const d = new Date(t.due_date + 'T00:00:00')
+    const label = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    const time = t.due_time ? ' ' + t.due_time.slice(0,5) : ''
+    return `<span style="font-size:11px;font-weight:600;color:${isOverdue?'#c0392b':'#f0a500'};background:${isOverdue?'#3a0a0a':'#3a2a00'};padding:1px 6px;border-radius:4px;margin-left:2px">⏰ ${label}${time}</span>`
+  })() : ''
   const metaLine = proj
-    ? `<span style="color:${projColor}">${project.title}</span>${t.category?` <span style="color:#555">· ${t.category}</span>`:""}${prio?` · ${prioChip}`:""}${partsIndicator}`
-    : `${t.category||''}${t.notes?(t.category?' · ':'')+t.notes:''}${prio?(t.category||t.notes?' · ':'')+prioChip:''}${partsIndicator}`
+    ? `<span style="color:${projColor}">${project.title}</span>${t.category?` <span style="color:#555">· ${t.category}</span>`:""}${prio?` · ${prioChip}`:""}${duePart}${partsIndicator}`
+    : `${t.category||''}${t.notes?(t.category?' · ':'')+t.notes:''}${prio?(t.category||t.notes?' · ':'')+prioChip:''}${duePart}${partsIndicator}`
   const isSelected = selectedTaskIds.has(t.id)
   card.innerHTML = `
     ${selectMode ? `<div onclick="event.stopPropagation();toggleTaskSelect('${t.id}')" style="width:22px;height:22px;border-radius:50%;border:2px solid ${isSelected?'#3fb950':'#444'};background:${isSelected?'#3fb950':'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#111">${isSelected?'✓':''}</div>` : `<div class="task-check${isDone?" done":""}" data-id="${t.id}" onclick="event.stopPropagation();completeTask('${t.id}')"></div>`}
@@ -908,7 +916,8 @@ function openEditTask(t) {
   document.querySelectorAll('#editTaskPlaceSeg .seg-btn').forEach(b => {
   b.classList.toggle('active', b.dataset.val === editTaskPlaceValue)
   })
-  
+  document.getElementById('editTaskDueDate').value = t.due_date || ''
+  document.getElementById('editTaskDueTime').value = t.due_time || ''
   document.getElementById('editTaskSheet').classList.add('open')
   setTimeout(() => {
     const inp = document.getElementById('editTaskTitle')
@@ -1016,6 +1025,8 @@ async function saveEditTask() {
     blocked_reason: document.getElementById("editTaskBlocked").value.trim() || null,
     film_flag: editTaskFilmFlagValue,
     place: editTaskPlaceValue || null,
+    due_date: document.getElementById("editTaskDueDate").value || null,
+    due_time: document.getElementById("editTaskDueTime").value || null,
   }
   const { error } = await sb.from("tasks").update(updates).eq("id", editingTask.id).eq("user_id", user.id)
   if (error) { showToast("Error saving task ✕"); return }
@@ -2686,6 +2697,18 @@ function setFocusProject(id, btn) {
   }
   renderFocus()
 }
+function scheduledTaskRow(t, proj, accentColor) {
+  const time = t.due_time ? t.due_time.slice(0,5) + ' · ' : ''
+  const d = t.due_date ? new Date(t.due_date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''
+  return `<div onclick="openEditTask(tasks.find(x=>x.id==='${t.id}'))" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #222;cursor:pointer">
+    <div onclick="event.stopPropagation();completeTask('${t.id}')" style="width:20px;height:20px;border:2px solid #444;border-radius:5px;flex-shrink:0"></div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(t.title)}</div>
+      <div style="font-size:11px;color:#555;margin-top:2px">${time}${d}${proj ? ' · ' + proj.title : ''}</div>
+    </div>
+  </div>`
+}
+
 function renderFocus() {
   const filterEl = document.getElementById("focusProjectFilter")
   const allOpen = tasks.filter(t => t.status !== "done" && !t.blocked_reason)
@@ -2718,8 +2741,30 @@ function renderFocus() {
     }
     return
   }
-  const pm = {}; projects.forEach(p => pm[p.id] = p)
-  el.innerHTML = `<div class="focus-count">${open.length} task${open.length!==1?"s":""} available</div><div class="focus-drum" id="focusDrum"></div>`
+const pm = {}; projects.forEach(p => pm[p.id] = p)
+  const today = new Date().toISOString().split('T')[0]
+  const todayTasks = open.filter(t => t.due_date === today).sort((a,b) => (a.due_time||'').localeCompare(b.due_time||''))
+  const upcomingTasks = open.filter(t => t.due_date && t.due_date > today).sort((a,b) => a.due_date.localeCompare(b.due_date) || (a.due_time||'').localeCompare(b.due_time||''))
+  const overdueTasks = open.filter(t => t.due_date && t.due_date < today).sort((a,b) => a.due_date.localeCompare(b.due_date))
+
+  let scheduledHtml = ''
+  if (overdueTasks.length) {
+    scheduledHtml += `<div style="font-size:11px;color:#c0392b;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px">Overdue</div>`
+    scheduledHtml += overdueTasks.map(t => scheduledTaskRow(t, pm[t.project_id], '#c0392b')).join('')
+  }
+  if (todayTasks.length) {
+    scheduledHtml += `<div style="font-size:11px;color:#f0a500;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px">Today</div>`
+    scheduledHtml += todayTasks.map(t => scheduledTaskRow(t, pm[t.project_id], '#f0a500')).join('')
+  }
+  if (upcomingTasks.length) {
+    scheduledHtml += `<div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px">Upcoming</div>`
+    scheduledHtml += upcomingTasks.map(t => scheduledTaskRow(t, pm[t.project_id], '#555')).join('')
+  }
+
+  el.innerHTML = `
+    ${scheduledHtml ? `<div style="background:#1a1a1a;border-radius:16px;padding:8px 12px;margin-bottom:12px">${scheduledHtml}</div>` : ''}
+    <div class="focus-count">${open.length} task${open.length!==1?"s":""} available</div>
+    <div class="focus-drum" id="focusDrum"></div>`
   open.forEach(t => {
     const proj = pm[t.project_id]
     const d = document.createElement("div")
