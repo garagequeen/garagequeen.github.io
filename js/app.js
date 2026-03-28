@@ -42,7 +42,7 @@ const PROJECT_TYPES = {
     svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`
   }
 }
-let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLinks = [], taskDeps = [], clients = [], currentProject = null, invFilter = 'all', editingInvItem = null, taskProjectFilter = null, filmFilterOn = false, blockedFilterOn = false
+let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLinks = [], taskDeps = [], clients = [], appointments = [], currentProject = null, invFilter = 'all', editingInvItem = null, taskProjectFilter = null, filmFilterOn = false, blockedFilterOn = false
 let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
 let selectedColor = null
@@ -137,18 +137,20 @@ function showToastUndo(msg, onUndo) {
   t._timer = setTimeout(() => { t.classList.remove("show"); _undoCallback = null }, 4000)
 }
 async function loadAll() {
-const [p, t, inv, obj, tl, td, cl] = await Promise.all([
+const [p, t, inv, obj, tl, td, cl, ap] = await Promise.all([
     sb.from("projects").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("tasks").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("inventory").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("objects").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("task_inventory").select("*"),
     sb.from("task_dependencies").select("*").eq("user_id", user.id),
-    sb.from("clients").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+    sb.from("clients").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+    sb.from("appointments").select("*").eq("user_id", user.id).order("date", { ascending: true })
   ])
   projects = p.data || []
   tasks = t.data || []
   clients = cl.data || []
+  appointments = ap.data || []
   inventory = inv.data || []
   objects = obj.data || []
   taskLinks = tl.data || []
@@ -2697,6 +2699,21 @@ function setFocusProject(id, btn) {
   }
   renderFocus()
 }
+//-- helper -- 
+function scheduledApptRow(a) {
+  const client = clients.find(c => c.id === a.client_id)
+  const time = a.time ? a.time.slice(0,5) + ' · ' : ''
+  const d = new Date(a.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  const duration = a.duration_minutes ? ` · ${a.duration_minutes} min` : ''
+  return `<div onclick="openEditAppointment(appointments.find(x=>x.id==='${a.id}'))" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #222;cursor:pointer">
+    <div style="width:8px;height:8px;border-radius:50%;background:#06b6d4;flex-shrink:0;margin-left:6px"></div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(a.title || client?.name || 'Appointment')}</div>
+      <div style="font-size:11px;color:#555;margin-top:2px">${time}${d}${duration}${client ? ' · ' + sanitize(client.name) : ''}</div>
+    </div>
+  </div>`
+}
+
 function scheduledTaskRow(t, proj, accentColor) {
   const time = t.due_time ? t.due_time.slice(0,5) + ' · ' : ''
   const d = t.due_date ? new Date(t.due_date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''
@@ -2743,6 +2760,8 @@ function renderFocus() {
   }
 const pm = {}; projects.forEach(p => pm[p.id] = p)
   const today = new Date().toISOString().split('T')[0]
+  const todayAppts = appointments.filter(a => a.date === today).sort((a,b) => (a.time||'').localeCompare(b.time||''))
+  const upcomingAppts = appointments.filter(a => a.date > today).sort((a,b) => a.date.localeCompare(b.date))
   const todayTasks = open.filter(t => t.due_date === today).sort((a,b) => (a.due_time||'').localeCompare(b.due_time||''))
   const upcomingTasks = open.filter(t => t.due_date && t.due_date > today).sort((a,b) => a.due_date.localeCompare(b.due_date) || (a.due_time||'').localeCompare(b.due_time||''))
   const overdueTasks = open.filter(t => t.due_date && t.due_date < today).sort((a,b) => a.due_date.localeCompare(b.due_date))
@@ -2752,12 +2771,14 @@ const pm = {}; projects.forEach(p => pm[p.id] = p)
     scheduledHtml += `<div style="font-size:11px;color:#c0392b;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px">Overdue</div>`
     scheduledHtml += overdueTasks.map(t => scheduledTaskRow(t, pm[t.project_id], '#c0392b')).join('')
   }
-  if (todayTasks.length) {
+  if (todayTasks.length || todayAppts.length) {
     scheduledHtml += `<div style="font-size:11px;color:#f0a500;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px">Today</div>`
+    scheduledHtml += todayAppts.map(a => scheduledApptRow(a)).join('')
     scheduledHtml += todayTasks.map(t => scheduledTaskRow(t, pm[t.project_id], '#f0a500')).join('')
   }
-  if (upcomingTasks.length) {
+  if (upcomingAppts.length || upcomingTasks.length) {
     scheduledHtml += `<div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px">Upcoming</div>`
+    scheduledHtml += upcomingAppts.map(a => scheduledApptRow(a)).join('')
     scheduledHtml += upcomingTasks.map(t => scheduledTaskRow(t, pm[t.project_id], '#555')).join('')
   }
 
@@ -2997,7 +3018,11 @@ function renderClientsProject() {
     el.appendChild(empty)
     return
   }
-  projectClients.forEach(c => el.appendChild(makeClientCard(c)))
+  projectClients.forEach(c => {
+    el.appendChild(makeClientCard(c))
+    const clientAppts = appointments.filter(a => a.client_id === c.id)
+    clientAppts.forEach(a => el.appendChild(makeAppointmentCard(a, c)))
+  })
 }
 
 function makeClientCard(c) {
@@ -3012,6 +3037,11 @@ function makeClientCard(c) {
       </div>` : ''}
       ${c.notes ? `<div style="font-size:13px;color:#555;margin-top:6px;line-height:1.4">${sanitize(c.notes)}</div>` : ''}
     </div>`
+  const addApptBtn = document.createElement('button')
+  addApptBtn.style.cssText = 'margin:8px 0 0;width:100%;background:#1a2a2a;color:#06b6d4;font-size:12px;padding:6px'
+  addApptBtn.innerText = '+ Appointment'
+  addApptBtn.onclick = (e) => { e.stopPropagation(); openAddAppointment(c) }
+  d.appendChild(addApptBtn)
   d.onclick = () => openEditClient(c)
   return d
 }
@@ -3081,6 +3111,106 @@ async function deleteClient() {
     if (!undone) await sb.from('clients').delete().eq('id', deleted.id).eq('user_id', user.id)
   }, 4000)
 }
+// ── APPOINTMENTS ──
+let editingAppointment = null
+let appointmentClientId = null
+
+function makeAppointmentCard(a, client) {
+  const d = document.createElement('div')
+  const dateStr = a.date ? new Date(a.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''
+  const time = a.time ? a.time.slice(0,5) : ''
+  const duration = a.duration_minutes ? ` · ${a.duration_minutes} min` : ''
+  const today = new Date().toISOString().split('T')[0]
+  const isPast = a.date < today
+  d.style.cssText = `background:#111;border-radius:12px;margin:4px 0 10px 16px;padding:10px 14px;cursor:pointer;opacity:${isPast?'0.5':'1'};border-left:2px solid #06b6d4`
+  d.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:13px;font-weight:600">${sanitize(a.title || client.name)}</div>
+      <div style="font-size:12px;color:#06b6d4">${time}</div>
+    </div>
+    <div style="font-size:11px;color:#555;margin-top:2px">${dateStr}${duration}</div>
+    ${a.notes ? `<div style="font-size:12px;color:#555;margin-top:4px">${sanitize(a.notes)}</div>` : ''}`
+  d.onclick = () => openEditAppointment(a)
+  return d
+}
+
+function openAddAppointment(client) {
+  editingAppointment = null
+  appointmentClientId = client.id
+  document.getElementById('apptSheetTitle').innerText = `New appointment — ${client.name}`
+  document.getElementById('apptSaveBtn').innerText = 'Add'
+  document.getElementById('apptDeleteBtn').style.display = 'none'
+  document.getElementById('apptTitle').value = ''
+  document.getElementById('apptDate').value = new Date().toISOString().split('T')[0]
+  document.getElementById('apptTime').value = ''
+  document.getElementById('apptDuration').value = '60'
+  document.getElementById('apptNotes').value = ''
+  document.getElementById('apptSheet').classList.add('open')
+  setTimeout(() => document.getElementById('apptDate').focus(), 300)
+}
+
+function openEditAppointment(a) {
+  editingAppointment = a
+  appointmentClientId = a.client_id
+  const client = clients.find(c => c.id === a.client_id)
+  document.getElementById('apptSheetTitle').innerText = client ? `Edit — ${client.name}` : 'Edit appointment'
+  document.getElementById('apptSaveBtn').innerText = 'Save'
+  document.getElementById('apptDeleteBtn').style.display = 'block'
+  document.getElementById('apptTitle').value = a.title || ''
+  document.getElementById('apptDate').value = a.date || ''
+  document.getElementById('apptTime').value = a.time ? a.time.slice(0,5) : ''
+  document.getElementById('apptDuration').value = a.duration_minutes || '60'
+  document.getElementById('apptNotes').value = a.notes || ''
+  document.getElementById('apptSheet').classList.add('open')
+}
+
+async function saveAppointment() {
+  const date = document.getElementById('apptDate').value
+  if (!date || !appointmentClientId || !currentProject) return
+  const data = {
+    title: document.getElementById('apptTitle').value.trim() || null,
+    date,
+    time: document.getElementById('apptTime').value || null,
+    duration_minutes: document.getElementById('apptDuration').value ? parseInt(document.getElementById('apptDuration').value) : null,
+    notes: document.getElementById('apptNotes').value.trim() || null,
+  }
+  if (editingAppointment) {
+    const { error } = await sb.from('appointments').update(data).eq('id', editingAppointment.id).eq('user_id', user.id)
+    if (error) { showToast('Error ✕'); return }
+    Object.assign(editingAppointment, data)
+    showToast('Appointment saved ✓')
+  } else {
+    const { data: inserted, error } = await sb.from('appointments').insert({
+      ...data, user_id: user.id, client_id: appointmentClientId, project_id: currentProject.id
+    }).select().single()
+    if (error) { showToast('Error ✕'); return }
+    appointments.push(inserted)
+    showToast('Appointment added ✓')
+  }
+  closeSheet('apptSheet')
+  renderClientsProject()
+}
+
+async function deleteAppointment() {
+  if (!editingAppointment) return
+  const deleted = editingAppointment
+  appointments = appointments.filter(a => a.id !== deleted.id)
+  closeSheet('apptSheet')
+  renderClientsProject()
+  let undone = false
+  showToastUndo('Appointment deleted', () => {
+    undone = true
+    appointments.push(deleted)
+    renderClientsProject()
+  })
+  setTimeout(async () => {
+    if (!undone) await sb.from('appointments').delete().eq('id', deleted.id).eq('user_id', user.id)
+  }, 4000)
+}
+
+window.saveAppointment = saveAppointment
+window.deleteAppointment = deleteAppointment
+window.openAddAppointment = openAddAppointment
 
 window.saveClient = saveClient
 window.deleteClient = deleteClient
