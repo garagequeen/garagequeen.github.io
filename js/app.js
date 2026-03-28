@@ -3038,7 +3038,7 @@ function makeClientCard(c) {
       ${c.notes ? `<div style="font-size:13px;color:#555;margin-top:6px;line-height:1.4">${sanitize(c.notes)}</div>` : ''}
     </div>`
   const addApptBtn = document.createElement('button')
-  addApptBtn.style.cssText = 'margin:8px 0 0;width:100%;background:#1a2a2a;color:#06b6d4;font-size:12px;padding:6px'
+  addApptBtn.style.cssText = 'margin:6px 0 0;width:auto;background:none;color:#06b6d4;font-size:12px;padding:2px 0;text-align:left'
   addApptBtn.innerText = '+ Appointment'
   addApptBtn.onclick = (e) => { e.stopPropagation(); openAddAppointment(c) }
   d.appendChild(addApptBtn)
