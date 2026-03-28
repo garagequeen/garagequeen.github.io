@@ -1058,10 +1058,13 @@ function openRenameProject() {
   selectedProjectType = currentProject.project_type || 'general'
 const typePicker = document.getElementById('projectTypePicker')
 typePicker.innerHTML = Object.entries(PROJECT_TYPES).map(([key, t]) => `
-  <div onclick="selectProjectType('${key}')" id="ptype_${key}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;background:${selectedProjectType===key?t.bg:'#222'};border:1px solid ${selectedProjectType===key?t.color:'transparent'}">
-    <div style="width:32px;height:32px;border-radius:8px;background:${t.bg};display:flex;align-items:center;justify-content:center">${t.svg}</div>
-    <div style="font-size:14px;color:${selectedProjectType===key?t.color:'#aaa'}">${t.label}</div>
+  <div onclick="selectProjectType('${key}')" id="ptype_${key}"
+    style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px;border-radius:12px;cursor:pointer;flex:1;
+    background:${selectedProjectType===key?t.bg:'#1a1a1a'};border:1px solid ${selectedProjectType===key?t.color:'#333'}">
+    ${t.svg}
+    <span style="font-size:10px;font-weight:600;letter-spacing:.04em;color:${selectedProjectType===key?t.color:'#555'}">${t.label}</span>
   </div>`).join('')
+updateProjectTypeFields(selectedProjectType)
   
   document.getElementById("renameProjectInput").value = currentProject.title
   document.getElementById("projectCoverUpload").value = ""
@@ -1098,10 +1101,18 @@ function selectProjectType(key) {
     const el = document.getElementById(`ptype_${k}`)
     const t = PROJECT_TYPES[k]
     if (!el) return
-    el.style.background = k === key ? t.bg : '#222'
-    el.style.borderColor = k === key ? t.color : 'transparent'
-    el.querySelector('div:last-child').style.color = k === key ? t.color : '#aaa'
+    el.style.background = k === key ? t.bg : '#1a1a1a'
+    el.style.borderColor = k === key ? t.color : '#333'
+    el.querySelector('span').style.color = k === key ? t.color : '#555'
   })
+  updateProjectTypeFields(key)
+}
+
+function updateProjectTypeFields(key) {
+  const vehicleRow = document.getElementById('projectFieldVehicle')
+  const contentRow = document.getElementById('projectFieldContent')
+  if (vehicleRow) vehicleRow.style.display = key === 'vehicle' ? 'block' : 'none'
+  if (contentRow) contentRow.style.display = key === 'content' ? 'block' : 'none'
 }
 
 async function saveRenameProject() {
