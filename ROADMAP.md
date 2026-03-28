@@ -32,7 +32,7 @@ Structure: Now → Next → Later
 - [ ] Changelog integrated — ? icon shows What's New + Known Bugs
 
 ### Project Types — New
-- [ ] 🩺 Clients/Patients type — categories: To contact, Sessions, Follow up, Notes
+- [x] 🩺 Clients/Patients type — categories: To contact, Sessions, Follow up, Notes
 - [ ] 🎨 Creative type — categories: Research, Grants, Portfolio, Submit, Reply
 - [ ] Project type templates — auto-create categories on project creation
 
