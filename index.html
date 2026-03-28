@@ -355,6 +355,16 @@
         <button class="priority-chip" data-val="high" onclick="setEditTaskPriority('high',this)" style="background:#3a0a0a;color:#e74c3c">High</button>
       </div>
       <textarea id="editTaskNotes" placeholder="Notes (optional)" style="height:72px;margin-top:12px"></textarea>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <div style="flex:1">
+          <div style="font-size:11px;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Date</div>
+          <input id="editTaskDueDate" type="date" style="margin:0;color-scheme:dark;-webkit-appearance:none;min-height:44px">
+        </div>
+        <div style="flex:1">
+          <div style="font-size:11px;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Time</div>
+          <input id="editTaskDueTime" type="time" style="margin:0;color-scheme:dark;-webkit-appearance:none;min-height:44px">
+        </div>
+       </div>
       <div style="margin-top:14px">
         <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Parts needed</div>
         <div id="editTaskPartsList_part" style="margin-bottom:6px"></div>
