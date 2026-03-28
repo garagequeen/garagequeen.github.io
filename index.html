@@ -616,6 +616,22 @@
     <button class="btn-cancel" onclick="closeSheet('addToLogSheet')">Skip</button>
   </div>
 </div>  
+
+<!-- CLIENT SHEET -->
+<div class="sheet-overlay" id="clientSheet" onclick="closeIfBg(event,'clientSheet')">
+  <div class="sheet">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <h3 id="clientSheetTitle">New client</h3>
+    <input id="clientName" placeholder="Name" autocomplete="off" style="margin-top:12px">
+    <input id="clientPhone" placeholder="Phone" type="tel" autocomplete="off" style="margin-top:8px">
+    <textarea id="clientNotes" placeholder="Notes (health history, preferences...)" style="height:100px;margin-top:8px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn-cancel" onclick="closeSheet('clientSheet')" style="flex:1;margin:0">Cancel</button>
+      <button class="btn-danger" id="clientDeleteBtn" style="display:none;flex:0 0 70px;margin:0;font-size:13px" onclick="deleteClient()">Delete</button>
+      <button onclick="saveClient()" style="flex:2;margin:0" id="clientSaveBtn">Add client</button>
+    </div>
+  </div>
+</div>  
   
 <script src="js/app.js"></script>
   
