@@ -34,9 +34,15 @@ const PROJECT_TYPES = {
     color: '#1abc9c',
     bg: '#0a2a2a',
     svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1abc9c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`
+  },
+  clients: {
+    label: 'Clients',
+    color: '#06b6d4',
+    bg: '#0a2a2a',
+    svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`
   }
 }
-let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLinks = [], taskDeps = [], currentProject = null, invFilter = 'all', editingInvItem = null, taskProjectFilter = null, filmFilterOn = false, blockedFilterOn = false
+let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLinks = [], taskDeps = [], clients = [], currentProject = null, invFilter = 'all', editingInvItem = null, taskProjectFilter = null, filmFilterOn = false, blockedFilterOn = false
 let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
 let selectedColor = null
@@ -131,16 +137,18 @@ function showToastUndo(msg, onUndo) {
   t._timer = setTimeout(() => { t.classList.remove("show"); _undoCallback = null }, 4000)
 }
 async function loadAll() {
-const [p, t, inv, obj, tl, td] = await Promise.all([
+const [p, t, inv, obj, tl, td, cl] = await Promise.all([
     sb.from("projects").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("tasks").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("inventory").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("objects").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     sb.from("task_inventory").select("*"),
-    sb.from("task_dependencies").select("*").eq("user_id", user.id)
+    sb.from("task_dependencies").select("*").eq("user_id", user.id),
+    sb.from("clients").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
   ])
   projects = p.data || []
   tasks = t.data || []
+  clients = cl.data || []
   inventory = inv.data || []
   objects = obj.data || []
   taskLinks = tl.data || []
@@ -264,7 +272,9 @@ function openDetail(p) {
   currentProject = p
   document.getElementById("detailTitle").innerText = p.title
   document.getElementById("projectDetail").classList.add("open")
-  if (p.is_content) {
+  if (p.project_type === 'clients') {
+    renderClientsProject()
+  } else if (p.is_content) {
     renderContentProject()
   } else {
     renderTasks()
@@ -2908,5 +2918,116 @@ async function convertTaskToItem() {
     }
   }, 4000)
 }
+
+// ── CLIENTS ──
+let editingClient = null
+
+function renderClientsProject() {
+  const el = document.getElementById('tasksList')
+  const bar = document.getElementById('multiselectBar')
+  if (bar) bar.style.display = 'none'
+  const projectClients = clients.filter(c => c.project_id === currentProject?.id)
+  el.innerHTML = ''
+  const addBtn = document.createElement('button')
+  addBtn.style.cssText = 'width:100%;background:#222;color:#aaa;margin-bottom:16px'
+  addBtn.innerText = '+ New client'
+  addBtn.onclick = () => openAddClient()
+  el.appendChild(addBtn)
+  if (!projectClients.length) {
+    const empty = document.createElement('div')
+    empty.className = 'empty'
+    empty.style.paddingTop = '40px'
+    empty.innerHTML = 'No clients yet.<br><span style="font-size:13px">Tap "+ New client" to add one.</span>'
+    el.appendChild(empty)
+    return
+  }
+  projectClients.forEach(c => el.appendChild(makeClientCard(c)))
+}
+
+function makeClientCard(c) {
+  const d = document.createElement('div')
+  d.className = 'task-card'
+  d.style.cssText = 'background:rgba(30,30,30,0.85);border-radius:16px;margin-bottom:10px;cursor:pointer;padding:14px 16px;'
+  d.innerHTML = `
+    <div style="flex:1">
+      <div style="font-size:16px;font-weight:600">${sanitize(c.name)}</div>
+      ${c.phone ? `<div style="margin-top:4px">
+        <a href="tel:${sanitize(c.phone)}" onclick="event.stopPropagation()" style="font-size:13px;color:#06b6d4">${sanitize(c.phone)}</a>
+      </div>` : ''}
+      ${c.notes ? `<div style="font-size:13px;color:#555;margin-top:6px;line-height:1.4">${sanitize(c.notes)}</div>` : ''}
+    </div>`
+  d.onclick = () => openEditClient(c)
+  return d
+}
+
+function openAddClient() {
+  editingClient = null
+  document.getElementById('clientSheetTitle').innerText = 'New client'
+  document.getElementById('clientSaveBtn').innerText = 'Add client'
+  document.getElementById('clientDeleteBtn').style.display = 'none'
+  document.getElementById('clientName').value = ''
+  document.getElementById('clientPhone').value = ''
+  document.getElementById('clientNotes').value = ''
+  document.getElementById('clientSheet').classList.add('open')
+  setTimeout(() => document.getElementById('clientName').focus(), 300)
+}
+
+function openEditClient(c) {
+  editingClient = c
+  document.getElementById('clientSheetTitle').innerText = 'Edit client'
+  document.getElementById('clientSaveBtn').innerText = 'Save'
+  document.getElementById('clientDeleteBtn').style.display = 'block'
+  document.getElementById('clientName').value = c.name || ''
+  document.getElementById('clientPhone').value = c.phone || ''
+  document.getElementById('clientNotes').value = c.notes || ''
+  document.getElementById('clientSheet').classList.add('open')
+  setTimeout(() => document.getElementById('clientName').focus(), 300)
+}
+
+async function saveClient() {
+  const name = document.getElementById('clientName').value.trim()
+  if (!name || !currentProject) return
+  const data = {
+    name,
+    phone: document.getElementById('clientPhone').value.trim() || null,
+    notes: document.getElementById('clientNotes').value.trim() || null,
+  }
+  if (editingClient) {
+    const { error } = await sb.from('clients').update(data).eq('id', editingClient.id).eq('user_id', user.id)
+    if (error) { showToast('Error saving ✕'); return }
+    Object.assign(editingClient, data)
+    showToast('Client saved ✓')
+  } else {
+    const { data: inserted, error } = await sb.from('clients').insert({
+      ...data, user_id: user.id, project_id: currentProject.id
+    }).select().single()
+    if (error) { showToast('Error saving ✕'); return }
+    clients.unshift(inserted)
+    showToast('Client added ✓')
+  }
+  closeSheet('clientSheet')
+  renderClientsProject()
+}
+
+async function deleteClient() {
+  if (!editingClient) return
+  const deleted = editingClient
+  clients = clients.filter(c => c.id !== deleted.id)
+  closeSheet('clientSheet')
+  renderClientsProject()
+  let undone = false
+  showToastUndo('Client deleted', () => {
+    undone = true
+    clients.unshift(deleted)
+    renderClientsProject()
+  })
+  setTimeout(async () => {
+    if (!undone) await sb.from('clients').delete().eq('id', deleted.id).eq('user_id', user.id)
+  }, 4000)
+}
+
+window.saveClient = saveClient
+window.deleteClient = deleteClient
+window.openAddClient = openAddClient
 window.convertTaskToItem = convertTaskToItem
 window.setEditTaskPlace = setEditTaskPlace
