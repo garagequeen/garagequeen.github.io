@@ -3215,5 +3215,101 @@ window.openAddAppointment = openAddAppointment
 window.saveClient = saveClient
 window.deleteClient = deleteClient
 window.openAddClient = openAddClient
+
+// ── CALENDAR ──
+let calYear = new Date().getFullYear()
+let calMonth = new Date().getMonth()
+let calSelectedDay = null
+
+function toggleCalendarSheet() {
+  calYear = new Date().getFullYear()
+  calMonth = new Date().getMonth()
+  calSelectedDay = null
+  renderCalGrid()
+  document.getElementById('calendarSheet').classList.add('open')
+}
+
+function calNavMonth(dir) {
+  calMonth += dir
+  if (calMonth > 11) { calMonth = 0; calYear++ }
+  if (calMonth < 0) { calMonth = 11; calYear-- }
+  calSelectedDay = null
+  document.getElementById('calDayList').style.display = 'none'
+  renderCalGrid()
+}
+
+function renderCalGrid() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December']
+  document.getElementById('calMonthLabel').innerText = `${monthNames[calMonth]} ${calYear}`
+  const grid = document.getElementById('calGrid')
+  grid.innerHTML = ''
+  const today = new Date().toISOString().split('T')[0]
+  const firstDay = new Date(calYear, calMonth, 1).getDay()
+  const offset = firstDay === 0 ? 6 : firstDay - 1
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
+  for (let i = 0; i < offset; i++) {
+    grid.appendChild(document.createElement('div'))
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    const isToday = key === today
+    const isSelected = key === calSelectedDay
+    const dayAppts = appointments.filter(a => a.date === key)
+    const dayTasks = tasks.filter(t => t.due_date === key && t.status !== 'done')
+    const hasDots = dayAppts.length + dayTasks.length
+    const cell = document.createElement('div')
+    cell.style.cssText = `padding:5px 2px;cursor:pointer;border-radius:8px;background:${isSelected?'#3fb950':isToday?'#1a2a1a':'transparent'}`
+    cell.innerHTML = `
+      <div style="font-size:13px;color:${isSelected?'#111':isToday?'#3fb950':'#aaa'};font-weight:${isToday?'600':'400'}">${d}</div>
+      <div style="display:flex;justify-content:center;gap:2px;margin-top:2px;min-height:6px">
+        ${dayAppts.slice(0,3).map(()=>`<div style="width:4px;height:4px;border-radius:50%;background:#06b6d4"></div>`).join('')}
+        ${dayTasks.slice(0,2).map(()=>`<div style="width:4px;height:4px;border-radius:50%;background:#f0a500"></div>`).join('')}
+      </div>`
+    cell.onclick = () => selectCalDay(key, d)
+    grid.appendChild(cell)
+  }
+}
+
+function selectCalDay(key, d) {
+  calSelectedDay = key
+  renderCalGrid()
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const title = `${d} ${monthNames[calMonth]}`
+  const dayAppts = appointments.filter(a => a.date === key)
+  const dayTasks = tasks.filter(t => t.due_date === key && t.status !== 'done')
+  const el = document.getElementById('calDayListItems')
+  el.innerHTML = ''
+  if (!dayAppts.length && !dayTasks.length) {
+    el.innerHTML = `<div style="font-size:13px;color:#555;padding:6px 0">No events</div>`
+  } else {
+    dayAppts.forEach(a => {
+      const client = clients.find(c => c.id === a.client_id)
+      const time = a.time ? a.time.slice(0,5) + ' · ' : ''
+      const d = document.createElement('div')
+      d.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #222;cursor:pointer'
+      d.innerHTML = `<div style="width:8px;height:8px;border-radius:50%;background:#06b6d4;flex-shrink:0"></div>
+        <div><div style="font-size:14px;color:white">${sanitize(a.title || client?.name || 'Appointment')}</div>
+        <div style="font-size:11px;color:#555">${time}${client ? sanitize(client.name) : ''}</div></div>`
+      d.onclick = () => openEditAppointment(a)
+      el.appendChild(d)
+    })
+    dayTasks.forEach(t => {
+      const proj = projects.find(p => p.id === t.project_id)
+      const time = t.due_time ? t.due_time.slice(0,5) + ' · ' : ''
+      const d = document.createElement('div')
+      d.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #222;cursor:pointer'
+      d.innerHTML = `<div style="width:8px;height:8px;border-radius:50%;background:#f0a500;flex-shrink:0"></div>
+        <div><div style="font-size:14px;color:white">${sanitize(t.title)}</div>
+        <div style="font-size:11px;color:#555">${time}${proj ? sanitize(proj.title) : ''}</div></div>`
+      d.onclick = () => { closeSheet('calendarSheet'); openEditTask(t) }
+      el.appendChild(d)
+    })
+  }
+  document.getElementById('calDayListTitle').innerText = title
+  document.getElementById('calDayList').style.display = 'block'
+}
+
+window.toggleCalendarSheet = toggleCalendarSheet
+window.calNavMonth = calNavMonth
 window.convertTaskToItem = convertTaskToItem
 window.setEditTaskPlace = setEditTaskPlace
