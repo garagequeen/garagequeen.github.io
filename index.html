@@ -30,11 +30,16 @@
   <div id="focusTab" class="container">
     <h2 style="margin-bottom:8px">Focus</h2>
     <div class="filter-tabs" id="focusProjectFilter" style="margin-bottom:10px"></div>
-    <div style="display:flex;gap:6px;margin-bottom:10px">
-      <button onclick="openTripChecklist('garage')" style="margin:0;padding:6px 12px;font-size:13px;background:#222;color:#aaa;border-radius:20px">🔧 Garage</button>
-      <button onclick="openTripChecklist('home')" style="margin:0;padding:6px 12px;font-size:13px;background:#222;color:#aaa;border-radius:20px">🏠 Home</button>
-      <button onclick="openTripChecklist('car')" style="margin:0;padding:6px 12px;font-size:13px;background:#222;color:#aaa;border-radius:20px">🚗 Car</button>
+   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="display:flex;gap:6px">
+    <button onclick="openTripChecklist('garage')" style="margin:0;padding:6px 12px;font-size:13px;background:#222;color:#aaa;border-radius:20px">🔧 Garage</button>
+    <button onclick="openTripChecklist('home')" style="margin:0;padding:6px 12px;font-size:13px;background:#222;color:#aaa;border-radius:20px">🏠 Home</button>
+    <button onclick="openTripChecklist('car')" style="margin:0;padding:6px 12px;font-size:13px;background:#222;color:#aaa;border-radius:20px">🚗 Car</button>
     </div>
+  <button onclick="toggleCalendarSheet()" id="calendarBtn" style="margin:0;padding:6px 8px;background:#222;color:#aaa;border-radius:10px;display:flex;align-items:center;justify-content:center">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  </button>
+</div>
     <div id="focusContent"></div>
   </div>
   <div id="tasksTab" class="container" style="display:none">
@@ -674,6 +679,37 @@
     </div>
   </div>
 </div>  
+
+<!-- CALENDAR SHEET -->
+<div class="sheet-overlay" id="calendarSheet" onclick="closeIfBg(event,'calendarSheet')">
+  <div class="sheet flex-sheet" style="max-height:85vh">
+    <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+    <div style="padding:0 16px;overflow-y:auto;flex:1">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <button onclick="calNavMonth(-1)" style="background:none;color:#aaa;width:auto;margin:0;padding:4px 8px;font-size:18px">‹</button>
+        <div id="calMonthLabel" style="font-size:15px;font-weight:600;color:white"></div>
+        <button onclick="calNavMonth(1)" style="background:none;color:#aaa;width:auto;margin:0;padding:4px 8px;font-size:18px">›</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:4px">
+        <div style="font-size:10px;color:#555;padding:4px 0">M</div>
+        <div style="font-size:10px;color:#555;padding:4px 0">T</div>
+        <div style="font-size:10px;color:#555;padding:4px 0">W</div>
+        <div style="font-size:10px;color:#555;padding:4px 0">T</div>
+        <div style="font-size:10px;color:#555;padding:4px 0">F</div>
+        <div style="font-size:10px;color:#555;padding:4px 0">S</div>
+        <div style="font-size:10px;color:#555;padding:4px 0">S</div>
+      </div>
+      <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center"></div>
+      <div id="calDayList" style="display:none;margin-top:14px;border-top:1px solid #222;padding-top:12px">
+        <div id="calDayListTitle" style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px"></div>
+        <div id="calDayListItems"></div>
+      </div>
+    </div>
+    <div style="flex-shrink:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #222;background:#1a1a1a">
+      <button class="btn-cancel" onclick="closeSheet('calendarSheet')" style="width:100%;margin:0">Close</button>
+    </div>
+  </div>
+</div>
   
 <script src="js/app.js"></script>
   
