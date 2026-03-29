@@ -1,6 +1,32 @@
 # Changelog — Garage Log
 
 All notable changes documented here.
+---
+
+## [0.8.0] - 2026-03-29
+
+### Added
+- Clients project type — client CRUD (name, phone, notes)
+- Appointments — linked to clients, date + time + duration
+- Calendar sheet — month view, dots for appointments + due tasks
+- Calendar — tap day → list of events
+- due_date + due_time on tasks — shown as chip on card
+- Focus tab — Overdue / Today / Upcoming sections (compact + show more)
+- New Project — type + color picker inline on creation
+- Edit Project — fields show/hide by type (vehicle/content)
+- Collapsible Garage section in Settings
+- Service log — cost field added
+- Priority — toggle button (None / High)
+
+### Changed
+- Service log — description first, mileage + cost after
+- Project header — ⋯ menu replaced with pencil icon
+- Delete project moved to Edit project sheet footer
+- Calendar grid fixed height (6 rows, no jumping)
+
+### Fixed
+- Swipe lag — direction detection before preventDefault
+- Duplicate id="projectStats" removed
 
 ---
 ## [0.7.5] - 2026-03-28
