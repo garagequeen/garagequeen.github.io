@@ -525,23 +525,35 @@
   <div class="sheet flex-sheet" style="max-height:85vh">
     <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
     <div style="padding:0 16px;overflow-y:auto;flex:1">
-      <h3 id="objSheetTitle" style="margin-bottom:12px">New vehicle</h3>
-      <input id="objName" placeholder="Name (e.g. BMW E23 Fjord Blau)" autocomplete="off">
-      <select id="objType" style="margin-top:8px">
-        <option value="car">Car</option>
-        <option value="motorcycle">Motorcycle</option>
-        <option value="other">Other</option>
-      </select>
-      <input id="objMake" placeholder="Make (e.g. BMW)" autocomplete="off" style="margin-top:8px">
-      <input id="objModel" placeholder="Model (e.g. 733i)" autocomplete="off" style="margin-top:8px">
-      <input id="objYear" placeholder="Year" type="number" min="1900" max="2099" style="margin-top:8px">
-      <input id="objVin" placeholder="VIN (optional)" autocomplete="off" style="margin-top:8px">
-      <input id="objColorCode" placeholder="Color code (optional)" autocomplete="off" style="margin-top:8px">
-      <input id="objMileage" placeholder="Mileage (optional)" type="number" min="0" style="margin-top:8px">
-      <!-- FIX: date inputs get color-scheme:dark so they render properly on iOS -->
-      <input id="objPurchaseDate" placeholder="Purchase date (optional)" type="date" style="margin-top:8px;-webkit-appearance:none;appearance:none;display:block;width:100%;box-sizing:border-box;text-align:left;min-height:44px;color-scheme:dark;">
-      <input id="objPurchasePrice" placeholder="Purchase price (optional)" type="number" min="0" step="0.01" style="margin-top:8px;margin-bottom:16px">
-    </div>
+  <h3 id="objSheetTitle" style="margin-bottom:16px">New vehicle</h3>
+
+  <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Basic</div>
+  <input id="objName" placeholder="Name (e.g. BMW E23 Fjord Blau)" autocomplete="off" style="margin:0">
+  <select id="objType" style="margin-top:8px">
+    <option value="car">Car</option>
+    <option value="motorcycle">Motorcycle</option>
+    <option value="other">Other</option>
+  </select>
+  <div style="display:flex;gap:8px;margin-top:8px">
+    <input id="objMake" placeholder="Make" autocomplete="off" style="flex:1;margin:0">
+    <input id="objModel" placeholder="Model" autocomplete="off" style="flex:1;margin:0">
+    <input id="objYear" placeholder="Year" type="number" min="1900" max="2099" style="flex:0 0 80px;margin:0">
+  </div>
+
+  <div style="height:1px;background:#222;margin:16px 0"></div>
+  <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Details</div>
+  <input id="objVin" placeholder="VIN" autocomplete="off" style="margin:0">
+  <input id="objColorCode" placeholder="Color code" autocomplete="off" style="margin-top:8px">
+
+  <div style="height:1px;background:#222;margin:16px 0"></div>
+  <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">History</div>
+  <input id="objMileage" placeholder="Current mileage (km)" type="number" min="0" style="margin:0">
+  <div style="display:flex;gap:8px;margin-top:8px">
+    <input id="objPurchaseDate" placeholder="Purchase date" type="date" style="flex:1;margin:0;-webkit-appearance:none;appearance:none;text-align:left;min-height:44px;color-scheme:dark;">
+    <input id="objPurchasePrice" placeholder="Price" type="number" min="0" step="0.01" style="flex:1;margin:0">
+  </div>
+  <div style="height:16px"></div>
+</div>
     <div style="flex-shrink:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #222;display:flex;gap:8px;background:#1a1a1a">
       <button class="btn-cancel" onclick="closeSheet('addObjectSheet')" style="flex:1;margin:0">Cancel</button>
       <button class="btn-danger" id="objDeleteBtn" style="display:none;flex:0 0 70px;margin:0;font-size:13px" onclick="deleteObject()">Delete</button>
