@@ -232,16 +232,54 @@ function renderProjects() {
 }
 function openAddProject() {
   document.getElementById("newProjectName").value = ""
+  selectedColor = PROJECT_COLORS[projects.length % PROJECT_COLORS.length]
+  selectedProjectType = 'general'
+  const typePicker = document.getElementById('newProjectTypePicker')
+  typePicker.innerHTML = Object.entries(PROJECT_TYPES).map(([key, t]) => `
+    <div onclick="selectNewProjectType('${key}')" id="nptype_${key}"
+      style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:12px;cursor:pointer;flex:1;
+      background:${key==='general'?t.bg:'#1a1a1a'};border:1px solid ${key==='general'?t.color:'#333'}">
+      ${t.svg}
+      <span style="font-size:10px;font-weight:600;color:${key==='general'?t.color:'#555'}">${t.label}</span>
+    </div>`).join('')
+  const colorPicker = document.getElementById('newProjectColorPicker')
+  colorPicker.innerHTML = ''
+  PROJECT_COLORS.forEach(c => {
+    const dot = document.createElement('div')
+    dot.className = 'color-dot' + (c === selectedColor ? ' selected' : '')
+    dot.style.background = c
+    dot.onclick = () => {
+      selectedColor = c
+      colorPicker.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'))
+      dot.classList.add('selected')
+    }
+    colorPicker.appendChild(dot)
+  })
   document.getElementById("addProjectSheet").classList.add("open")
   setTimeout(() => document.getElementById("newProjectName").focus(), 300)
 }
+
+function selectNewProjectType(key) {
+  selectedProjectType = key
+  Object.keys(PROJECT_TYPES).forEach(k => {
+    const el = document.getElementById(`nptype_${k}`)
+    const t = PROJECT_TYPES[k]
+    if (!el) return
+    el.style.background = k === key ? t.bg : '#1a1a1a'
+    el.style.borderColor = k === key ? t.color : '#333'
+    el.querySelector('span').style.color = k === key ? t.color : '#555'
+  })
+}
+window.selectNewProjectType = selectNewProjectType
+
 async function addProject() {
   const title = document.getElementById("newProjectName").value.trim()
   if (!title) return
   const duplicate = projects.find(p => p.title.toLowerCase() === title.toLowerCase())
   if (duplicate) { showToast(`"${title}" already exists`); return }
   const { data, error } = await sb.from("projects").insert({
-    title, user_id: user.id, color: PROJECT_COLORS[projects.length % PROJECT_COLORS.length]
+    title, user_id: user.id, color: selectedColor || PROJECT_COLORS[projects.length % PROJECT_COLORS.length],
+    project_type: selectedProjectType || 'general'
   }).select().single()
   if (error) { showToast("Error creating project ✕"); return }
   projects.unshift(data)
