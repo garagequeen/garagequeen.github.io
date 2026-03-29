@@ -102,7 +102,6 @@ async function loadBg() {
 document.addEventListener("change", async function(e) {
   if (e.target.id !== "bgUpload") return
   const file = e.target.files[0]
-  const file = this.files[0]
   if (!file) return
   const localUrl = URL.createObjectURL(file)
   document.getElementById("bg").src = localUrl
