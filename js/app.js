@@ -2796,13 +2796,6 @@ if (hiddenScheduled.length) {
   scheduledHtml += `<div id="showMoreScheduled" style="font-size:11px;color:#555;padding:4px 0;cursor:pointer">+ ${hiddenScheduled.length} more</div>`
 }
 
-// вставка в DOM
-el.innerHTML = `
-  ${scheduledHtml ? `<div style="background:#1a1a1a;border-radius:16px;padding:8px 12px;margin-bottom:12px">${scheduledHtml}</div>` : ''}
-  <div class="focus-count">${open.length} task${open.length!==1?"s":""} available</div>
-  <div class="focus-drum" id="focusDrum"></div>
-`
-
 if (hiddenScheduled.length) {
   document.getElementById('showMoreScheduled').onclick = function () {
     let moreHtml = ''
