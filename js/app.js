@@ -43,6 +43,7 @@ const PROJECT_TYPES = {
   }
 }
 let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLinks = [], taskDeps = [], clients = [], appointments = [], currentProject = null, invFilter = 'all', editingInvItem = null, taskProjectFilter = null, filmFilterOn = false, blockedFilterOn = false
+let focusProjectId = null
 let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
 let selectedColor = null
@@ -2720,7 +2721,6 @@ document.addEventListener("touchstart", e => {
   if (x < 20 || x > window.innerWidth - 20) e.preventDefault()
 }, { passive: false })
 // ── FOCUS ──
-let focusProjectId = null
 function setFocusProject(id, btn) {
   focusProjectId = id
   document.querySelectorAll("#focusProjectFilter .filter-tab").forEach(b => {
