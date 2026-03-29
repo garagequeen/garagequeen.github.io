@@ -127,9 +127,7 @@
   </div>
 </div>
   <div style="padding:8px 16px 0;display:flex;align-items:center;gap:8px">
-    <div id="projectStats" style="font-size:12px;color:#555;flex:1"></div>
-    <div id="projectStats" style="font-size:12px;color:#555;flex:1"></div>
-  <div id="projectStats" style="font-size:12px;color:#555;flex:1"></div>
+   <div style="flex:1"></div>
     <button onclick="toggleCollapseAll()" id="collapseAllBtn" style="margin:0;padding:4px 10px;font-size:12px;background:#222;color:#aaa;border-radius:20px">⊟</button>
     <button id="projectFilmBtn"    
       onclick="toggleProjectFilmFilter()" style="margin:0;padding:4px 10px;font-size:12px;background:#222;color:#aaa;border-radius:20px">🎬</button>
@@ -485,8 +483,11 @@
     <div id="serviceLogList" style="max-height:180px;overflow-y:auto;margin-top:10px"></div>
     <h3 style="margin-top:16px;font-size:13px;color:#aaa">Add entry</h3>
     <input id="svcDate" type="date" style="text-align:left;-webkit-appearance:none;appearance:none;display:block;width:100%;box-sizing:border-box;min-height:44px;color-scheme:dark;">
-    <input id="svcMileage" placeholder="Mileage (optional)" type="number" min="0">
     <textarea id="svcDesc" placeholder="What was done..." style="height:80px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:0">
+      <input id="svcMileage" placeholder="Mileage km" type="number" min="0" style="flex:1;margin:0">
+      <input id="svcCost" placeholder="Cost" type="number" min="0" step="0.01" style="flex:1;margin:0">
+    </div>
     <button onclick="exportServiceLog()" style="margin-top:8px;background:#333">↑ Export CSV</button>
     <button onclick="openServiceJournal()" style="margin-top:8px;background:#333">📋 View journal</button>
     <button class="btn-cancel" onclick="closeSheet('serviceLogSheet')">Close</button>
