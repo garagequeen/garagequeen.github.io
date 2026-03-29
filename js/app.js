@@ -3001,6 +3001,13 @@ window.saveQuickCapture = saveQuickCapture
 window.openDepPicker = openDepPicker
 window.addTaskDep = addTaskDep
 window.removeTaskDep = removeTaskDep
+let garageSectionOpen = false
+function toggleGarageSection() {
+  garageSectionOpen = !garageSectionOpen
+  document.getElementById('garageSection').style.display = garageSectionOpen ? 'block' : 'none'
+  document.getElementById('garageChevron').style.transform = garageSectionOpen ? 'rotate(90deg)' : 'rotate(0deg)'
+}
+window.toggleGarageSection = toggleGarageSection
 async function convertTaskToItem() {
   if (!editingTask) return
   const task = editingTask
