@@ -556,10 +556,13 @@
     <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
     <h3>New project</h3>
     <input id="newProjectName" placeholder="Project name" autocomplete="off">
-    <button onclick="addProject()" style="margin-top:12px">Add project</button>
+    <div style="font-size:11px;color:#555;margin:12px 0 6px;text-transform:uppercase;letter-spacing:.5px">Type</div>
+    <div id="newProjectTypePicker" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <div style="font-size:11px;color:#555;margin:12px 0 6px;text-transform:uppercase;letter-spacing:.5px">Color</div>
+    <div class="project-colors" id="newProjectColorPicker"></div>
+    <button onclick="addProject()" style="margin-top:16px">Add project</button>
     <button class="btn-cancel" onclick="closeSheet('addProjectSheet')">Cancel</button>
   </div>
-
 </div>
 <!-- BLOCK TASK -->
 <div class="sheet-overlay" id="blockTaskSheet" onclick="closeIfBg(event,'blockTaskSheet')">
