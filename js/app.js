@@ -2840,32 +2840,26 @@ if (hiddenScheduled.length) {
   scheduledHtml += `<div id="showMoreScheduled" style="font-size:11px;color:#555;padding:4px 0;cursor:pointer">+ ${hiddenScheduled.length} more</div>`
 }
 
+el.innerHTML = `
+  ${scheduledHtml ? `<div style="background:#1a1a1a;border-radius:16px;padding:8px 12px;margin-bottom:12px">${scheduledHtml}</div>` : ''}
+  <div class="focus-count">${open.length} task${open.length!==1?"s":""} available</div>
+  <div class="focus-drum" id="focusDrum"></div>`
+
 if (hiddenScheduled.length) {
-  document.getElementById('showMoreScheduled').onclick = function () {
+  const moreBtn = document.getElementById('showMoreScheduled')
+  if (moreBtn) moreBtn.onclick = function() {
     let moreHtml = ''
-
     hiddenScheduled.forEach(x => {
-      if (x.type === 'overdue') {
-        moreHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#c0392b', false)
-      } else if (x.type === 'today_task') {
-        moreHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#f0a500', false)
-      } else if (x.type === 'today_appt') {
-        moreHtml += scheduledApptRow(x.data, false)
-      } else if (x.type === 'upcoming_task') {
-        moreHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#555', false)
-      } else if (x.type === 'upcoming_appt') {
-        moreHtml += scheduledApptRow(x.data, false)
-      }
+      if (x.type === 'overdue') moreHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#c0392b', false)
+      else if (x.type === 'today_task') moreHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#f0a500', false)
+      else if (x.type === 'today_appt') moreHtml += scheduledApptRow(x.data, false)
+      else if (x.type === 'upcoming_task') moreHtml += scheduledTaskRow(x.data, pm[x.data.project_id], '#555', false)
+      else if (x.type === 'upcoming_appt') moreHtml += scheduledApptRow(x.data, false)
     })
-
     this.outerHTML = moreHtml
   }
 }
 
-  el.innerHTML = `
-    ${scheduledHtml ? `<div style="background:#1a1a1a;border-radius:16px;padding:8px 12px;margin-bottom:12px">${scheduledHtml}</div>` : ''}
-    <div class="focus-count">${open.length} task${open.length!==1?"s":""} available</div>
-    <div class="focus-drum" id="focusDrum"></div>`
   open.forEach(t => {
     const proj = pm[t.project_id]
     const d = document.createElement("div")
