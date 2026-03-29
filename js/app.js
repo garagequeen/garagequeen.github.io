@@ -44,6 +44,8 @@ const PROJECT_TYPES = {
 }
 let user = null, projects = [], tasks = [], inventory = [], objects = [], taskLinks = [], taskDeps = [], clients = [], appointments = [], currentProject = null, invFilter = 'all', editingInvItem = null, taskProjectFilter = null, filmFilterOn = false, blockedFilterOn = false
 let focusProjectId = null
+let tasksPage = 1
+const TASKS_PAGE_SIZE = 30
 let collapsedCats = new Set()
 let selectMode = false, selectedTaskIds = new Set()
 let selectedColor = null
@@ -2990,8 +2992,6 @@ if (window.visualViewport) {
   })
 }
 // ── LOAD MORE (Tasks tab) ──
-let tasksPage = 1
-const TASKS_PAGE_SIZE = 30
 function renderAllTasks() {
   tasksPage = 1
   _renderAllTasksPage()
