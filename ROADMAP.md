@@ -4,6 +4,16 @@ Living document. Updated 2026-03-25.
 Structure: Now → Next → Later
 
 ---
+### v0.8.1 · Polish
+- [ ] Edit Vehicle — sections: Basic / Details / History
+- [ ] Inventory — linked vehicle/location field
+- [ ] Analyse — explanation string + clearer UI
+- [ ] Service log — retro journal view as separate screen
+- [ ] Scroll to top button on long task lists
+- [ ] Content project — content_status field (filmed → editing → ready → posted)
+- [ ] Appointments — notification reminder (browser or Telegram)
+- [ ] New task — priority toggle inline
+
 
 ## Now — v0.7.4 · In Progress
 
