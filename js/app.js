@@ -1523,12 +1523,14 @@ async function saveServiceLog() {
   const newMileage = document.getElementById("svcMileage").value ? parseInt(document.getElementById("svcMileage").value) : null
   const rawDate = document.getElementById("svcDate").value.trim()
   const isoDate = rawDate || new Date().toISOString().split("T")[0]
+  const cost = document.getElementById('svcCost').value ? parseFloat(document.getElementById('svcCost').value) : null
   const { error } = await sb.from("service_log").insert({
     user_id: user.id,
     object_id: serviceLogObject.id,
     date: isoDate,
     mileage: newMileage,
-    title: title
+    title: title,
+    cost: cost
   })
   if (error) { showToast("Error: " + (error.message || error.code)); return }
   if (newMileage && serviceLogObject.mileage && newMileage < serviceLogObject.mileage) {
@@ -1543,6 +1545,7 @@ async function saveServiceLog() {
   document.getElementById("svcDesc").value = ""
   document.getElementById("svcMileage").value = ""
   showToast("Entry added ✓")
+  document.getElementById("svcCost").value = ""
   await renderServiceLog()
 }
 async function deleteServiceLogEntry(id) {
