@@ -1,0 +1,9 @@
+name: Keep Supabase alive
+on:
+  schedule:
+    - cron: '0 12 * * 1'
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -s "https://fqmmlntmpybijmvrsfxx.supabase.co/rest/v1/projects?select=id&limit=1" -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxbW1sbnRtcHliaWptdnJzZnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTYyMzMsImV4cCI6MjA4ODM5MjIzM30.HeiCco9pyNwDKUJJhA5Af6Yh7AIRZH5GGlvr4BFOcXk" > /dev/null
